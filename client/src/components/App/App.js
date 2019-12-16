@@ -17,42 +17,40 @@ import VSM from '../VSM/VSM';
 
 import './App.css';
 
-class App extends React.Component {
-    render() {
-        return (
-            <Router>
-                <AuthProvider>
-                    <div className="app">
-                        <Navbar />
+function App() {
+    return (
+        <Router>
+            <AuthProvider>
+                <div className="app">
+                    <Navbar />
 
-                        <Switch>
-                            <Route exact path="/">
-                                <Main />
-                            </Route>
-                            <Route path="/login">
-                                <Login />
-                            </Route>
-                            <Route path="/register">
-                                <Register />
-                            </Route>
-                            <PrivateRoute path="/home">
-                                <VSM />
-                            </PrivateRoute>
-                            <PrivateRoute path="/portfolio">
-                                <Portfolio />
-                            </PrivateRoute>
-                            <PrivateRoute path="/orders">
-                                <Orders />
-                            </PrivateRoute>
-                            <PrivateRoute path="/stock">
-                                <Stock />
-                            </PrivateRoute>
-                        </Switch>
-                    </div>
-                </AuthProvider>
-            </Router>
-        );
-    }
+                    <Switch>
+                        <Route exact path="/">
+                            <Main />
+                        </Route>
+                        <Route path="/login">
+                            <Login />
+                        </Route>
+                        <Route path="/register">
+                            <Register />
+                        </Route>
+                        <PrivateRoute path="/home">
+                            <VSM />
+                        </PrivateRoute>
+                        <PrivateRoute path="/portfolio">
+                            <Portfolio />
+                        </PrivateRoute>
+                        <PrivateRoute path="/orders">
+                            <Orders />
+                        </PrivateRoute>
+                        <PrivateRoute path="/stock">
+                            <Stock />
+                        </PrivateRoute>
+                    </Switch>
+                </div>
+            </AuthProvider>
+        </Router>
+    );
 }
 
 // A wrapper for <Route> that redirects to the login screen if you're not yet authenticated.

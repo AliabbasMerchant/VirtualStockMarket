@@ -1,36 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const AuthContext = React.createContext();
 
-class AuthProvider extends React.Component {
-    state = {
-        userToken: null
-    }
-    render() {
-        return (
-            <AuthContext.Provider value={{
-                userToken: this.state,
-                login: (cb) => {
-                    // TODO API Request
-                    // if ok, set Auth.userToken and cb(); and show "Successfully Logged In" Toast
-                    cb();
-                    this.setState({ userToken: "fakeToken" });
-                    // else show Toast "Error Logging You in"
-                },
-                isAuthenticated: () => {
-                    return this.state.userToken != null;
-                },
-                logout(cb) {
-                    // TODO API Request
-                    this.setState({ userToken: null });
-                    cb();
-                    // Toast "Successfully Logged Out"
-                },
-            }}>
-                {this.props.children}
-            </AuthContext.Provider>
-        )
-    }
+function AuthProvider(props) {
+    const [userToken, setUserToken] = useState(null);
+    return (
+        <AuthContext.Provider value={{
+            userToken,
+            login: (cb) => {
+                // TODO API Request
+                // if ok, set Auth.userToken and cb(); and show "Successfully Logged In" Toast
+                cb();
+                setUserToken("fakeToken");
+                // else show Toast "Error Logging You in"
+            },
+            isAuthenticated: () => {
+                return userToken != null;
+            },
+            logout(cb) {
+                // TODO API Request
+                setUserToken(null);
+                cb();
+                // Toast "Successfully Logged Out"
+            },
+        }}>
+            {props.children}
+        </AuthContext.Provider>
+    )
 }
 
-export {AuthProvider, AuthContext};
+export { AuthProvider, AuthContext };
