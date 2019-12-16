@@ -3,17 +3,14 @@ import {
     BrowserRouter as Router,
     Switch,
     Route,
-    Redirect,
 } from "react-router-dom";
-import { AuthContext, AuthProvider } from '../../auth';
+import { AuthProvider } from '../../auth';
 import Login from '../Login/Login';
 import Main from '../Main/Main';
 import Navbar from '../Navbar/Navbar';
-import Orders from '../Orders/Orders';
-import Portfolio from '../Portfolio/Portfolio';
 import Register from '../Register/Register';
-import Stock from '../Stock/Stock';
 import VSM from '../VSM/VSM';
+import PrivateRoute from '../PrivateRoute';
 
 import './App.css';
 
@@ -34,48 +31,13 @@ function App() {
                         <Route path="/register">
                             <Register />
                         </Route>
-                        <PrivateRoute path="/home">
+                        <PrivateRoute path="/vsm">
                             <VSM />
-                        </PrivateRoute>
-                        <PrivateRoute path="/portfolio">
-                            <Portfolio />
-                        </PrivateRoute>
-                        <PrivateRoute path="/orders">
-                            <Orders />
-                        </PrivateRoute>
-                        <PrivateRoute path="/stock">
-                            <Stock />
                         </PrivateRoute>
                     </Switch>
                 </div>
             </AuthProvider>
         </Router>
-    );
-}
-
-// A wrapper for <Route> that redirects to the login screen if you're not yet authenticated.
-function PrivateRoute({ children, ...rest }) {
-    // TODO: Show message via snackbar "Please login to view this page" if not logged in
-    return (
-        <AuthContext.Consumer>
-            {(context) => (
-                <Route
-                    {...rest}
-                    render={({ location }) =>
-                        context.isAuthenticated() ? (
-                            children
-                        ) : (
-                                <Redirect
-                                    to={{
-                                        pathname: "/login",
-                                        state: { from: location }
-                                    }}
-                                />
-                            )
-                    }
-                />
-            )}
-        </AuthContext.Consumer>
     );
 }
 

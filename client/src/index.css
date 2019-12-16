@@ -11,3 +11,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.required:after {
+  color: #e32;
+  content: ' *';
+  display: inline;
+}

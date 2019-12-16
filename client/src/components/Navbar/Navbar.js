@@ -11,7 +11,7 @@ function Navbar() {
         let elem = document.querySelector('.sidenav');
         new window.M.Sidenav(elem);
     });
-    // let history = useHistory();
+    let history = useHistory();
     let list = <AuthContext.Consumer>
         {(context) => (
             <div>
@@ -21,16 +21,16 @@ function Navbar() {
                             <Link className="sidenav-close" to="/">About</Link>
                         </li>
                         <li>
-                            <Link className="sidenav-close" to="/home">VSM</Link>
+                            <Link className="sidenav-close" to="/vsm">VSM</Link>
                         </li>
                         <li>
-                            <Link className="sidenav-close" to="/portfolio">My Portfolio</Link>
+                            <Link className="sidenav-close" to="/vsm/portfolio">My Portfolio</Link>
                         </li>
                         <li>
-                            <Link className="sidenav-close" to="/orders">My Orders</Link>
+                            <Link className="sidenav-close" to="/vsm/orders">My Orders</Link>
                         </li>
                         <li>
-                            {/* <a onclick={() => context.logout(() => history.push("/"))} className='mr-3'>Logout</a> */}
+                            <a onClick={() => context.logout(() => history.push("/"))} className='mr-3 sidenav-close'>Logout</a>
                         </li>
                     </ul>
                     : <ul>
