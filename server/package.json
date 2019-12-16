@@ -1,0 +1,30 @@
+{
+  "name": "vsm-server",
+  "version": "1.0.0",
+  "description": "The server for VSM",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AliabbasMerchant/VSM.git"
+  },
+  "keywords": [
+    "WebSockets",
+    "Express"
+  ],
+  "author": "Aliabbas Merchant",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/AliabbasMerchant/VSM/issues"
+  },
+  "homepage": "https://github.com/AliabbasMerchant/VSM#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.4",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "mongoose": "^5.8.1"
+  }
+}
