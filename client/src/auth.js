@@ -3,13 +3,16 @@ import React, { useState } from 'react';
 import {
     useHistory,
 } from "react-router-dom";
+import Cookies from 'js-cookie';
+
 const { getUserIdFromToken } = require('./helpers');
 const constants = require('./constants');
 
 const AuthContext = React.createContext();
 
 function AuthProvider(props) {
-    const [userToken, setUserToken] = useState(null);
+    let token =  Cookies.get(constants.tokenCookieName) ? Cookies.get(constants.tokenCookieName) : null;
+    const [userToken, setUserToken] = useState(token);
     let history = useHistory();
     return (
         <AuthContext.Provider value={{
@@ -18,6 +21,7 @@ function AuthProvider(props) {
             },
             logout() {
                 setUserToken(null);
+                Cookies.remove(constants.tokenCookieName);
             },
             getUserId() {
                 if (!userToken) return null;
@@ -33,6 +37,7 @@ function AuthProvider(props) {
                         if (response.ok) {
                             window.M.toast({ html: response.message, classes: "toast-success" });
                             setUserToken(response.userToken);
+                            Cookies.set(constants.tokenCookieName, response.userToken);
                             history.replace("/vsm");
                         } else {
                             window.M.toast({ html: response.message, classes: "toast-error" });

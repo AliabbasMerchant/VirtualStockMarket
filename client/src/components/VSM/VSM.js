@@ -15,6 +15,7 @@ function VSM() {
     let { path } = useRouteMatch();
     return (
         <div className="vsm-main">
+            {console.log("rerender")}
             {/* TODO Make a component to maintain state */}
             <Switch>
                 <Route exact path={path}>

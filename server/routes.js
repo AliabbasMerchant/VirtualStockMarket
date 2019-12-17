@@ -1,6 +1,8 @@
 const express = require('express');
 const auth = require('./auth');
 const userModel = require('./models/user');
+const stocks = require('./stocks');
+
 const router = express.Router();
 
 router.get('/', (_req, res) => {
@@ -99,6 +101,10 @@ router.post('/register', (req, res) => {
 
 router.get('*', (_req, res) => {
     res.redirect('/');
+});
+
+router.post('/stocks', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
+    res.json(stocks);
 });
 
 module.exports = router;

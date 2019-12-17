@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
     Link,
     useHistory
@@ -30,7 +30,7 @@ function Navbar() {
                             <Link className="sidenav-close" to="/vsm/orders">My Orders</Link>
                         </li>
                         <li>
-                            <div onClick={() => { context.logout(); history.push("/"); window.M.toast({ html: "Successfully Logged Out", classes: "toast-success" }); }} className='mr-3 sidenav-close'>Logout</div>
+                            <a href="/" onClick={() => { context.logout(); history.push("/"); window.M.toast({ html: "Successfully Logged Out", classes: "toast-success" }); }} className='mr-3 sidenav-close'>Logout</a>
                         </li>
                     </ul>
                     : <ul>

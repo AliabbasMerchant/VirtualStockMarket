@@ -30,15 +30,15 @@ app.use(
     })
 );
 
-app.use((req, res, next) => {
+// app.use((req, res, next) => {
     // res.locals.user = req.user;
     // res.locals.PRESENT = constants.PRESENT;
     // res.locals.ABSENT = constants.ABSENT;
     // res.locals.MIN_DATE = constants.MIN_DATE;
-    // res.locals.success_msgs = req.flash('success_msgs');
-    // res.locals.error_msgs = req.flash('error_msgs');
-    next();
-});
+    // next();
+// });
+
+require('./fastStorage/stocks').initStockPrices();
 
 app.use('/', require('./routes'));
 
