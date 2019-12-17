@@ -15,7 +15,7 @@ function Navbar() {
     let list = <AuthContext.Consumer>
         {(context) => (
             <div>
-                {context.isAuthenticated()
+                {context.getUserToken()
                     ? <ul>
                         <li>
                             <Link className="sidenav-close" to="/">About</Link>
@@ -30,7 +30,7 @@ function Navbar() {
                             <Link className="sidenav-close" to="/vsm/orders">My Orders</Link>
                         </li>
                         <li>
-                            <a onClick={() => context.logout(() => history.push("/"))} className='mr-3 sidenav-close'>Logout</a>
+                            <div onClick={() => { context.logout(); history.push("/"); window.M.toast({ html: "Successfully Logged Out", classes: "toast-success" }); }} className='mr-3 sidenav-close'>Logout</div>
                         </li>
                     </ul>
                     : <ul>
@@ -55,7 +55,7 @@ function Navbar() {
             <nav style={{ borderBottom: '1px solid grey' }} className="navbar navbar-fixed">
                 <div className="nav-wrapper">
                     <a href="/" className="brand-logo mx-3">VSM</a>
-                    <a href="#" data-target="slide-out" className="sidenav-trigger hide-on-large-only"><i className="material-icons">menu</i></a>
+                    <div href="#" data-target="slide-out" className="sidenav-trigger hide-on-large-only"><i className="material-icons">menu</i></div>
                     <div className="right hide-on-med-and-down">
                         {list}
                     </div>

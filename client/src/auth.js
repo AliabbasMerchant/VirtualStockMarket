@@ -1,28 +1,48 @@
+import axios from 'axios';
 import React, { useState } from 'react';
+import {
+    useHistory,
+} from "react-router-dom";
+const { getUserIdFromToken } = require('./helpers');
+const constants = require('./constants');
 
 const AuthContext = React.createContext();
 
 function AuthProvider(props) {
     const [userToken, setUserToken] = useState(null);
+    let history = useHistory();
     return (
         <AuthContext.Provider value={{
-            userToken,
-            login: (cb) => {
-                // TODO API Request
-                // if ok, set Auth.userToken and cb(); and show "Successfully Logged In" Toast
-                cb();
-                setUserToken("fakeToken");
-                // else show Toast "Error Logging You in"
+            getUserToken() {
+                return userToken;
             },
-            isAuthenticated: () => {
-                return userToken != null;
-            },
-            logout(cb) {
-                // TODO API Request
+            logout() {
                 setUserToken(null);
-                cb();
-                // Toast "Successfully Logged Out"
             },
+            getUserId() {
+                if (!userToken) return null;
+                return getUserIdFromToken(userToken);
+            },
+            async loginFromLoginPage() {
+                axios.post(`${constants.DOMAIN}/login`, {
+                    password: document.getElementById('password').value,
+                    username: document.getElementById('username').value,
+                })
+                    .then(function (response) {
+                        response = response.data;
+                        if (response.ok) {
+                            window.M.toast({ html: response.message, classes: "toast-success" });
+                            setUserToken(response.userToken);
+                            history.replace("/vsm");
+                        } else {
+                            window.M.toast({ html: response.message, classes: "toast-error" });
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        window.M.toast({ html: "An error occurred while processing your request", classes: "toast-error" });
+                    });
+            }
         }}>
             {props.children}
         </AuthContext.Provider>

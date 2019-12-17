@@ -17,3 +17,11 @@ body {
   content: ' *';
   display: inline;
 }
+
+.toast-success {
+  color: #00ff00;
+}
+
+.toast-error {
+  color: #ff0055;
+}

@@ -2,6 +2,7 @@ import React from 'react';
 import {
     Route,
     Switch,
+    Redirect,
     useRouteMatch
 } from "react-router-dom";
 import Orders from '../Orders/Orders';
@@ -27,6 +28,9 @@ function VSM() {
                 </Route>
                 <Route path={`${path}/stock`}>
                     <Stock />
+                </Route>
+                <Route path="*">
+                    <Redirect to={`${path}/`} />
                 </Route>
             </Switch>
         </div>

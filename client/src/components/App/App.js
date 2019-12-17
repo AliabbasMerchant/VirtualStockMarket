@@ -3,6 +3,7 @@ import {
     BrowserRouter as Router,
     Switch,
     Route,
+    Redirect,
 } from "react-router-dom";
 import { AuthProvider } from '../../auth';
 import Login from '../Login/Login';
@@ -34,6 +35,9 @@ function App() {
                         <PrivateRoute path="/vsm">
                             <VSM />
                         </PrivateRoute>
+                        <Route path="*">
+                            <Redirect to="/" />
+                        </Route>
                     </Switch>
                 </div>
             </AuthProvider>
