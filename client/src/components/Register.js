@@ -2,6 +2,7 @@ import axios from 'axios';
 import React from 'react';
 import {
     useHistory,
+    Link
 } from "react-router-dom";
 
 import constants from '../constants';
@@ -53,7 +54,7 @@ function Register() {
                         </div>
                         <div onClick={registerFunction} className="waves-effect waves-light btn my-2">Register</div>
                         <br />
-                        <a href="/login" className="btn btn-outline-danger my-2">Login</a>
+                        <Link className="btn my-2" to="/login">Login</Link>
                     </div>
                 </div>
             </div>

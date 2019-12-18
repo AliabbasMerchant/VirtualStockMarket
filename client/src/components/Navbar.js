@@ -29,7 +29,11 @@ function Navbar() {
                             <Link className="sidenav-close" to="/vsm/orders">My Orders</Link>
                         </li>
                         <li>
-                            <a href="/" onClick={() => { context.logout(); history.push("/"); window.M.toast({ html: "Successfully Logged Out", classes: "toast-success" }); }} className='mr-3 sidenav-close'>Logout</a>
+                            <Link
+                                className='mr-3 sidenav-close' to="/register"
+                                onClick={() => { context.logout(); history.push("/"); window.M.toast({ html: "Successfully Logged Out", classes: "toast-success" }); }}>
+                                Logout
+                            </Link>
                         </li>
                     </ul>
                     : <ul>
@@ -53,8 +57,8 @@ function Navbar() {
         <div id="appNavbar">
             <nav style={{ borderBottom: '1px solid grey' }} className="navbar navbar-fixed">
                 <div className="nav-wrapper">
-                    <a href="/" className="brand-logo mx-3">VSM</a>
-                    <div href="#" data-target="slide-out" className="sidenav-trigger hide-on-large-only"><i className="material-icons">menu</i></div>
+                    <Link className="brand-logo mx-3" to="/">VSM</Link>
+                    <div data-target="slide-out" className="sidenav-trigger hide-on-large-only"><i className="material-icons">menu</i></div>
                     <div className="right hide-on-med-and-down">
                         {list}
                     </div>
