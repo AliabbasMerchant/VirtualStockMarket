@@ -3,8 +3,7 @@ import {
     Link,
     useHistory
 } from "react-router-dom";
-import { AuthContext } from '../../auth';
-import './Navbar.css';
+import { AuthContext } from '../contexts/auth';
 
 function Navbar() {
     document.addEventListener('DOMContentLoaded', function () {

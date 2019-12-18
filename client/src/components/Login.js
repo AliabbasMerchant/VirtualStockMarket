@@ -2,8 +2,7 @@ import React from 'react';
 import {
     useHistory,
 } from "react-router-dom";
-import { AuthContext } from '../../auth';
-import './Login.css';
+import { AuthContext } from '../contexts/auth';
 
 function Login() {
     let history = useHistory();

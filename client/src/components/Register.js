@@ -3,10 +3,8 @@ import React from 'react';
 import {
     useHistory,
 } from "react-router-dom";
-import './Register.css';
 
-import constants from '../../constants';
-// const constants = require('../../constants');
+import constants from '../constants';
 
 function Register() {
     let history = useHistory();

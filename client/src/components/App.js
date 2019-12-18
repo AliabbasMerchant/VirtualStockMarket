@@ -5,15 +5,18 @@ import {
     Route,
     Redirect,
 } from "react-router-dom";
-import { AuthProvider } from '../../auth';
-import Login from '../Login/Login';
-import Main from '../Main/Main';
-import Navbar from '../Navbar/Navbar';
-import Register from '../Register/Register';
-import VSM from '../VSM/VSM';
-import PrivateRoute from '../PrivateRoute';
 
-import './App.css';
+import { AuthProvider } from '../contexts/auth';
+
+import Login from './Login';
+import Main from './Main';
+import Navbar from './Navbar';
+import Orders from './Orders';
+import Portfolio from './Portfolio';
+import PrivateRoute from './PrivateRoute';
+import Register from './Register';
+import Stock from './Stock';
+import VSM from './VSM';
 
 function App() {
     return (
@@ -21,6 +24,7 @@ function App() {
             <AuthProvider>
                 <div className="app">
                     <Navbar />
+                    {/* TODO Make a component to maintain state */}
 
                     <Switch>
                         <Route exact path="/">
@@ -32,8 +36,17 @@ function App() {
                         <Route path="/register">
                             <Register />
                         </Route>
-                        <PrivateRoute path="/vsm">
+                        <PrivateRoute exact path="/vsm">
                             <VSM />
+                        </PrivateRoute>
+                        <PrivateRoute path='/vsm/portfolio'>
+                            <Portfolio />
+                        </PrivateRoute>
+                        <PrivateRoute path='/vsm/orders'>
+                            <Orders />
+                        </PrivateRoute>
+                        <PrivateRoute path='/vsm/stock'>
+                            <Stock />
                         </PrivateRoute>
                         <Route path="*">
                             <Redirect to="/" />

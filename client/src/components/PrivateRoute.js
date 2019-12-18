@@ -3,8 +3,7 @@ import {
     Route,
     Redirect
 } from "react-router-dom";
-import { AuthContext } from '../auth';
-
+import { AuthContext } from '../contexts/auth';
 
 // A wrapper for <Route> that redirects to the login screen if you're not yet authenticated.
 function PrivateRoute({ children, ...rest }) {
