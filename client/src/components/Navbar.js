@@ -1,7 +1,6 @@
 import React from 'react';
 import {
     Link,
-    useHistory
 } from "react-router-dom";
 import { AuthContext } from '../contexts/auth';
 
@@ -10,7 +9,6 @@ function Navbar() {
         let elem = document.querySelector('.sidenav');
         new window.M.Sidenav(elem);
     });
-    let history = useHistory();
     let list = <AuthContext.Consumer>
         {(authContext) => (
             <div>
@@ -30,8 +28,8 @@ function Navbar() {
                         </li>
                         <li>
                             <Link
-                                className='mr-3 sidenav-close' to="/register"
-                                onClick={() => { authContext.logout(); history.push("/"); window.M.toast({ html: "Successfully Logged Out", classes: "toast-success" }); }}>
+                                className='mr-3 sidenav-close' to="/login"
+                                onClick={() => { authContext.logout(); window.M.toast({ html: "Successfully Logged Out", classes: "toast-success" }); }}>
                                 Logout
                             </Link>
                         </li>
