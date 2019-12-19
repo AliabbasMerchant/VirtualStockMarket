@@ -12,9 +12,9 @@ function Navbar() {
     });
     let history = useHistory();
     let list = <AuthContext.Consumer>
-        {(context) => (
+        {(authContext) => (
             <div>
-                {context.getUserToken()
+                {authContext.getUserToken()
                     ? <ul>
                         <li>
                             <Link className="sidenav-close" to="/">About</Link>
@@ -31,7 +31,7 @@ function Navbar() {
                         <li>
                             <Link
                                 className='mr-3 sidenav-close' to="/register"
-                                onClick={() => { context.logout(); history.push("/"); window.M.toast({ html: "Successfully Logged Out", classes: "toast-success" }); }}>
+                                onClick={() => { authContext.logout(); history.push("/"); window.M.toast({ html: "Successfully Logged Out", classes: "toast-success" }); }}>
                                 Logout
                             </Link>
                         </li>

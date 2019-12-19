@@ -10,7 +10,7 @@ import constants from '../constants';
 function Login() {
     let history = useHistory();
     
-    function login(context) {
+    function login(authContext) {
         axios.post(`${constants.DOMAIN}/login`, {
             password: document.getElementById('password').value,
             username: document.getElementById('username').value,
@@ -19,7 +19,7 @@ function Login() {
                 response = response.data;
                 if (response.ok) {
                     window.M.toast({ html: response.message, classes: "toast-success" });
-                    context.login(response.userToken);
+                    authContext.login(response.userToken);
                     history.replace("/vsm");
                 } else {
                     window.M.toast({ html: response.message, classes: "toast-error" });
@@ -33,8 +33,8 @@ function Login() {
     
     return (
         <AuthContext.Consumer>
-            {(context) => 
-                context.getUserToken() ?
+            {(authContext) => 
+                authContext.getUserToken() ?
                     history.replace("/vsm")
                     :
                     <div className="my-3 mx-auto p-3 center container">
@@ -50,7 +50,7 @@ function Login() {
                                         <input id="password" type="password" className="validate" name="password" required />
                                         <label htmlFor="password">Password</label>
                                     </div>
-                                    <div onClick={() => login(context)} className="waves-effect waves-light btn my-2" id="login-button">Login</div>
+                                    <div onClick={() => login(authContext)} className="waves-effect waves-light btn my-2" id="login-button">Login</div>
                                     <br />
                                     <Link className="btn my-2" to="/register">Register</Link>
                                 </div>

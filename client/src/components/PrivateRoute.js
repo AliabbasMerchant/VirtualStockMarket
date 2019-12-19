@@ -10,12 +10,12 @@ function PrivateRoute({ children, ...rest }) {
     // TODO: Show message via snackbar "Please login to view this page" if not logged in
     return (
         <AuthContext.Consumer>
-            {(context) => {
+            {(authContext) => {
                 return (
                     <Route
                         {...rest}
                         render={({ location }) =>
-                            context.getUserToken() ? (
+                            authContext.getUserToken() ? (
                                 children
                             ) : (
                                     <Redirect
