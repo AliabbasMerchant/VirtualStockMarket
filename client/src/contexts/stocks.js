@@ -19,7 +19,7 @@ function StocksProvider(props) {
                                 axios.post(`${constants.DOMAIN}/stocks`)
                                     .then(function (response) {
                                         let s = response.data;
-                                        for(let i=0;i<stocks.length;i++) {
+                                        for(let i=0;i<s.length;i++) {
                                             s[i].prevRate = s[i].rate;
                                         }
                                         setStocks(s);

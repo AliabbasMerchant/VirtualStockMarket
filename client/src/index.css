@@ -25,3 +25,17 @@ body {
 .toast-error {
   color: #ff0055;
 }
+
+.stocksListElement {
+  max-width: 100%;
+  width: 100%;
+  /* display: flex;
+  justify-content: space-between; */
+  background-color: lightgray;
+  font-size: large;
+  margin-bottom: 1px;
+}
+
+.textAlignRight {
+  text-align: right;
+}
