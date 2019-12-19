@@ -16,15 +16,23 @@ function StocksProvider(props) {
                     <StocksContext.Provider value={{
                         getStocks() {
                             if (stocks == null) {
-                                // axios call
-                                // prevPrice
-                                // setStocks
+                                axios.post(`${constants.DOMAIN}/stocks`)
+                                    .then(function (response) {
+                                        stocks = response.data;
+                                        for(let i=0;i<stocks.length;i++) {
+                                            stocks[i].prevRate = stocks[i].rate;
+                                        }
+                                        setStocks(stocks);
+                                    })
+                                    .catch(function (error) {
+                                        console.log(error);
+                                    });
                             }
                             return stocks;
                         },
-                        updateStockPrice(id, newPrice) {
-                            stocks[id].prevPrice = stocks[id].price;
-                            stocks[id].price = newPrice;
+                        updateStockRate(id, newRate) {
+                            stocks[id].prevRate = stocks[id].rate;
+                            stocks[id].rate = newRate;
                             setStocks(stocks);
                             return true;
                         }
@@ -36,7 +44,7 @@ function StocksProvider(props) {
                         getStocks() {
                             return null;
                         },
-                        updateStockPrice(id, newPrice) {
+                        updateStockRate(id, newRate) {
                             return false;
                         }
                     }}>

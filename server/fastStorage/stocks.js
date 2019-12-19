@@ -2,38 +2,38 @@
 
 const stocks = require('../stocks');
 
-stocksPrices = [];
+stocksRates = [];
 
-function initStockPrices() {
-    stocksPrices = [];
+function initStockRates() {
+    stocksRates = [];
     stocks.forEach((stock) => {
-        stocksPrices.push(stock.price);
+        stocksRates.push(stock.rate);
     });
 }
 
-function setStockPrice(index, price) {
-    if (0 <= index <= stocksPrices.length) {
-        stocksPrices[index] = price;
+function setStockRate(index, rate) {
+    if (0 <= index <= stocksRates.length) {
+        stocksRates[index] = rate;
     }
 }
 
-function getStockPrice(index) {
-    return (0 <= index <= stocksPrices.length) ? stocksPrices[index] : null;
+function getStockRate(index) {
+    return (0 <= index <= stocksRates.length) ? stocksRates[index] : null;
 }
 
-function calcStocksPrices() {
-    // TODO?
-    initStockPrices(); // Remove this
+function calcStocksRates() {
+    // TODO
+    initStockRates(); // Remove this
 }
 
-function getStocksPrices() {
-    return stocksPrices;
+function getStocksRates() {
+    return stocksRates;
 }
 
 module.exports = {
-    initStockPrices,
-    setStockPrice,
-    getStockPrice,
-    getStocksPrices,
-    calcStocksPrices
+    initStockRates,
+    setStockRate,
+    getStockRate,
+    getStocksRates,
+    calcStocksRates
 }

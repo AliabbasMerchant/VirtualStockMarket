@@ -1,7 +1,11 @@
 const express = require('express');
 const auth = require('./auth');
-const userModel = require('./models/user');
 const stocks = require('./stocks');
+const stocksRatesStorage = require('./fastStorage/stocks');
+const pendingOrdersStorage = require('./fastStorage/orders');
+const constants = require('./constants');
+
+const userModel = require('./models/user');
 
 const router = express.Router();
 
@@ -103,8 +107,65 @@ router.get('*', (_req, res) => {
     res.redirect('/');
 });
 
-router.post('/stocks', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
+router.post('/stocks', (_req, res) => {
+    let rates = stocksRatesStorage.getStocksRatesStorage();
+    for (let i = 0; i < stocks.length; i++) {
+        stocks[i].rate = rates[i];
+    }
     res.json(stocks);
+});
+
+router.post('/getFunds', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
+    userModel.findOne({ userId: req.userId }, (err, user) => {
+        if (err) {
+            res.json({
+                ok: false,
+                message: "No such user",
+            });
+        } else {
+            // TODO calc funds, based on initialFunds and orders
+            let funds = constants.initialFunds;
+            res.json({
+                ok: true,
+                message: "Success",
+                funds
+            });
+        }
+    });
+});
+
+router.post('/getExecutedOrders', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
+    userModel.findOne({ userId: req.userId }, (err, user) => {
+        if (err) {
+            res.json({
+                ok: false,
+                message: "No such user",
+            });
+        } else {
+            res.json({
+                ok: true,
+                message: "Success",
+                executedOrders: user.executedOrders
+            });
+        }
+    });
+});
+
+router.post('/getExecutedOrders', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
+    userModel.findOne({ userId: req.userId }, (err, user) => {
+        if (err) {
+            res.json({
+                ok: false,
+                message: "No such user",
+            });
+        } else {
+            res.json({
+                ok: true,
+                message: "Success",
+                pendingOrders: pendingOrdersStorage.getPendingOrdersOfUser(req.userId)
+            });
+        }
+    });
 });
 
 module.exports = router;

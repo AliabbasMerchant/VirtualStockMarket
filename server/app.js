@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const constants = require('./constants');
+const webSocketHandler = require('./webSocket/webSocket');
 
 mongoose.connect(process.env.MONGO_CONNECTION_STRING, {
     dbName: 'VSM',
@@ -15,6 +16,11 @@ mongoose.connect(process.env.MONGO_CONNECTION_STRING, {
 });
 
 const app = express();
+
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+
+webSocketHandler(io);
 
 app.use(cors());
 
@@ -31,15 +37,15 @@ app.use(
 );
 
 // app.use((req, res, next) => {
-    // res.locals.user = req.user;
-    // res.locals.PRESENT = constants.PRESENT;
-    // res.locals.ABSENT = constants.ABSENT;
-    // res.locals.MIN_DATE = constants.MIN_DATE;
-    // next();
+// res.locals.user = req.user;
+// res.locals.PRESENT = constants.PRESENT;
+// res.locals.ABSENT = constants.ABSENT;
+// res.locals.MIN_DATE = constants.MIN_DATE;
+// next();
 // });
 
-require('./fastStorage/stocks').initStockPrices();
+require('./fastStorage/stocks').initStockRates();
 
 app.use('/', require('./routes'));
 
-app.listen(process.env.PORT, process.env.IP);
+server.listen(process.env.PORT, process.env.IP);

@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 
 import { AuthContext } from './auth';
@@ -15,8 +16,21 @@ function AssetsProvider(props) {
                     <AssetsContext.Provider value={{
                         getFunds() {
                             if (funds === null) {
-                                // axios call
-                                // setFunds
+                                axios.post(`${constants.DOMAIN}/getFunds`, {
+                                    userToken: authContext.getUserToken(),
+                                })
+                                    .then(function (response) {
+                                        response = response.data;
+                                        if (response.ok) {
+                                            funds = response.funds;
+                                            setFunds(funds);
+                                        } else {
+                                            console.log(response.message);
+                                        }
+                                    })
+                                    .catch(function (error) {
+                                        console.log(error);
+                                    });
                             }
                             return funds;
                         },

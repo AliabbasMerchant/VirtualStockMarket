@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 
 import { AuthContext } from './auth';
@@ -16,15 +17,41 @@ function OrdersProvider(props) {
                     <OrdersContext.Provider value={{
                         getExecutedOrders() {
                             if (executedOrders == null) {
-                                // axios call
-                                // setExecutedOrders
+                                axios.post(`${constants.DOMAIN}/getExecutedOrders`, {
+                                    userToken: authContext.getUserToken(),
+                                })
+                                    .then(function (response) {
+                                        response = response.data;
+                                        if (response.ok) {
+                                            executedOrders = response.executedOrders;
+                                            setExecutedOrders(executedOrders);
+                                        } else {
+                                            console.log(response.message);
+                                        }
+                                    })
+                                    .catch(function (error) {
+                                        console.log(error);
+                                    });
                             }
                             return executedOrders;
                         },
                         getPendingOrders() {
                             if (pendingOrders == null) {
-                                // axios call
-                                // setPendingOrders
+                                axios.post(`${constants.DOMAIN}/getPendingOrders`, {
+                                    userToken: authContext.getUserToken(),
+                                })
+                                    .then(function (response) {
+                                        response = response.data;
+                                        if (response.ok) {
+                                            pendingOrders = response.pendingOrders;
+                                            setPendingOrders(pendingOrders);
+                                        } else {
+                                            console.log(response.message);
+                                        }
+                                    })
+                                    .catch(function (error) {
+                                        console.log(error);
+                                    });
                             }
                             return pendingOrders;
                         },
@@ -40,7 +67,7 @@ function OrdersProvider(props) {
                             for (let i = 0; i < pendingOrders.length; i++) {
                                 if (pendingOrders[i].id == order.id) {
                                     pendingOrders[i].quantity -= order.quantity;
-                                    if (pendingOrders[i].quantity != 0) {
+                                    if (pendingOrders[i].quantity !== 0) {
                                         newPendingOrders.push(pendingOrders[i]);
                                     }
                                 } else {
@@ -51,29 +78,31 @@ function OrdersProvider(props) {
                         },
                         getHoldings() {
                             let holdings = [];
-                            executedOrders.forEach(order => {
+                            for (let i = 0; i < executedOrders.length; i++) {
                                 let found = false;
-                                holdings.forEach(holding => {
-                                    if (holding.stockId == order.stockId) {
+                                let order = executedOrders[i];
+                                for (let j = 0; j < holdings.length; j++) {
+                                    let holding = holdings[j];
+                                    if (holding.stockId === order.stockId) {
                                         found = true;
-                                        if ((holding.quantity + order.quantity) != 0) {
+                                        if ((holding.quantity + order.quantity) !== 0) {
                                             holding.rate = (holding.rate * holding.quantity + order.rate * order.quantity) / (holding.quantity + order.quantity);
                                         } else {
                                             holding.rate = 0;;
                                         }
                                         holding.quantity += order.quantity;
                                     }
-                                })
+                                }
                                 if (!found) {
                                     holdings.push({ stockId: order.stockId, rate: order.rate, quantity: order.quantity });
                                 }
-                            });
+                            }
                             holdings = holdings.filter(holding => {
-                                return holding.quantity != 0;
+                                return holding.quantity !== 0;
                             })
-                            holdings.forEach(holding => {
-                                holding.price = holding.rate * holding.quantity;
-                            });
+                            for(let i=0;i<holdings.length;i++) {
+                                holdings[i].price = holdings[i].rate * holdings[i].quantity;
+                            };
                             return holdings;
                         }
                     }}>

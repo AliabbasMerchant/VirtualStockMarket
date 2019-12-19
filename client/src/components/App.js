@@ -7,6 +7,9 @@ import {
 } from "react-router-dom";
 
 import { AuthProvider } from '../contexts/auth';
+import { StocksProvider } from '../contexts/stocks';
+import { AssetsProvider } from '../contexts/assets';
+import { OrdersProvider } from '../contexts/orders';
 
 import Login from './Login';
 import Main from './Main';
@@ -22,37 +25,43 @@ function App() {
     return (
         <Router>
             <AuthProvider>
-                <div className="app">
-                    <Navbar />
-                    {/* TODO Make a component to maintain state */}
+                <StocksProvider>
+                    <AssetsProvider>
+                        <OrdersProvider>
+                            <div className="app">
+                                <Navbar />
+                                {/* TODO Make a component for sockets */}
 
-                    <Switch>
-                        <Route exact path="/">
-                            <Main />
-                        </Route>
-                        <Route path="/login">
-                            <Login />
-                        </Route>
-                        <Route path="/register">
-                            <Register />
-                        </Route>
-                        <PrivateRoute exact path="/vsm">
-                            <VSM />
-                        </PrivateRoute>
-                        <PrivateRoute path='/vsm/portfolio'>
-                            <Portfolio />
-                        </PrivateRoute>
-                        <PrivateRoute path='/vsm/orders'>
-                            <Orders />
-                        </PrivateRoute>
-                        <PrivateRoute path='/vsm/stock'>
-                            <Stock />
-                        </PrivateRoute>
-                        <Route path="*">
-                            <Redirect to="/" />
-                        </Route>
-                    </Switch>
-                </div>
+                                <Switch>
+                                    <Route exact path="/">
+                                        <Main />
+                                    </Route>
+                                    <Route path="/login">
+                                        <Login />
+                                    </Route>
+                                    <Route path="/register">
+                                        <Register />
+                                    </Route>
+                                    <PrivateRoute exact path="/vsm">
+                                        <VSM />
+                                    </PrivateRoute>
+                                    <PrivateRoute path='/vsm/portfolio'>
+                                        <Portfolio />
+                                    </PrivateRoute>
+                                    <PrivateRoute path='/vsm/orders'>
+                                        <Orders />
+                                    </PrivateRoute>
+                                    <PrivateRoute path='/vsm/stock'>
+                                        <Stock />
+                                    </PrivateRoute>
+                                    <Route path="*">
+                                        <Redirect to="/" />
+                                    </Route>
+                                </Switch>
+                            </div>
+                        </OrdersProvider>
+                    </AssetsProvider>
+                </StocksProvider>
             </AuthProvider>
         </Router>
     );
