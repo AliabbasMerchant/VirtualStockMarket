@@ -1,18 +1,25 @@
 order = {
-    "id":"string",
+    "id": "string",
     "quantity": "+- int",
     "rate": "float",
-    "stockId": "int",
+    "stockIndex": "int",
     "userId": "string"
 }
 
 holding = {
-    "stockId": "int",
+    "stockIndex": "int",
     "rate": "float",
     "quantity": "int",
     "price": "float",
 }
 
 user = {
-    "_id":"mongoID"
+    "_id": "mongoID"
+}
+
+stock = {
+    "name": "Mno Company",
+    "scrip": "String",
+    "rate": "float",
+    "prevRate": "float"
 }

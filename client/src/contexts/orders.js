@@ -23,7 +23,6 @@ function OrdersProvider(props) {
                                     .then(function (response) {
                                         response = response.data;
                                         if (response.ok) {
-                                            executedOrders = response.executedOrders;
                                             setExecutedOrders(executedOrders);
                                         } else {
                                             console.log(response.message);
@@ -43,7 +42,6 @@ function OrdersProvider(props) {
                                     .then(function (response) {
                                         response = response.data;
                                         if (response.ok) {
-                                            pendingOrders = response.pendingOrders;
                                             setPendingOrders(pendingOrders);
                                         } else {
                                             console.log(response.message);
@@ -65,7 +63,7 @@ function OrdersProvider(props) {
                             setExecutedOrders(executedOrders);
                             let newPendingOrders = [];
                             for (let i = 0; i < pendingOrders.length; i++) {
-                                if (pendingOrders[i].id == order.id) {
+                                if (pendingOrders[i].id === order.id) {
                                     pendingOrders[i].quantity -= order.quantity;
                                     if (pendingOrders[i].quantity !== 0) {
                                         newPendingOrders.push(pendingOrders[i]);
@@ -83,7 +81,7 @@ function OrdersProvider(props) {
                                 let order = executedOrders[i];
                                 for (let j = 0; j < holdings.length; j++) {
                                     let holding = holdings[j];
-                                    if (holding.stockId === order.stockId) {
+                                    if (holding.stockIndex === order.stockIndex) {
                                         found = true;
                                         if ((holding.quantity + order.quantity) !== 0) {
                                             holding.rate = (holding.rate * holding.quantity + order.rate * order.quantity) / (holding.quantity + order.quantity);
@@ -94,7 +92,7 @@ function OrdersProvider(props) {
                                     }
                                 }
                                 if (!found) {
-                                    holdings.push({ stockId: order.stockId, rate: order.rate, quantity: order.quantity });
+                                    holdings.push({ stockIndex: order.stockIndex, rate: order.rate, quantity: order.quantity });
                                 }
                             }
                             holdings = holdings.filter(holding => {

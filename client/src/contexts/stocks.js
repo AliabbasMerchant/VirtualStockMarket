@@ -18,11 +18,11 @@ function StocksProvider(props) {
                             if (stocks == null) {
                                 axios.post(`${constants.DOMAIN}/stocks`)
                                     .then(function (response) {
-                                        stocks = response.data;
+                                        let s = response.data;
                                         for(let i=0;i<stocks.length;i++) {
-                                            stocks[i].prevRate = stocks[i].rate;
+                                            s[i].prevRate = s[i].rate;
                                         }
-                                        setStocks(stocks);
+                                        setStocks(s);
                                     })
                                     .catch(function (error) {
                                         console.log(error);

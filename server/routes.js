@@ -108,7 +108,7 @@ router.get('*', (_req, res) => {
 });
 
 router.post('/stocks', (_req, res) => {
-    let rates = stocksRatesStorage.getStocksRatesStorage();
+    let rates = stocksRatesStorage.getStocksRates();
     for (let i = 0; i < stocks.length; i++) {
         stocks[i].rate = rates[i];
     }
@@ -151,7 +151,7 @@ router.post('/getExecutedOrders', auth.checkIfAuthenticatedAndGetUserId, (req, r
     });
 });
 
-router.post('/getExecutedOrders', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
+router.post('/getPendingOrders', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
     userModel.findOne({ userId: req.userId }, (err, user) => {
         if (err) {
             res.json({

@@ -22,7 +22,6 @@ function AssetsProvider(props) {
                                     .then(function (response) {
                                         response = response.data;
                                         if (response.ok) {
-                                            funds = response.funds;
                                             setFunds(funds);
                                         } else {
                                             console.log(response.message);

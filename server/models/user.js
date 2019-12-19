@@ -7,12 +7,12 @@ const userSchema = mongoose.Schema({
     username: { type: String, required: true },
     password: { type: String, required: true },
     funds: { type: Number, required: true, default: constants.initialFunds },
-    executedOrders: {
+    executedOrders: [{
         id: { type: String, required: true },
         quantity: { type: Number, required: true },
         rate: { type: Number, required: true },
-        stockId: { type: Number, required: true }
-    }
+        stockIndex: { type: Number, required: true }
+    }]
 });
 
 module.exports = mongoose.model('vsm_user', userSchema);
