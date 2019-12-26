@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Cookies from 'js-cookie';
 
-// import getUserIdFromToken from '../helpers';
 import constants from '../constants';
 
 const AuthContext = React.createContext();
@@ -12,6 +11,7 @@ function AuthProvider(props) {
 
     return (
         <AuthContext.Provider value={{
+            userToken,
             login(userToken) {
                 setUserToken(userToken);
                 Cookies.set(constants.tokenCookieName, userToken);
@@ -20,14 +20,6 @@ function AuthProvider(props) {
                 setUserToken(null);
                 Cookies.remove(constants.tokenCookieName);
             },
-            getUserToken() {
-                return userToken;
-            },
-            /* getUserId() {
-                if (!userToken) return null;
-                return getUserIdFromToken(userToken);
-            },
-            */
         }}>
             {props.children}
         </AuthContext.Provider>

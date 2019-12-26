@@ -12,7 +12,7 @@ function Navbar() {
     let list = <AuthContext.Consumer>
         {(authContext) => (
             <div>
-                {authContext.getUserToken()
+                {authContext.userToken
                     ? <ul>
                         <li>
                             <Link className="sidenav-close" to="/">About</Link>

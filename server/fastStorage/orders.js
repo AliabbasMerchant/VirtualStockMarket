@@ -6,7 +6,7 @@ pendingOrders = [];
 
 function initPendingOrders() {
     pendingOrders = [];
-    stocks.forEach((stock) => {
+    stocks.forEach((_stock) => {
         pendingOrders.push([]);
     });
 }

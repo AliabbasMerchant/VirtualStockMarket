@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import io from 'socket.io-client';
 
 import { AuthContext } from './auth';
@@ -12,18 +12,23 @@ const SocketContext = React.createContext();
 
 function SocketProvider(props) {
     let [socket] = useState(null);
-    function connect() {
-        if (socket === null) {
-            socket = io(constants.DOMAIN);
-        } else if (!socket.connected) {
+    function connect(authContext, stocksContext, ordersContext, assetsContext) {
+        if (socket === null || !socket.connected) {
             socket = io(constants.DOMAIN);
         }
+        socket.on('connect', () => {
+            console.log('socketId:', socket.id);
+            socket.emit(constants.eventNewClient, {userToken: authContext.userToken});
+        });
+        
+        socket.on(constants.eventStockRateUpdate, (data) => {
+            console.log(constants.eventStockRateUpdate)
+            stocksContext.updateStockRate(data.stockId, data.newRate);
+        });
     }
     function disconnect() {
-        if (socket !== null) {
-            if (socket.connected) {
-                socket.disconnect();
-            }
+        if (socket !== null && socket.connected) {
+            socket.disconnect();
         }
     }
     return (
@@ -35,11 +40,11 @@ function SocketProvider(props) {
                             {(ordersContext) =>
                                 <AssetsContext.Consumer>
                                     {(assetsContext) =>
-                                        authContext.getUserToken() ?
+                                        authContext.userToken ?
                                             <SocketContext.Provider value={{
                                                 // TODO
                                             }}>
-                                                {connect()}
+                                                {connect(authContext, stocksContext, ordersContext, assetsContext)}
                                                 {props.children}
                                             </SocketContext.Provider>
                                             :

@@ -1,11 +1,24 @@
-function webSocketHandler(io) {
+const users = require('../fastStorage/users');
+const constants = require('../constants');
+
+IO = null;
+
+function init(io) {
+    IO = io;
     io.on('connection', function (socket) {
-        console.log("A client connected", socket.id);
-        // socket.emit('news', { hello: 'world' });
-        // socket.on('my other event', function (data) {
-        //     console.log(data);
-        // });
+        socket.on(constants.eventNewClient, (data) => {
+            users.setUserSocketId(data.userId, socket.id);
+        });
+
+        setTimeout(() => {stockRateUpdate(2, 150)}, 7000);
     });
 }
 
-module.exports = webSocketHandler;
+function stockRateUpdate(stockId, newRate) {
+    IO.emit(constants.eventStockRateUpdate, { stockId, newRate });
+}
+
+module.exports = {
+    init,
+    stockRateUpdate
+};

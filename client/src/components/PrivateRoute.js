@@ -15,7 +15,7 @@ function PrivateRoute({ children, ...rest }) {
                     <Route
                         {...rest}
                         render={({ location }) =>
-                            authContext.getUserToken() ? (
+                            authContext.userToken ? (
                                 children
                             ) : (
                                     <Redirect

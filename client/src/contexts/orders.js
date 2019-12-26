@@ -9,50 +9,49 @@ const OrdersContext = React.createContext();
 function OrdersProvider(props) {
     const [executedOrders, setExecutedOrders] = useState(null);
     const [pendingOrders, setPendingOrders] = useState(null);
+    
+    function initOrders(authContext) {
+        if (executedOrders == null) {
+            axios.post(`${constants.DOMAIN}/getExecutedOrders`, {
+                userToken: authContext.userToken,
+            })
+                .then(function (response) {
+                    response = response.data;
+                    if (response.ok) {
+                        setExecutedOrders(executedOrders);
+                    } else {
+                        console.log(response.message);
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
+        if (pendingOrders == null) {
+            axios.post(`${constants.DOMAIN}/getPendingOrders`, {
+                userToken: authContext.userToken,
+            })
+                .then(function (response) {
+                    response = response.data;
+                    if (response.ok) {
+                        setPendingOrders(pendingOrders);
+                    } else {
+                        console.log(response.message);
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
+    }
 
     return (
         <AuthContext.Consumer>
             {(authContext) =>
-                authContext.getUserToken() ?
+                authContext.userToken ?
                     <OrdersContext.Provider value={{
-                        getExecutedOrders() {
-                            if (executedOrders == null) {
-                                axios.post(`${constants.DOMAIN}/getExecutedOrders`, {
-                                    userToken: authContext.getUserToken(),
-                                })
-                                    .then(function (response) {
-                                        response = response.data;
-                                        if (response.ok) {
-                                            setExecutedOrders(executedOrders);
-                                        } else {
-                                            console.log(response.message);
-                                        }
-                                    })
-                                    .catch(function (error) {
-                                        console.log(error);
-                                    });
-                            }
-                            return executedOrders;
-                        },
-                        getPendingOrders() {
-                            if (pendingOrders == null) {
-                                axios.post(`${constants.DOMAIN}/getPendingOrders`, {
-                                    userToken: authContext.getUserToken(),
-                                })
-                                    .then(function (response) {
-                                        response = response.data;
-                                        if (response.ok) {
-                                            setPendingOrders(pendingOrders);
-                                        } else {
-                                            console.log(response.message);
-                                        }
-                                    })
-                                    .catch(function (error) {
-                                        console.log(error);
-                                    });
-                            }
-                            return pendingOrders;
-                        },
+                        executedOrders,
+                        pendingOrders,
                         placeOrder(order) {
                             pendingOrders.push(order);
                             setPendingOrders(pendingOrders);
@@ -104,25 +103,18 @@ function OrdersProvider(props) {
                             return holdings;
                         }
                     }}>
+                        {initOrders(authContext)}
                         {props.children}
                     </OrdersContext.Provider>
                     :
                     <OrdersContext.Provider value={{
-                        getExecutedOrders() {
-                            return null;
-                        },
-                        getPendingOrders() {
-                            return null;
-                        },
-                        placeOrder() {
+                        executedOrders: null,
+                        pendingOrders: null,
+                        placeOrder(order) {
                             return false;
                         },
-                        orderIsExecuted() {
-                            return false;
-                        },
-                        getHoldings() {
-                            return null;
-                        }
+                        orderIsExecuted(_order) { },
+                        getHoldings() { }
                     }}>
                         {setPendingOrders(null)}
                         {setExecutedOrders(null)}

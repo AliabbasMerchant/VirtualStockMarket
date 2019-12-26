@@ -34,7 +34,7 @@ function Login() {
     return (
         <AuthContext.Consumer>
             {(authContext) => 
-                authContext.getUserToken() ?
+                authContext.userToken ?
                     history.replace("/vsm")
                     :
                     <div className="my-3 mx-auto p-3 center container">

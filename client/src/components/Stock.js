@@ -24,8 +24,8 @@ function Stock() {
             {stockId
                 ? <StocksContext.Consumer>
                     {(stocksContext) =>
-                        stocksContext.getStocks()
-                            ? stockDataDiv(stocksContext.getStocks()[stockId])
+                        stocksContext.stocks
+                            ? stockDataDiv(stocksContext.stocks[stockId])
                             : errorDiv()
                     }
                 </StocksContext.Consumer>
