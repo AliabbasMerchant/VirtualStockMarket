@@ -27,6 +27,10 @@ function setUserSocketId(userId, socketId) {
 }
 
 function getUserFunds(userId, callback) {
+    if(!users[userId]) {
+        callback("No such user", null);
+        return;
+    }
     if (users[userId].funds) {
         callback(null, users[userId].funds);
     } else {

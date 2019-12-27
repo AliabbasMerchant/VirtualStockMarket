@@ -8,13 +8,15 @@ function init(io) {
     io.on('connection', function (socket) {
         socket.on(constants.eventNewClient, (data) => {
             usersStorage.initUser(data.userId, socket.id);
+            messageToUser(data.userId, constants.eventStockRateUpdate, { stockIndex: 2, rate: 150 });
         });
     });
+
 }
 
 function messageToUser(userId, eventName, data) {
     let userSocketId = usersStorage.getUserSocketId(userId);
-    if(userSocketId) {
+    if (userSocketId) {
         IO.to(userSocketId).emit(eventName, data);
     }
 }

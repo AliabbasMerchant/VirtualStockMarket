@@ -19,7 +19,7 @@ function StocksProvider(props) {
                         s[i].prevRate = s[i].rate;
                     }
                     stocks = s;
-                    setStocks(s);
+                    setStocks([...stocks.slice(0)]);
                 })
                 .catch(function (error) {
                     console.log(error);
@@ -36,7 +36,8 @@ function StocksProvider(props) {
                         updateStockRate (id, newRate) {
                             stocks[id].prevRate = stocks[id].rate;
                             stocks[id].rate = newRate;
-                            setStocks(stocks);
+                            let s = [...stocks.slice(0, id),stocks[id], ...stocks.slice(id+1)];
+                            setStocks(s);
                             return true;
                         }
                     }}>

@@ -15,16 +15,15 @@ function SocketProvider(props) {
     function connect(authContext, stocksContext, ordersContext, assetsContext) {
         if (socket === null || !socket.connected) {
             socket = io(constants.DOMAIN);
+            socket.on('connect', () => {
+                console.log('socketId:', socket.id);
+                socket.emit(constants.eventNewClient, { userToken: authContext.userToken });
+            });
+
+            socket.on(constants.eventStockRateUpdate, (data) => {
+                stocksContext.updateStockRate(data.stockIndex, data.rate);
+            });
         }
-        socket.on('connect', () => {
-            console.log('socketId:', socket.id);
-            socket.emit(constants.eventNewClient, {userToken: authContext.userToken});
-        });
-        
-        socket.on(constants.eventStockRateUpdate, (data) => {
-            console.log(constants.eventStockRateUpdate)
-            stocksContext.updateStockRate(data.stockIndex, data.newRate);
-        });
     }
     function disconnect() {
         if (socket !== null && socket.connected) {

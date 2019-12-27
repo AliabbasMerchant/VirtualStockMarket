@@ -129,7 +129,7 @@ router.post('/getFunds', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
 
 router.post('/getExecutedOrders', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
     userModel.findOne({ userId: req.body.userId }, (err, user) => {
-        if (err) {
+        if (err || !user) {
             res.json({
                 ok: false,
                 message: "No such user",
