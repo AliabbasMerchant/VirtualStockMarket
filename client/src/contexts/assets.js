@@ -7,10 +7,10 @@ import constants from '../constants';
 const AssetsContext = React.createContext();
 
 function AssetsProvider(props) {
-    let [funds, setFunds] = useState(null);
+    let [funds, setFunds] = useState(0);
 
     function initFunds(authContext) {
-        if (funds === null) {
+        if (funds === 0) {
             axios.post(`${constants.DOMAIN}/getFunds`, {
                 userToken: authContext.userToken,
             })

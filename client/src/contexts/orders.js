@@ -7,11 +7,11 @@ import constants from '../constants';
 const OrdersContext = React.createContext();
 
 function OrdersProvider(props) {
-    let [executedOrders, setExecutedOrders] = useState(null);
-    let [pendingOrders, setPendingOrders] = useState(null);
+    let [executedOrders, setExecutedOrders] = useState([]);
+    let [pendingOrders, setPendingOrders] = useState([]);
 
     function initOrders(authContext) {
-        if (executedOrders == null) {
+        if (executedOrders.length === 0) {
             axios.post(`${constants.DOMAIN}/getExecutedOrders`, {
                 userToken: authContext.userToken,
             })
@@ -29,7 +29,7 @@ function OrdersProvider(props) {
                     console.log(error);
                 });
         }
-        if (pendingOrders == null) {
+        if (pendingOrders.length === 0) {
             axios.post(`${constants.DOMAIN}/getPendingOrders`, {
                 userToken: authContext.userToken,
             })
@@ -112,18 +112,18 @@ function OrdersProvider(props) {
                     </OrdersContext.Provider>
                     :
                     <OrdersContext.Provider value={{
-                        executedOrders: null,
-                        pendingOrders: null,
-                        placeOrder(order) {
+                        executedOrders: [],
+                        pendingOrders: [],
+                        placeOrder(_order) {
                             return false;
                         },
                         orderIsExecuted(_order) { },
                         getHoldings() { }
                     }}>
-                        {pendingOrders = null}
-                        {setPendingOrders(null)}
-                        {executedOrders = null}
-                        {setExecutedOrders(null)}
+                        {pendingOrders = []}
+                        {setPendingOrders([])}
+                        {executedOrders = []}
+                        {setExecutedOrders([])}
                         {props.children}
                     </OrdersContext.Provider>
             }

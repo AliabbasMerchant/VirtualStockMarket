@@ -23,9 +23,6 @@ function Navbar() {
                             <Link className="sidenav-close" to="/vsm/portfolio">My Portfolio</Link>
                         </li>
                         <li>
-                            <Link className="sidenav-close" to="/vsm/orders">My Orders</Link>
-                        </li>
-                        <li>
                             <Link
                                 className='mr-3 sidenav-close' to="/login"
                                 onClick={() => { authContext.logout(); window.M.toast({ html: "Successfully Logged Out", classes: "toast-success" }); }}>
@@ -51,8 +48,8 @@ function Navbar() {
     </AuthContext.Consumer>
 
     return (
-        <div id="appNavbar">
-            <nav style={{ borderBottom: '1px solid grey' }} className="navbar navbar-fixed">
+        <div id="appNavbar" className="navbar-fixed">
+            <nav style={{ borderBottom: '1px solid grey' }} className="navbar">
                 <div className="nav-wrapper">
                     <Link className="brand-logo mx-3" to="/">VSM</Link>
                     <div data-target="slide-out" className="sidenav-trigger hide-on-large-only"><i className="material-icons">menu</i></div>

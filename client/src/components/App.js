@@ -15,7 +15,6 @@ import { SocketProvider } from '../contexts/socket';
 import Login from './Login';
 import Main from './Main';
 import Navbar from './Navbar';
-import Orders from './Orders';
 import Portfolio from './Portfolio';
 import PrivateRoute from './PrivateRoute';
 import Register from './Register';
@@ -48,9 +47,6 @@ function App() {
                                         </PrivateRoute>
                                         <PrivateRoute path='/vsm/portfolio'>
                                             <Portfolio />
-                                        </PrivateRoute>
-                                        <PrivateRoute path='/vsm/orders'>
-                                            <Orders />
                                         </PrivateRoute>
                                         <PrivateRoute path='/vsm/stock'>
                                             <Stock />

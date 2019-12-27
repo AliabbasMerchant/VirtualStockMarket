@@ -12,6 +12,7 @@ const SocketContext = React.createContext();
 
 function SocketProvider(props) {
     let [socket] = useState(null);
+    
     function connect(authContext, stocksContext, ordersContext, assetsContext) {
         if (socket === null || !socket.connected) {
             socket = io(constants.DOMAIN);
@@ -23,6 +24,12 @@ function SocketProvider(props) {
                 stocksContext.updateStockRate(data.stockIndex, data.rate);
             });
             socket.on(constants.eventOrderPlaced, (data) => {
+                if(data.ok) {
+                    // TODO
+                } else {
+                    // TODO delete from pending orders
+                    window.M.toast({ html: data.message, classes: "toast-error" });
+                }
                 console.log(constants.eventOrderPlaced, data);
             });
         }

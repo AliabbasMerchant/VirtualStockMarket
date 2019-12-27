@@ -7,13 +7,14 @@ import constants from '../constants';
 const StocksContext = React.createContext();
 
 function StocksProvider(props) {
-    let [stocks, setStocks] = useState(null);
+    let [stocks, setStocks] = useState([]);
 
     const initStocks = () => {
-        if (stocks === null) {
+        if (stocks.length === 0) {
             axios.post(`${constants.DOMAIN}/stocks`)
                 .then(function (response) {
                     let s = response.data;
+                    console.log("stocks", s);
                     for (let i = 0; i < s.length; i++) {
                         s[i].prevRate = s[i].rate;
                     }
