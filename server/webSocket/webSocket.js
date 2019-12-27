@@ -1,5 +1,6 @@
 const usersStorage = require('../fastStorage/users');
 const constants = require('../constants');
+const auth = require('../auth');
 
 IO = null;
 
@@ -7,11 +8,15 @@ function init(io) {
     IO = io;
     io.on('connection', function (socket) {
         socket.on(constants.eventNewClient, (data) => {
-            usersStorage.initUser(data.userId, socket.id);
-            messageToUser(data.userId, constants.eventStockRateUpdate, { stockIndex: 2, rate: 150 });
+            auth.getUserIdFromToken(data.userToken, (err, userId) => {
+                if (err) socket.disconnect();
+                else {
+                    usersStorage.initUser(userId, socket.id);
+                    // messageToUser(userId, constants.eventStockRateUpdate, { stockIndex: 2, rate: 150 }); // For Testing
+                }
+            });
         });
     });
-
 }
 
 function messageToUser(userId, eventName, data) {

@@ -8,7 +8,6 @@ const StocksContext = React.createContext();
 
 function StocksProvider(props) {
     let [stocks, setStocks] = useState(null);
-    console.log("stocks", stocks);
 
     const initStocks = () => {
         if (stocks === null) {
@@ -19,7 +18,7 @@ function StocksProvider(props) {
                         s[i].prevRate = s[i].rate;
                     }
                     stocks = s;
-                    setStocks([...stocks.slice(0)]);
+                    setStocks([...s]);
                 })
                 .catch(function (error) {
                     console.log(error);
@@ -36,8 +35,7 @@ function StocksProvider(props) {
                         updateStockRate (id, newRate) {
                             stocks[id].prevRate = stocks[id].rate;
                             stocks[id].rate = newRate;
-                            let s = [...stocks.slice(0, id),stocks[id], ...stocks.slice(id+1)];
-                            setStocks(s);
+                            setStocks([...stocks.slice(0, id),stocks[id], ...stocks.slice(id+1)]);
                             return true;
                         }
                     }}>
@@ -51,6 +49,7 @@ function StocksProvider(props) {
                             return false;
                         }
                     }}>
+                        {stocks = null}
                         {setStocks(null)}
                         {props.children}
                     </StocksContext.Provider>

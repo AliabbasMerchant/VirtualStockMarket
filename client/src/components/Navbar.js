@@ -6,8 +6,7 @@ import { AuthContext } from '../contexts/auth';
 
 function Navbar() {
     document.addEventListener('DOMContentLoaded', function () {
-        let elem = document.querySelector('.sidenav');
-        new window.M.Sidenav(elem);
+        new window.M.Sidenav(document.querySelector('.sidenav'));
     });
     let list = <AuthContext.Consumer>
         {(authContext) => (

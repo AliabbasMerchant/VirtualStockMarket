@@ -128,7 +128,7 @@ router.post('/getFunds', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
 });
 
 router.post('/getExecutedOrders', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
-    userModel.findOne({ userId: req.body.userId }, (err, user) => {
+    userModel.findById(req.body.userId, (err, user) => {
         if (err || !user) {
             res.json({
                 ok: false,
@@ -164,6 +164,7 @@ router.post('/getLeaderboard', (req, res) => {
 
 router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
     const { orderId, quantity, rate, stockIndex, userId } = req.body;
+    console.log(req.body);
     if (0 <= stockIndex < pendingOrdersStorage.getPendingOrders().length) {
         if (quantity == 0) {
             res.json({

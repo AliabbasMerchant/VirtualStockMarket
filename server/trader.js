@@ -76,7 +76,7 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
                                 }
                             }
                         }
-                        webSocketHandler.messageToUser(currentOrder.userId, constants.eventOrderPlaced, { ok: true, message: constants.defaultSuccessMessage, orderId });
+                        webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: true, message: constants.defaultSuccessMessage, orderId });
                     });
                 }
             });

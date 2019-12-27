@@ -26,7 +26,7 @@ function createUserToken(userId) {
 function getUserIdFromToken(token, handler) {
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if (err) handler(err, undefined);
-        else handler(null, decoded.userId)
+        else handler(null, decoded.userId);
     });
 }
 

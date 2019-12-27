@@ -8,4 +8,5 @@ export default {
 
     eventNewClient: "newClient",
     eventStockRateUpdate: "stockRateUpdate",
+    eventOrderPlaced: "orderPlaced",
 };

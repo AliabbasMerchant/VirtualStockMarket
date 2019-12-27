@@ -16,12 +16,14 @@ function SocketProvider(props) {
         if (socket === null || !socket.connected) {
             socket = io(constants.DOMAIN);
             socket.on('connect', () => {
-                console.log('socketId:', socket.id);
+                console.log("socketId", socket.id);
                 socket.emit(constants.eventNewClient, { userToken: authContext.userToken });
             });
-
             socket.on(constants.eventStockRateUpdate, (data) => {
                 stocksContext.updateStockRate(data.stockIndex, data.rate);
+            });
+            socket.on(constants.eventOrderPlaced, (data) => {
+                console.log(constants.eventOrderPlaced, data);
             });
         }
     }
@@ -39,20 +41,10 @@ function SocketProvider(props) {
                             {(ordersContext) =>
                                 <AssetsContext.Consumer>
                                     {(assetsContext) =>
-                                        authContext.userToken ?
-                                            <SocketContext.Provider value={{
-                                                // TODO
-                                            }}>
-                                                {connect(authContext, stocksContext, ordersContext, assetsContext)}
-                                                {props.children}
-                                            </SocketContext.Provider>
-                                            :
-                                            <SocketContext.Provider value={{
-                                                // TODO
-                                            }}>
-                                                {disconnect()}
-                                                {props.children}
-                                            </SocketContext.Provider>
+                                        <SocketContext.Provider value={{}}>
+                                            {authContext.userToken ? connect(authContext, stocksContext, ordersContext, assetsContext) : disconnect()}
+                                            {props.children}
+                                        </SocketContext.Provider>
                                     }
                                 </AssetsContext.Consumer>
                             }

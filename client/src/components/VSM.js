@@ -13,7 +13,6 @@ function VSM() {
                         <table className="row">
                             <tbody>
                                 {stocksContext.stocks.map((stock, stockIndex) => {
-                                    console.log("render", stock);
                                     return <StocksListElement key={stockIndex} data={stock} id={stockIndex} />
                                 })}
                             </tbody>

@@ -10,7 +10,7 @@ import { AuthProvider } from '../contexts/auth';
 import { StocksProvider } from '../contexts/stocks';
 import { AssetsProvider } from '../contexts/assets';
 import { OrdersProvider } from '../contexts/orders';
-import { SocketProvider, SocketContext } from '../contexts/socket';
+import { SocketProvider } from '../contexts/socket';
 
 import Login from './Login';
 import Main from './Main';
@@ -30,40 +30,36 @@ function App() {
                     <AssetsProvider>
                         <OrdersProvider>
                             <SocketProvider>
-                                <SocketContext.Consumer>
-                                    {(socketContext) =>
-                                        <div className="app">
-                                            <Navbar />
+                                <div className="app">
+                                    <Navbar />
 
-                                            <Switch>
-                                                <Route exact path="/">
-                                                    <Main />
-                                                </Route>
-                                                <Route path="/login">
-                                                    <Login />
-                                                </Route>
-                                                <Route path="/register">
-                                                    <Register />
-                                                </Route>
-                                                <PrivateRoute exact path="/vsm">
-                                                    <VSM />
-                                                </PrivateRoute>
-                                                <PrivateRoute path='/vsm/portfolio'>
-                                                    <Portfolio />
-                                                </PrivateRoute>
-                                                <PrivateRoute path='/vsm/orders'>
-                                                    <Orders />
-                                                </PrivateRoute>
-                                                <PrivateRoute path='/vsm/stock'>
-                                                    <Stock />
-                                                </PrivateRoute>
-                                                <Route path="*">
-                                                    <Redirect to="/" />
-                                                </Route>
-                                            </Switch>
-                                        </div>
-                                    }
-                                </SocketContext.Consumer>
+                                    <Switch>
+                                        <Route exact path="/">
+                                            <Main />
+                                        </Route>
+                                        <Route path="/login">
+                                            <Login />
+                                        </Route>
+                                        <Route path="/register">
+                                            <Register />
+                                        </Route>
+                                        <PrivateRoute exact path="/vsm">
+                                            <VSM />
+                                        </PrivateRoute>
+                                        <PrivateRoute path='/vsm/portfolio'>
+                                            <Portfolio />
+                                        </PrivateRoute>
+                                        <PrivateRoute path='/vsm/orders'>
+                                            <Orders />
+                                        </PrivateRoute>
+                                        <PrivateRoute path='/vsm/stock'>
+                                            <Stock />
+                                        </PrivateRoute>
+                                        <Route path="*">
+                                            <Redirect to="/" />
+                                        </Route>
+                                    </Switch>
+                                </div>
 
                             </SocketProvider>
                         </OrdersProvider>

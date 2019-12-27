@@ -27,14 +27,10 @@ function setUserSocketId(userId, socketId) {
 }
 
 function getUserFunds(userId, callback) {
-    if(!users[userId]) {
-        callback("No such user", null);
-        return;
-    }
-    if (users[userId].funds) {
+    if (users[userId] && users[userId].funds) {
         callback(null, users[userId].funds);
     } else {
-        userModel.findOne({ userId }, (err, user) => {
+        userModel.findById(userId, (err, user) => {
             if (err) {
                 console.log(err);
                 callback("No such user", null);

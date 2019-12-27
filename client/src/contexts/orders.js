@@ -7,9 +7,9 @@ import constants from '../constants';
 const OrdersContext = React.createContext();
 
 function OrdersProvider(props) {
-    const [executedOrders, setExecutedOrders] = useState(null);
-    const [pendingOrders, setPendingOrders] = useState(null);
-    
+    let [executedOrders, setExecutedOrders] = useState(null);
+    let [pendingOrders, setPendingOrders] = useState(null);
+
     function initOrders(authContext) {
         if (executedOrders == null) {
             axios.post(`${constants.DOMAIN}/getExecutedOrders`, {
@@ -17,10 +17,12 @@ function OrdersProvider(props) {
             })
                 .then(function (response) {
                     response = response.data;
+                    console.log("getExecutedOrders", response);
                     if (response.ok) {
-                        setExecutedOrders(executedOrders);
+                        executedOrders = response.executedOrders;
+                        setExecutedOrders([...response.executedOrders]);
                     } else {
-                        console.log(response.message);
+                        console.log("getExecutedOrders Error", response.message);
                     }
                 })
                 .catch(function (error) {
@@ -33,10 +35,12 @@ function OrdersProvider(props) {
             })
                 .then(function (response) {
                     response = response.data;
+                    console.log("getPendingOrders", response);
                     if (response.ok) {
-                        setPendingOrders(pendingOrders);
+                        pendingOrders = response.pendingOrders;
+                        setPendingOrders([...response.pendingOrders]);
                     } else {
-                        console.log(response.message);
+                        console.log("getPendingOrders Error", response.message);
                     }
                 })
                 .catch(function (error) {
@@ -53,13 +57,13 @@ function OrdersProvider(props) {
                         executedOrders,
                         pendingOrders,
                         placeOrder(order) {
-                            pendingOrders.push(order);
-                            setPendingOrders(pendingOrders);
+                            pendingOrders.concat(order);
+                            setPendingOrders([...pendingOrders]);
                             return true;
                         },
                         orderIsExecuted(order) {
-                            executedOrders.push(order);
-                            setExecutedOrders(executedOrders);
+                            executedOrders.concat(order);
+                            setExecutedOrders([...executedOrders]);
                             let newPendingOrders = [];
                             for (let i = 0; i < pendingOrders.length; i++) {
                                 if (pendingOrders[i].id === order.id) {
@@ -71,7 +75,7 @@ function OrdersProvider(props) {
                                     newPendingOrders.push(pendingOrders[i]);
                                 }
                             }
-                            setPendingOrders(newPendingOrders);
+                            setPendingOrders([...newPendingOrders]);
                         },
                         getHoldings() {
                             let holdings = [];
@@ -97,7 +101,7 @@ function OrdersProvider(props) {
                             holdings = holdings.filter(holding => {
                                 return holding.quantity !== 0;
                             })
-                            for(let i=0;i<holdings.length;i++) {
+                            for (let i = 0; i < holdings.length; i++) {
                                 holdings[i].price = holdings[i].rate * holdings[i].quantity;
                             };
                             return holdings;
@@ -116,7 +120,9 @@ function OrdersProvider(props) {
                         orderIsExecuted(_order) { },
                         getHoldings() { }
                     }}>
+                        {pendingOrders = null}
                         {setPendingOrders(null)}
+                        {executedOrders = null}
                         {setExecutedOrders(null)}
                         {props.children}
                     </OrdersContext.Provider>

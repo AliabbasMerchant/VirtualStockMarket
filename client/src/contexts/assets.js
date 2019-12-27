@@ -7,7 +7,7 @@ import constants from '../constants';
 const AssetsContext = React.createContext();
 
 function AssetsProvider(props) {
-    const [funds, setFunds] = useState(null);
+    let [funds, setFunds] = useState(null);
 
     function initFunds(authContext) {
         if (funds === null) {
@@ -16,10 +16,12 @@ function AssetsProvider(props) {
             })
                 .then(function (response) {
                     response = response.data;
+                    console.log("getFunds", response);
                     if (response.ok) {
-                        setFunds(funds);
+                        funds = response.funds;
+                        setFunds(response.funds);
                     } else {
-                        console.log(response.message);
+                        console.log("getFunds Error", response.message);
                     }
                 })
                 .catch(function (error) {
@@ -35,6 +37,7 @@ function AssetsProvider(props) {
                     <AssetsContext.Provider value={{
                         funds,
                         changeFunds(newFunds) {
+                            funds = newFunds;
                             setFunds(newFunds);
                             return true;
                         }
@@ -45,8 +48,9 @@ function AssetsProvider(props) {
                     :
                     <AssetsContext.Provider value={{
                         funds: null,
-                        changeFunds() {},
+                        changeFunds() { },
                     }}>
+                        {funds = null}
                         {setFunds(null)}
                         {props.children}
                     </AssetsContext.Provider>
