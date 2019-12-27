@@ -18,14 +18,14 @@ function stockDataDiv(stock) {
 }
 
 function Stock() {
-    let stockId = (new URLSearchParams(useLocation().search)).get("stockId");
+    let stockIndex = (new URLSearchParams(useLocation().search)).get("stockIndex");
     return (
         <div>
-            {stockId
+            {stockIndex
                 ? <StocksContext.Consumer>
                     {(stocksContext) =>
                         stocksContext.stocks
-                            ? stockDataDiv(stocksContext.stocks[stockId])
+                            ? stockDataDiv(stocksContext.stocks[stockIndex])
                             : errorDiv()
                     }
                 </StocksContext.Consumer>

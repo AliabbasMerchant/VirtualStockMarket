@@ -1,9 +1,11 @@
 const express = require('express');
 const auth = require('./auth');
 const stocks = require('./stocks');
-const stocksRatesStorage = require('./fastStorage/stocks');
+const stocksStorage = require('./fastStorage/stocks');
 const pendingOrdersStorage = require('./fastStorage/orders');
+const usersStorage = require('./fastStorage/users');
 const constants = require('./constants');
+const trader = require('./trader');
 
 const userModel = require('./models/user');
 
@@ -103,39 +105,30 @@ router.post('/register', (req, res) => {
     });
 });
 
-router.get('*', (_req, res) => {
-    res.redirect('/');
-});
-
 router.post('/stocks', (_req, res) => {
-    let rates = stocksRatesStorage.getStocksRates();
+    let rates = stocksStorage.getStocks();
     for (let i = 0; i < stocks.length; i++) {
-        stocks[i].rate = rates[i];
+        stocks[i].rate = rates[i].rate;
     }
     res.json(stocks);
 });
 
 router.post('/getFunds', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
-    userModel.findOne({ userId: req.userId }, (err, user) => {
+    usersStorage.getUserFunds(req.body.userId, (err, funds) => {
         if (err) {
             res.json({
-                ok: false,
-                message: "No such user",
+                ok: false, message: err
             });
         } else {
-            // TODO calc funds, based on initialFunds and orders
-            let funds = constants.initialFunds;
             res.json({
-                ok: true,
-                message: "Success",
-                funds
+                ok: true, message: constants.defaultSuccessMessage, funds
             });
         }
     });
 });
 
 router.post('/getExecutedOrders', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
-    userModel.findOne({ userId: req.userId }, (err, user) => {
+    userModel.findOne({ userId: req.body.userId }, (err, user) => {
         if (err) {
             res.json({
                 ok: false,
@@ -144,7 +137,7 @@ router.post('/getExecutedOrders', auth.checkIfAuthenticatedAndGetUserId, (req, r
         } else {
             res.json({
                 ok: true,
-                message: "Success",
+                message: constants.defaultSuccessMessage,
                 executedOrders: user.executedOrders
             });
         }
@@ -152,20 +145,49 @@ router.post('/getExecutedOrders', auth.checkIfAuthenticatedAndGetUserId, (req, r
 });
 
 router.post('/getPendingOrders', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
-    userModel.findOne({ userId: req.userId }, (err, user) => {
-        if (err) {
+    const userId = req.body.userId;
+    res.json({
+        ok: true,
+        message: constants.defaultSuccessMessage,
+        pendingOrders: pendingOrdersStorage.getPendingOrdersOfUser(userId)
+    });
+});
+
+router.post('/getHoldings', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
+    const userId = req.body.userId;
+    // TODO
+});
+
+router.post('/getLeaderboard', (req, res) => {
+    // TODO
+});
+
+router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
+    const { orderId, quantity, rate, stockIndex, userId } = req.body;
+    if (0 <= stockIndex < pendingOrdersStorage.getPendingOrders().length) {
+        if (quantity == 0) {
             res.json({
                 ok: false,
-                message: "No such user",
+                message: "Quantity cannot be zero"
             });
         } else {
+            pendingOrdersStorage.addPendingOrder(orderId, quantity, rate, stockIndex, userId);
+            trader.tryToTrade(orderId, quantity, rate, stockIndex, userId);
             res.json({
                 ok: true,
-                message: "Success",
-                pendingOrders: pendingOrdersStorage.getPendingOrdersOfUser(req.userId)
+                message: constants.defaultSuccessMessage
             });
         }
-    });
+    } else {
+        res.json({
+            ok: false,
+            message: "No such stock"
+        });
+    }
+});
+
+router.get('*', (_req, res) => {
+    res.redirect('/');
 });
 
 module.exports = router;

@@ -8,10 +8,11 @@ const userSchema = mongoose.Schema({
     password: { type: String, required: true },
     funds: { type: Number, required: true, default: constants.initialFunds },
     executedOrders: [{
-        id: { type: String, required: true },
+        orderId: { type: String, required: true },
         quantity: { type: Number, required: true },
         rate: { type: Number, required: true },
-        stockIndex: { type: Number, required: true }
+        stockIndex: { type: Number, required: true },
+        changeRate: { type: Boolean, required: true, default: true }
     }]
 });
 

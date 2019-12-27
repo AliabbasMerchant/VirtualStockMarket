@@ -23,7 +23,7 @@ function SocketProvider(props) {
         
         socket.on(constants.eventStockRateUpdate, (data) => {
             console.log(constants.eventStockRateUpdate)
-            stocksContext.updateStockRate(data.stockId, data.newRate);
+            stocksContext.updateStockRate(data.stockIndex, data.newRate);
         });
     }
     function disconnect() {

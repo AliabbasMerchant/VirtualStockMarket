@@ -1,4 +1,4 @@
-const users = require('../fastStorage/users');
+const usersStorage = require('../fastStorage/users');
 const constants = require('../constants');
 
 IO = null;
@@ -7,18 +7,24 @@ function init(io) {
     IO = io;
     io.on('connection', function (socket) {
         socket.on(constants.eventNewClient, (data) => {
-            users.setUserSocketId(data.userId, socket.id);
+            usersStorage.initUser(data.userId, socket.id);
         });
-
-        setTimeout(() => {stockRateUpdate(2, 150)}, 7000);
     });
 }
 
-function stockRateUpdate(stockId, newRate) {
-    IO.emit(constants.eventStockRateUpdate, { stockId, newRate });
+function messageToUser(userId, eventName, data) {
+    let userSocketId = usersStorage.getUserSocketId(userId);
+    if(userSocketId) {
+        IO.to(userSocketId).emit(eventName, data);
+    }
+}
+
+function messageToEveryone(eventName, data) {
+    IO.emit(eventName, data);
 }
 
 module.exports = {
     init,
-    stockRateUpdate
+    messageToUser,
+    messageToEveryone,
 };

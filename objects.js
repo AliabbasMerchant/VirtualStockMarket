@@ -1,5 +1,5 @@
 order = {
-    "id": "string",
+    "orderId": "string",
     "quantity": "+- int",
     "rate": "float",
     "stockIndex": "int",
@@ -23,3 +23,5 @@ stock = {
     "rate": "float",
     "prevRate": "float"
 }
+
+// Buying -> quantity is -ve

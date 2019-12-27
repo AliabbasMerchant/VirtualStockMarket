@@ -44,7 +44,8 @@ app.use(
 // next();
 // });
 
-require('./fastStorage/stocks').initStockRates();
+require('./fastStorage/stocks').initStocks();
+require('./fastStorage/orders').initPendingOrders();
 
 app.use('/', require('./routes'));
 
