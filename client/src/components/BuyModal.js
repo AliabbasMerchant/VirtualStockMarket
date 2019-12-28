@@ -36,8 +36,8 @@ function BuyModal(props) {
                 userToken: Cookies.get(constants.tokenCookieName),
                 orderId: order.orderId,
                 quantity: order.quantity,
-                rate: rate,
-                stockIndex: stockIndex
+                rate,
+                stockIndex
             })
                 .then(function (response) {
                     response = response.data;

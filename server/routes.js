@@ -6,8 +6,8 @@ const stocksStorage = require('./fastStorage/stocks');
 const pendingOrdersStorage = require('./fastStorage/orders');
 const constants = require('./constants');
 const trader = require('./trader');
-
 const userModel = require('./models/user');
+const developer = require('./developer');
 
 const router = express.Router();
 
@@ -39,7 +39,7 @@ router.post('/login', (req, res) => {
             });
             return;
         } else {
-            if (user.password === auth.hash(password)) {
+            if (user.password == auth.hash(password)) {
                 res.json({
                     ok: true,
                     message: "Successfully logged in",
@@ -105,9 +105,9 @@ router.post('/register', (req, res) => {
     });
 });
 
-router.post('/stocks', async (_req, res) => {
+router.post('/getStocks', async (_req, res) => {
     let rates = await stocksStorage.getStocks();
-    for (let i = 0; i < stocks.length; i++) {
+    for (let i = 0; i < rates.length; i++) {
         stocks[i].rate = rates[i].rate;
     }
     res.json(stocks);
@@ -153,18 +153,23 @@ router.post('/getPendingOrders', auth.checkIfAuthenticatedAndGetUserId, async (r
     });
 });
 
-router.post('/getLeaderboard', (req, res) => {
-    // TODO
-});
+if (constants.developer) {
+    router.get('/getLeaderboard', developer.leaderboard);
+
+    router.get('/initialize', developer.initializer);
+}
 
 router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, res) => {
     const { orderId, quantity, rate, stockIndex, userId } = req.body;
     // console.log("placeOrder", req.body);
     if (!orderId || !quantity || !rate || !stockIndex) {
-        res.json({
-            ok: false,
-            message: "Please fill in all required fields"
-        })
+        if (stockIndex !== 0) {
+            res.json({
+                ok: false,
+                message: "Please fill in all required fields"
+            });
+            return;
+        }
     }
     if (0 <= stockIndex < stocks.length) {
         if (quantity == 0) {

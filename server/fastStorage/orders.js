@@ -36,16 +36,18 @@ function pendingOrderExecuted(stockIndex, orderId, quantity) {
         if (err) {
             console.log(err);
         } else {
-            let q = order.quantity;
-            if (q === quantity) {
-                cancelPendingOder(stockIndex, orderId);
-            } else {
-                order.quantity -= quantity;
-                order.save()
-                    .then(_order => { })
-                    .catch(err => {
-                        console.log(err);
-                    });
+            if (order) {
+                let q = order.quantity;
+                if (q == quantity) {
+                    cancelPendingOder(stockIndex, orderId);
+                } else {
+                    order.quantity -= quantity;
+                    order.save()
+                        .then(_order => { })
+                        .catch(err => {
+                            console.log(err);
+                        });
+                }
             }
         }
     });
@@ -66,6 +68,5 @@ module.exports = {
     cancelPendingOder,
     pendingOrderExecuted,
     getPendingOrdersOfStock,
+    pendingOrdersModel
 }
-
-// pendingOrdersModel.deleteMany({}, (err) => console.log(err));

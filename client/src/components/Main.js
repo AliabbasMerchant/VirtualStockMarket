@@ -9,6 +9,8 @@ function Main() {
             <div className="row">
                 <div className="mx-auto col s12 md10 lg8">
                     <h1>Wallstreet</h1>
+                    <img src="/ecell.jpg" alt="ECell VJTI" />
+                    <br />
                     <Link className="btn my-3" to="/login">Login</Link>
                     <br />
                     <Link className="btn my-3" to="/register">Register</Link>

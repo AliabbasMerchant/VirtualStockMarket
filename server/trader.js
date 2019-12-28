@@ -6,9 +6,9 @@ const constants = require('./constants');
 const userModel = require('./models/user');
 
 async function tryToTrade(orderId, quantity, rate, stockIndex, userId) {
-    console.log("gotOrder", orderId, quantity, rate, stockIndex, userId);
+    const currentTime = Date.now();
+    console.log("gotOrder", orderId, quantity, rate, stockIndex, userId, currentTime);
     if (0 <= stockIndex < require('./stocks').length) {
-        const currentTime = Date.now();
         if (currentTime <= constants.buyingTimeLimit || constants.buyingTimeLimit < currentTime <= constants.breakTimeStart || constants.breakTimeEnd < currentTime <= constants.endTime) {
             assets.getUserFundsAndHoldings(userId, async (err, funds, holdings) => {
                 if (err) {
@@ -21,7 +21,7 @@ async function tryToTrade(orderId, quantity, rate, stockIndex, userId) {
                                 if (stockQuantity != null) {
                                     if (quantity + stockQuantity >= 0) { // qtty less than total available quantity
                                         let stockRate = await stocksStorage.getStockRate(stockIndex);
-                                        if (rate === stockRate) {
+                                        if (rate == stockRate) {
                                             executeOrder(orderId, quantity, rate, stockIndex, userId, false, true);
                                         } else {
                                             webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "In this period, you can only buy at market rate", orderId });
@@ -103,22 +103,27 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
     });
 }
 
-async function trade(stockIndex, orderId1) {
+async function trade(stockIndex, orderId) {
     let orders = await pendingOrdersStorage.getPendingOrdersOfStock(stockIndex);
     console.log("ordersPool", orders);
-    let order1 = orders[orderId1];
-    Object.keys(orders).forEach(orderId2 => {
-        let order2 = orders[orderId2];
-        if (order1.rate === order2.rate) {
-            if (order1.quantity * order2.quantity < 0) { // any 1 one wants to sell and the other is buying
-                let quantity = Math.min(Math.abs(order1.quantity), Math.abs(order2.quantity));
-                let quantity1 = quantity * Math.sign(order1.quantity);
-                let quantity2 = quantity * Math.sign(order2.quantity);
-                executeOrder(orderId1, quantity1, order1.rate, stockIndex, order1.userId);
-                executeOrder(orderId2, quantity2, order2.rate, stockIndex, order2.userId);
+    for (let i = 0; i < orders.length; i++) {
+        let order1 = orders[i];
+        if (order1.orderId == orderId) {
+            for (let j = 0; j < orders.length; j++) {
+                let order2 = orders[j];
+                if (j != i && order2.rate == order1.rate) {
+                    if (order1.quantity * order2.quantity < 0) { // any 1 one wants to sell and the other is buying
+                        let quantity = Math.min(Math.abs(order1.quantity), Math.abs(order2.quantity));
+                        let quantity1 = quantity * Math.sign(order1.quantity);
+                        let quantity2 = quantity * Math.sign(order2.quantity);
+                        executeOrder(order1.orderId, quantity1, order1.rate, stockIndex, order1.userId);
+                        executeOrder(order2.orderId, quantity2, order2.rate, stockIndex, order2.userId);
+                    }
+                }
             }
+            break;
         }
-    });
+    }
 }
 
 module.exports = {

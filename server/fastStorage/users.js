@@ -22,18 +22,28 @@ async function getUserSocketId(userId) {
 }
 
 function setUserSocketId(userId, socketId) {
-    const userSocket = new userSocketModel({ userId, socketId });
-    userSocket.save()
-        .then(_user => { })
-        .catch(err => {
+    userSocketModel.findOne({ userId }, (err, socketModel) => {
+        if (err) {
             console.log(err);
-        });
+        } else {
+            if (socketModel) {
+                socketModel.socketId = socketId;
+                socketModel.save()
+                    .then(_socketModel => { })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            } else {
+                const socketModel = new userSocketModel({ socketId, userId });
+                socketModel.save().then(_socketModel => { }).catch(err => console.log(err));
+            }
+        }
+    });
 }
 
 module.exports = {
     initUser,
     getUserSocketId,
     setUserSocketId,
+    userSocketModel
 }
-
-// userSocketModel.deleteMany({}, (err) => console.log(err));

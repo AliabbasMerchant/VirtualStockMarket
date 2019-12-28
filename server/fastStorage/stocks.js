@@ -17,7 +17,7 @@ function initStocks() {
     stocksModel.deleteMany({}, (err) => console.log(err));
     stocksData.forEach((stock, stockIndex) => {
         const newStockModel = new stocksModel({ stockIndex, rate: stock.rate, quantity: stock.initialQuantity });
-        newStockModel.rateList.push({ rate: stock.rate, timestamp: constants.initialTime })
+        newStockModel.rateList.push({ rate: stock.rate, timestamp: constants.initialTime });
         newStockModel.save()
             .then(_stock => { })
             .catch(err => {
@@ -46,7 +46,7 @@ function setStockRate(stockIndex, rate) {
         if (err) {
             console.log(err);
         } else {
-            stock.quantity = quantity;
+            stock.rate = rate;
             stock.rateList.push({ rate, timestamp: Date.now() })
             stock.save()
                 .then(_stock => { })
@@ -69,7 +69,7 @@ async function getStockQuantity(stockIndex) {
 }
 
 function getInitialStockQuantity(stockIndex) {
-    return (0 <= stockIndex <= stocks.length) ? stocksData[stockIndex].initialQuantity : null;
+    return (0 <= stockIndex <= stocksData.length) ? stocksData[stockIndex].initialQuantity : null;
 }
 
 async function getStockRate(stockIndex) {
@@ -110,9 +110,6 @@ module.exports = {
     setStockRate,
     getStockRate,
     getStocks,
-    getStockRateList
+    getStockRateList,
+    initStocks
 }
-
-
-// initStocks();
-// If we initStocks() correctly, we dont need to check for null values anywhere

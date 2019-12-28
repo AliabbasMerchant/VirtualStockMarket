@@ -8,16 +8,15 @@ import { StocksContext } from '../contexts/stocks';
 import { OrdersContext } from '../contexts/orders';
 
 function Stock() {
-    let stockIndex = (new URLSearchParams(useLocation().search)).get("stockIndex");
+    let stockIndex = Number((new URLSearchParams(useLocation().search)).get("stockIndex"));
 
     function errorDiv() {
-        return <div>No such stock</div>
+        return <div>No Such Stock</div>
     }
 
     function stockDataDiv(stock, stockIndex) {
         if (stock) {
             return (
-
                 <OrdersContext.Consumer>
                     {(ordersContext) =>
                         <div className="mx-auto p-3 center container">
@@ -44,7 +43,7 @@ function Stock() {
     }
     return (
         <div>
-            {stockIndex
+            {stockIndex || stockIndex === 0
                 ? <StocksContext.Consumer>
                     {(stocksContext) =>
                         stocksContext.stocks

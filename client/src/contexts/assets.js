@@ -7,7 +7,7 @@ import constants from '../constants';
 const AssetsContext = React.createContext();
 
 function AssetsProvider(props) {
-    let [funds, setFunds] = useState(0);
+    let [f, setFunds] = useState(0);
     let [got, setGot] = useState(false);
 
     function initFunds(authContext) {
@@ -20,8 +20,8 @@ function AssetsProvider(props) {
                     response = response.data;
                     console.log("getFunds", response);
                     if (response.ok) {
-                        funds = response.funds;
-                        setFunds(response.funds);
+                        f = Number(response.funds);
+                        setFunds(Number(response.funds));
                     } else {
                         console.log("getFunds Error", response.message);
                     }
@@ -37,11 +37,11 @@ function AssetsProvider(props) {
             {(authContext) =>
                 authContext.userToken ?
                     <AssetsContext.Provider value={{
-                        funds,
-                        fundsChange(addition) {
-                            funds += addition;
-                            setFunds(funds);
-                        }
+                        funds: f,
+                        fundsChange: (additional) => { // TODO givesWrongFunds
+                            f += additional;
+                            setFunds(f);
+                        },
                     }}>
                         {initFunds(authContext)}
                         {props.children}
@@ -49,10 +49,8 @@ function AssetsProvider(props) {
                     :
                     <AssetsContext.Provider value={{
                         funds: null,
-                        changeFunds() { },
+                        fundsChange: (_) => { },
                     }}>
-                        {funds = null}
-                        {setFunds(null)}
                         {props.children}
                     </AssetsContext.Provider>
             }

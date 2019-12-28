@@ -13,10 +13,10 @@ function StocksProvider(props) {
     const initStocks = () => {
         if (!got) { // Okay. No prob
             setGot(true);
-            axios.post(`${constants.DOMAIN}/stocks`)
+            axios.post(`${constants.DOMAIN}/getStocks`)
                 .then(function (response) {
                     let s = response.data;
-                    console.log("stocks", s);
+                    console.log("getStocks", s);
                     for (let i = 0; i < s.length; i++) {
                         s[i].prevRate = s[i].rate;
                     }
@@ -35,7 +35,8 @@ function StocksProvider(props) {
                 authContext.userToken ?
                     <StocksContext.Provider value={{
                         stocks,
-                        updateStockRate (id, newRate) {
+                        updateStockRate (id, newRate) { // TODO breaks
+                            console.log(stocks, stocks[id]);
                             stocks[id].prevRate = stocks[id].rate;
                             stocks[id].rate = newRate;
                             setStocks([...stocks.slice(0, id),stocks[id], ...stocks.slice(id+1)]);
