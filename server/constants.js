@@ -1,4 +1,4 @@
-const initialTime = + new Date(); // TODO change
+const initialTime = Date.now(); // TODO change
 
 module.exports = {
     initialFunds: 100000,

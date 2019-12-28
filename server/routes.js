@@ -4,7 +4,6 @@ const stocks = require('./stocks');
 const assets = require('./assets');
 const stocksStorage = require('./fastStorage/stocks');
 const pendingOrdersStorage = require('./fastStorage/orders');
-const usersStorage = require('./fastStorage/users');
 const constants = require('./constants');
 const trader = require('./trader');
 
@@ -106,8 +105,8 @@ router.post('/register', (req, res) => {
     });
 });
 
-router.post('/stocks', (_req, res) => {
-    let rates = stocksStorage.getStocks();
+router.post('/stocks', async (_req, res) => {
+    let rates = await stocksStorage.getStocks();
     for (let i = 0; i < stocks.length; i++) {
         stocks[i].rate = rates[i].rate;
     }
@@ -145,12 +144,12 @@ router.post('/getExecutedOrders', auth.checkIfAuthenticatedAndGetUserId, (req, r
     });
 });
 
-router.post('/getPendingOrders', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
+router.post('/getPendingOrders', auth.checkIfAuthenticatedAndGetUserId, async (req, res) => {
     const userId = req.body.userId;
     res.json({
         ok: true,
         message: constants.defaultSuccessMessage,
-        pendingOrders: pendingOrdersStorage.getPendingOrdersOfUser(userId)
+        pendingOrders: await pendingOrdersStorage.getPendingOrdersOfUser(userId)
     });
 });
 
@@ -158,7 +157,7 @@ router.post('/getLeaderboard', (req, res) => {
     // TODO
 });
 
-router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
+router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, res) => {
     const { orderId, quantity, rate, stockIndex, userId } = req.body;
     // console.log("placeOrder", req.body);
     if (!orderId || !quantity || !rate || !stockIndex) {
@@ -167,7 +166,7 @@ router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, (req, res) => 
             message: "Please fill in all required fields"
         })
     }
-    if (0 <= stockIndex < pendingOrdersStorage.getPendingOrders().length) {
+    if (0 <= stockIndex < stocks.length) {
         if (quantity == 0) {
             res.json({
                 ok: false,

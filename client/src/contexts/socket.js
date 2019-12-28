@@ -15,7 +15,7 @@ function SocketProvider(props) {
     
     function connect(authContext, stocksContext, ordersContext, assetsContext) {
         if (socket === null || !socket.connected) {
-            socket = io(constants.DOMAIN);
+            socket = io(constants.WEBSOCKET_DOMAIN);
             socket.on('connect', () => {
                 console.log("connect socketId", socket.id);
                 socket.emit(constants.eventNewClient, { userToken: authContext.userToken });

@@ -1,52 +1,118 @@
 // TODO Redis
-
+const constants = require('../constants');
 const stocksData = require('../stocks');
 
-stocks = []; // index: {rate, quantity}
+const mongoose = require('mongoose');
+const stocksModel = mongoose.model('vsm_stocks', mongoose.Schema({
+    stockIndex: { type: Number, required: true },
+    rate: { type: Number, required: true },
+    quantity: { type: Number, required: true },
+    rateList: [{
+        rate: { type: Number, required: true },
+        timestamp: { type: Date, required: true }
+    }]
+}));
 
 function initStocks() {
-    stocks = [];
-    stocksData.forEach((stock) => {
-        stocks.push({ rate: stock.rate, quantity: stock.initialQuantity });
+    stocksModel.deleteMany({}, (err) => console.log(err));
+    stocksData.forEach((stock, stockIndex) => {
+        const newStockModel = new stocksModel({ stockIndex, rate: stock.rate, quantity: stock.initialQuantity });
+        newStockModel.rateList.push({ rate: stock.rate, timestamp: constants.initialTime })
+        newStockModel.save()
+            .then(_stock => { })
+            .catch(err => {
+                console.log(err);
+            });
     });
 }
 
-function setStockQuantity(index, quantity) {
-    if (0 <= index <= stocks.length) stocks[index].quantity = quantity;
+function setStockQuantity(stockIndex, quantity) {
+    stocksModel.findOne({ stockIndex }, (err, stock) => {
+        if (err) {
+            console.log(err);
+        } else {
+            stock.quantity = quantity;
+            stock.save()
+                .then(_stock => { })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+    });
 }
 
-function setStockRate(index, rate) {
-    if (0 <= index <= stocks.length) stocks[index].rate = rate;
+function setStockRate(stockIndex, rate) {
+    stocksModel.findOne({ stockIndex }, (err, stock) => {
+        if (err) {
+            console.log(err);
+        } else {
+            stock.quantity = quantity;
+            stock.rateList.push({ rate, timestamp: Date.now() })
+            stock.save()
+                .then(_stock => { })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+    });
 }
 
-function getStockQuantity(index) {
-    return (0 <= index <= stocks.length) ? stocks[index].quantity : null;
+async function getStockQuantity(stockIndex) {
+    try {
+        let result = await stocksModel.findOne({ stockIndex });
+        if (!result) return null;
+        return result.quantity;
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
 }
 
-function getInitialStockQuantity(index) {
-    return (0 <= index <= stocks.length) ? stocksData[index].initialQuantity : null;
+function getInitialStockQuantity(stockIndex) {
+    return (0 <= stockIndex <= stocks.length) ? stocksData[stockIndex].initialQuantity : null;
 }
 
-function getStockRate(index) {
-    return (0 <= index <= stocks.length) ? stocks[index].rate : null;
+async function getStockRate(stockIndex) {
+    try {
+        let result = await stocksModel.findOne({ stockIndex });
+        if (!result) return null;
+        return result.rate;
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
 }
 
-function calcStocksData() {
-    // TODO
-    initStocks(); // Remove this
+async function getStockRateList(stockIndex) {
+    try {
+        let result = await stocksModel.findOne({ stockIndex });
+        if (!result) return null;
+        return result.rateList;
+    } catch (err) {
+        console.log(err);
+        return [];
+    }
 }
 
-function getStocks() {
-    return stocks;
+async function getStocks() {
+    try {
+        return await stocksModel.find({});
+    } catch (err) {
+        console.log(err);
+        return [];
+    }
 }
 
 module.exports = {
-    initStocks,
     setStockQuantity,
     getStockQuantity,
     getInitialStockQuantity,
     setStockRate,
     getStockRate,
     getStocks,
-    // calcStocksData
+    getStockRateList
 }
+
+
+// initStocks();
+// If we initStocks() correctly, we dont need to check for null values anywhere

@@ -61,12 +61,12 @@ function BuyModal(props) {
                     <div>Current Market Rate: {stock.rate}</div>
 
                     <div className="input-field">
-                        <input ref={buyQuantityInputRef} type="number" className="validate" name="quantity" min="1" step="1" defaultValue={10} />
                         <label htmlFor="quantity" className="active">Quantity</label>
+                        <input ref={buyQuantityInputRef} type="number" className="validate" name="quantity" min="1" step="1" defaultValue={10} />
                     </div>
                     <div className="input-field">
-                        <input ref={buyRateInputRef} type="number" className="validate" name="rate" defaultValue={stock.rate} />
                         <label htmlFor="rate" className="active">Buying Price</label>
+                        <input ref={buyRateInputRef} type="number" className="validate" name="rate" defaultValue={stock.rate} />
                     </div>
                 </div>
                 <div className="modal-footer">

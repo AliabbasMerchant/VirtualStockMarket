@@ -1,31 +1,31 @@
-import Cookies from 'js-cookie';
-import axios from 'axios';
+// import Cookies from 'js-cookie';
+// import axios from 'axios';
 import React from 'react';
 import SellModal from './SellModal';
-import constants from '../constants';
+// import constants from '../constants';
 import { StocksContext } from '../contexts/stocks';
 import { OrdersContext } from '../contexts/orders';
 import { AssetsContext } from '../contexts/assets';
 
-function cancelOrder(orderId, stockIndex, deletePendingOrderFunction) {
-    axios.post(`${constants.DOMAIN}/cancelOrder`, {
-        userToken: Cookies.get(constants.tokenCookieName),
-        orderId,
-        stockIndex
-    })
-        .then(function (response) {
-            response = response.data;
-            if (response.ok) {
-                window.M.toast({ html: "Pending Order Successfully Cancelled", classes: "toast-success" });
-                deletePendingOrderFunction(orderId);
-            } else {
-                window.M.toast({ html: response.message, classes: "toast-error" });
-            }
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
-}
+// function cancelOrder(orderId, stockIndex, deletePendingOrderFunction) {
+//     axios.post(`${constants.DOMAIN}/cancelOrder`, {
+//         userToken: Cookies.get(constants.tokenCookieName),
+//         orderId,
+//         stockIndex
+//     })
+//         .then(function (response) {
+//             response = response.data;
+//             if (response.ok) {
+//                 window.M.toast({ html: "Pending Order Successfully Cancelled", classes: "toast-success" });
+//                 deletePendingOrderFunction(orderId);
+//             } else {
+//                 window.M.toast({ html: response.message, classes: "toast-error" });
+//             }
+//         })
+//         .catch(function (error) {
+//             console.log(error);
+//         });
+// }
 
 function HoldingsTableHeader() {
     return <tr>
@@ -86,7 +86,7 @@ function PendingOrderTableHeader() {
 function PendingOrderTableRow(props) {
     let order = props.order;
     let stock = props.stock;
-    let deletePendingOrderFunction = props.deletePendingOrderFunction;
+    // let deletePendingOrderFunction = props.deletePendingOrderFunction;
     return (
         <tr>
             <td>{stock.scrip}</td>

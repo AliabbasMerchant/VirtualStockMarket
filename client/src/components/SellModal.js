@@ -60,12 +60,12 @@ function SellModal(props) {
                     <h4>Sell '{stock.name}'</h4>
                     <div>Current Market Rate: {stock.rate}</div>
                     <div className="input-field">
-                        <input ref={sellQuantityInputRef} type="number" className="validate" name="quantity" min="1" step="1" max={Math.abs(holding.quantity)} defaultValue={Math.abs(holding.quantity)} />
                         <label htmlFor="quantity" className="active">Quantity</label>
+                        <input ref={sellQuantityInputRef} type="number" className="validate" name="quantity" min="1" step="1" max={Math.abs(holding.quantity)} defaultValue={Math.abs(holding.quantity)} />
                     </div>
                     <div className="input-field">
-                        <input ref={sellRateInputRef} type="number" className="validate" name="rate" defaultValue={stock.rate} />
                         <label htmlFor="rate" className="active">Selling Price</label>
+                        <input ref={sellRateInputRef} type="number" className="validate" name="rate" defaultValue={stock.rate} />
                     </div>
                 </div>
                 <div className="modal-footer">

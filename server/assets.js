@@ -2,15 +2,16 @@ const stocksStorage = require('./fastStorage/stocks');
 const userModel = require('./models/user');
 const constants = require('./constants');
 
-function getUserFundsAndHoldings(userId, callback) {
-    userModel.findById(userId, (err, user) => {
+async function getUserFundsAndHoldings(userId, callback) {
+    userModel.findById(userId, async (err, user) => {
         if (err) {
             console.log(err);
             callback("No such user", null);
         } else {
             let funds = constants.initialFunds;
             let holdings = [];
-            stocksStorage.getStocks().forEach((_stock, stockIndex) => {
+            let stocks = await stocksStorage.getStocks();
+            stocks.forEach((_stock, stockIndex) => {
                 holdings.push({ stockIndex, rate: 0, quantity: 0 });
             });
             user.executedOrders.forEach(order => {

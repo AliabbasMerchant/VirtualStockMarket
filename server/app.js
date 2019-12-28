@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const constants = require('./constants');
 const webSocketHandler = require('./webSocket/webSocket');
 
 mongoose.connect(process.env.MONGO_CONNECTION_STRING, {
@@ -44,8 +43,7 @@ app.use(
 // next();
 // });
 
-require('./fastStorage/stocks').initStocks();
-require('./fastStorage/orders').initPendingOrders();
+// require('./fastStorage/stocks').initStocks();
 
 app.use('/', require('./routes'));
 

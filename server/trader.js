@@ -7,24 +7,28 @@ const userModel = require('./models/user');
 
 async function tryToTrade(orderId, quantity, rate, stockIndex, userId) {
     console.log("gotOrder", orderId, quantity, rate, stockIndex, userId);
-    if (0 <= stockIndex < stocksStorage.getStocks().length) {
-        const currentTime = + new Date();
+    if (0 <= stockIndex < require('./stocks').length) {
+        const currentTime = Date.now();
         if (currentTime <= constants.buyingTimeLimit || constants.buyingTimeLimit < currentTime <= constants.breakTimeStart || constants.breakTimeEnd < currentTime <= constants.endTime) {
-            assets.getUserFundsAndHoldings(userId, (err, funds, holdings) => {
+            assets.getUserFundsAndHoldings(userId, async (err, funds, holdings) => {
                 if (err) {
                     webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
                 } else {
                     if (funds + (quantity * rate) - assets.getBrokerageFees(quantity) >= 0) {
                         if (currentTime <= constants.buyingTimeLimit) {
                             if (quantity < 0) { // buying
-                                if (quantity + stocksStorage.getStockQuantity(stockIndex) >= 0) { // qtty less than total available quantity
-                                    if (rate === stocksStorage.getStockRate(stockIndex)) {
-                                        executeOrder(orderId, quantity, rate, stockIndex, userId, false, true);
+                                let stockQuantity = await stocksStorage.getStockQuantity(stockIndex);
+                                if (stockQuantity != null) {
+                                    if (quantity + stockQuantity >= 0) { // qtty less than total available quantity
+                                        let stockRate = await stocksStorage.getStockRate(stockIndex);
+                                        if (rate === stockRate) {
+                                            executeOrder(orderId, quantity, rate, stockIndex, userId, false, true);
+                                        } else {
+                                            webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "In this period, you can only buy at market rate", orderId });
+                                        }
                                     } else {
-                                        webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "In this period, you can only buy at market rate", orderId });
+                                        webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "Quantity too high", orderId });
                                     }
-                                } else {
-                                    webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "Quantity too high", orderId });
                                 }
                             } else { // quantity >= 0 // selling
                                 webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "Cannot sell in buying period", orderId });
@@ -62,13 +66,13 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
     // change stock quantity true/false
     // change rate true/false
     // notify user
-    userModel.findById(userId, (err, user) => {
+    userModel.findById(userId, async (err, user) => {
         if (err) {
             console.log(err);
             webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
         } else {
             user.executedOrders.push({ orderId, quantity, rate, stockIndex, changeRate });
-            user.save((err, _user) => {
+            user.save(async (err, _user) => {
                 if (err) {
                     console.log(err);
                     webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
@@ -76,7 +80,8 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
                     pendingOrdersStorage.pendingOrderExecuted(stockIndex, orderId, quantity);
                     if (changeRate && quantity > 0) { // calc only on selling, otherwise we will end up at same price, for each pair of trades
                         let initialQuantity = stocksStorage.getInitialStockQuantity(stockIndex);
-                        let currentRate = stocksStorage.getStockRate(stockIndex);
+                        // should never be null. Hence, not checking if(null)
+                        let currentRate = await stocksStorage.getStockRate(stockIndex);
                         let rateDiff = rate - currentRate;
                         let newRate = currentRate + (rateDiff * quantity / initialQuantity);
                         if (newRate !== currentRate) {
@@ -85,7 +90,10 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
                         }
                     }
                     if (stockQuantityChange) {
-                        stocksStorage.setStockQuantity(stockIndex, stocksStorage.getStockQuantity(stockIndex) + quantity);
+                        let stockQuantity = await stocksStorage.getStockQuantity(stockIndex);
+                        if (stockQuantity != null) {
+                            stocksStorage.setStockQuantity(stockIndex, stockQuantity + quantity);
+                        }
                     }
                     let fundsChange = quantity * rate - assets.getBrokerageFees(quantity);
                     webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: true, message: constants.defaultSuccessMessage, orderId, quantity, fundsChange });
@@ -96,7 +104,7 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
 }
 
 async function trade(stockIndex, orderId1) {
-    let orders = pendingOrdersStorage.getPendingOrdersOfStock(stockIndex);
+    let orders = await pendingOrdersStorage.getPendingOrdersOfStock(stockIndex);
     console.log("ordersPool", orders);
     let order1 = orders[orderId1];
     Object.keys(orders).forEach(orderId2 => {

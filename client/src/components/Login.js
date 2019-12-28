@@ -45,12 +45,12 @@ function Login() {
                                 <div>
                                     <h3 className="my-3">Login</h3>
                                     <div className="input-field my-3">
-                                        <input ref={usernameRef} type="text" className="validate" name="username" required />
                                         <label htmlFor="username">Username</label>
+                                        <input ref={usernameRef} type="text" className="validate" name="username" required />
                                     </div>
                                     <div className="input-field my-3">
-                                        <input ref={passwordRef} type="password" className="validate" name="password" required />
                                         <label htmlFor="password">Password</label>
+                                        <input ref={passwordRef} type="password" className="validate" name="password" required />
                                     </div>
                                     <div onClick={() => login(authContext)} className="waves-effect waves-light btn my-2" id="login-button">Login</div>
                                     <br />

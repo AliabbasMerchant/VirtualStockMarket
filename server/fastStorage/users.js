@@ -1,17 +1,33 @@
 // TODO Redis
 
-users = {}; // userId -> socketId
+const mongoose = require('mongoose');
+const userSocketModel = mongoose.model('vsm_user_socket', mongoose.Schema({
+    userId: { type: String, required: true },
+    socketId: { type: String, required: true },
+}));
 
 function initUser(userId, socketId) {
-    users[userId] = socketId;
+    setUserSocketId(userId, socketId);
 }
 
-function getUserSocketId(userId) {
-    return users[userId];
+async function getUserSocketId(userId) {
+    try {
+        let result = await userSocketModel.findOne({ userId });
+        if (!result) return null;
+        return result.socketId;
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
 }
 
 function setUserSocketId(userId, socketId) {
-    users[userId] = socketId;
+    const userSocket = new userSocketModel({ userId, socketId });
+    userSocket.save()
+        .then(_user => { })
+        .catch(err => {
+            console.log(err);
+        });
 }
 
 module.exports = {
@@ -19,3 +35,5 @@ module.exports = {
     getUserSocketId,
     setUserSocketId,
 }
+
+// userSocketModel.deleteMany({}, (err) => console.log(err));

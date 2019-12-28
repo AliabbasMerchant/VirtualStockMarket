@@ -11,8 +11,6 @@ function OrdersProvider(props) {
     let [pendingOrders, setPendingOrders] = useState([]);
     let [got, setGot] = useState(false);
 
-    console.log("PO", pendingOrders);
-
     function initOrders(authContext) {
         if (!got) {
             setGot(true);

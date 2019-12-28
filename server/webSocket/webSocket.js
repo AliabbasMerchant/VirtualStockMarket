@@ -19,8 +19,8 @@ function init(io) {
     });
 }
 
-function messageToUser(userId, eventName, data) {
-    let userSocketId = usersStorage.getUserSocketId(userId);
+async function messageToUser(userId, eventName, data) {
+    let userSocketId = await usersStorage.getUserSocketId(userId);
     if (userSocketId) {
         IO.to(userSocketId).emit(eventName, data);
     }

@@ -42,20 +42,20 @@ function Register() {
                     <div>
                         <h3 className="my-3">Register</h3>
                         <div className="input-field my-3">
-                            <input ref={nameRef} type="text" className="validate" name="name" required />
                             <label htmlFor="name">Name</label>
+                            <input ref={nameRef} type="text" className="validate" name="name" required />
                         </div>
                         <div className="input-field my-3">
-                            <input ref={usernameRef} type="text" className="validate" name="username" required />
                             <label htmlFor="username">Username</label>
+                            <input ref={usernameRef} type="text" className="validate" name="username" required />
                         </div>
                         <div className="input-field my-3">
-                            <input ref={passwordRef} type="password" className="validate" name="password" required />
                             <label htmlFor="password">Password</label>
+                            <input ref={passwordRef} type="password" className="validate" name="password" required />
                         </div>
                         <div className="input-field my-3">
-                            <input ref={password2Ref} type="password" className="validate" name="password2" required />
                             <label htmlFor="password2">Confirm Password</label>
+                            <input ref={password2Ref} type="password" className="validate" name="password2" required />
                         </div>
                         <div onClick={registerFunction} className="waves-effect waves-light btn my-2">Register</div>
                         <br />

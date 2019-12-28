@@ -1,73 +1,71 @@
 // TODO Redis
 
-pendingOrders = []; // stockIndex: { orderId -> { quantity, rate, userId }}
+const mongoose = require('mongoose');
+const pendingOrdersModel = mongoose.model('vsm_pending_orders', mongoose.Schema({
+    orderId: { type: String, required: true },
+    quantity: { type: Number, required: true },
+    rate: { type: Number, required: true },
+    stockIndex: { type: Number, required: true },
+    userId: { type: String, required: true },
+}));
 
-function initPendingOrders() {
-    pendingOrders = [];
-    require('../stocks').forEach((_stock) => {
-        pendingOrders.push([]);
-    });
-}
-
-function getPendingOrders() {
-    return pendingOrders;
-}
-
-function getPendingOrdersOfStock(stockIndex) {
-    return (0 <= stockIndex <= pendingOrders.length) ? pendingOrders[stockIndex] : [];
+async function getPendingOrdersOfStock(stockIndex) {
+    try {
+        return await pendingOrdersModel.find({ stockIndex });
+    } catch (err) {
+        console.log(err);
+        return [];
+    }
 }
 
 function addPendingOrder(orderId, quantity, rate, stockIndex, userId) {
-    if (0 <= stockIndex < pendingOrders.length) {
-        pendingOrders[stockIndex][orderId] = { quantity, rate, userId };
-        return true;
-    } else {
-        return false;
-    }
+    const pendingOrder = new pendingOrdersModel({ orderId, quantity, rate, stockIndex, userId });
+    pendingOrder.save()
+        .then(_order => { })
+        .catch(err => {
+            console.log(err);
+        });
 }
 
 function cancelPendingOder(stockIndex, orderId) {
-    delete pendingOrders[stockIndex][orderId];
+    pendingOrdersModel.findOneAndDelete({ stockIndex, orderId }, (_err, _doc) => { });
 }
 
 function pendingOrderExecuted(stockIndex, orderId, quantity) {
-    if (0 <= stockIndex < pendingOrders.length) {
-        if (pendingOrders[stockIndex][orderId]) {
-            let q = pendingOrders[stockIndex][orderId].quantity;
-            if (q === quantity)
-                delete pendingOrders[stockIndex][orderId];
-            else
-                pendingOrders[stockIndex][orderId].quantity = q - quantity;
+    pendingOrdersModel.findOne({ stockIndex, orderId }, (err, order) => {
+        if (err) {
+            console.log(err);
+        } else {
+            let q = order.quantity;
+            if (q === quantity) {
+                cancelPendingOder(stockIndex, orderId);
+            } else {
+                order.quantity -= quantity;
+                order.save()
+                    .then(_order => { })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            }
         }
+    });
+}
+
+async function getPendingOrdersOfUser(userId) {
+    try {
+        return await pendingOrdersModel.find({ userId });
+    } catch (err) {
+        console.log(err);
+        return [];
     }
 }
 
-function getOrder(stockIndex, orderId) {
-    return (0 <= stockIndex < pendingOrders.length) ? pendingOrders[stockIndex][orderId] : null;
-}
-
-function getPendingOrdersOfUser(userId) {
-    let orders = [];
-    pendingOrders.forEach((ordersOfStock, stockIndex) => {
-        Object.keys(ordersOfStock).forEach((orderId) => {
-            let order = ordersOfStock[orderId];
-            if (order.userId === userId) {
-                order.stockIndex = stockIndex;
-                order.orderId = orderId;
-                orders.push(order);
-            }
-        });
-    });
-    return orders;
-}
-
 module.exports = {
-    initPendingOrders,
-    getPendingOrders,
-    getPendingOrdersOfStock,
     getPendingOrdersOfUser,
     addPendingOrder,
     cancelPendingOder,
-    getOrder,
-    pendingOrderExecuted
+    pendingOrderExecuted,
+    getPendingOrdersOfStock,
 }
+
+// pendingOrdersModel.deleteMany({}, (err) => console.log(err));
