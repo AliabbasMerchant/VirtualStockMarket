@@ -178,7 +178,6 @@ router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, re
                 message: "Quantity cannot be zero"
             });
         } else {
-            pendingOrdersStorage.addPendingOrder(orderId, quantity, rate, stockIndex, userId);
             trader.tryToTrade(orderId, quantity, rate, stockIndex, userId);
             res.json({
                 ok: true,

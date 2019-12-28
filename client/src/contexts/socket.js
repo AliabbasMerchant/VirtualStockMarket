@@ -24,6 +24,7 @@ function SocketProvider(props) {
             });
             socket.on(constants.eventStockRateUpdate, (data) => {
                 console.log(constants.eventStockRateUpdate, data);
+                console.log(stocksContext.stocks)
                 stocksContext.updateStockRate(Number(data.stockIndex), Number(data.rate));
             });
             socket.on(constants.eventOrderPlaced, (data) => {

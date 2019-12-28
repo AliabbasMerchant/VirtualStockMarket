@@ -22,6 +22,7 @@ async function tryToTrade(orderId, quantity, rate, stockIndex, userId) {
                                     if (quantity + stockQuantity >= 0) { // qtty less than total available quantity
                                         let stockRate = await stocksStorage.getStockRate(stockIndex);
                                         if (rate == stockRate) {
+                                            pendingOrdersStorage.addPendingOrder(orderId, quantity, rate, stockIndex, userId);
                                             executeOrder(orderId, quantity, rate, stockIndex, userId, false, true);
                                         } else {
                                             webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "In this period, you can only buy at market rate", orderId });
@@ -37,11 +38,13 @@ async function tryToTrade(orderId, quantity, rate, stockIndex, userId) {
                             // check holdings
                             if (quantity > 0) { // selling
                                 if (quantity <= holdings[stockIndex].quantity) {
+                                    await pendingOrdersStorage.addPendingOrder(orderId, quantity, rate, stockIndex, userId);
                                     trade(stockIndex, orderId);
                                 } else {
                                     webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "You don't have those many stocks. Short selling is not allowed", orderId });
                                 }
                             } else {
+                                await pendingOrdersStorage.addPendingOrder(orderId, quantity, rate, stockIndex, userId);
                                 trade(stockIndex, orderId);
                             }
                         }

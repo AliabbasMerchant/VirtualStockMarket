@@ -66,7 +66,7 @@ function BuyModal(props) {
                     </div>
                     <div className="input-field">
                         <label htmlFor="rate" className="active">Buying Price</label>
-                        <input ref={buyRateInputRef} type="number" className="validate" name="rate" defaultValue={stock.rate} />
+                        <input ref={buyRateInputRef} type="number" className="validate" name="rate" defaultValue={Math.round(stock.rate)} />
                     </div>
                 </div>
                 <div className="modal-footer">

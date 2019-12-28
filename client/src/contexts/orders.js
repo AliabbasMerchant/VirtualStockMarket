@@ -72,23 +72,25 @@ function OrdersProvider(props) {
                             return true;
                         },
                         orderIsExecuted(orderId, quantity) {
-                            console.log("orderIsExecuted", pendingOrders, executedOrders);
+                            let p = pendingOrders.filter(_ => true);
+                            let e = executedOrders.filter(_ => true);
+                            console.log("orderIsExecuted", p, e);
                             let newPendingOrders = [];
-                            for (let i = 0; i < pendingOrders.length; i++) {
-                                if (pendingOrders[i].orderId === orderId) {
-                                    let e = executedOrders.concat({ ...pendingOrders[i], quantity });
+                            for (let i = 0; i < p.length; i++) {
+                                if (p[i].orderId === orderId) {
+                                    e = e.concat({ ...p[i], quantity });
                                     console.log("exec", e);
                                     setExecutedOrders([...e]);
-                                    pendingOrders[i].quantity -= quantity;
-                                    if (pendingOrders[i].quantity !== 0) {
-                                        newPendingOrders.concat(pendingOrders[i]);
+                                    p[i].quantity -= quantity;
+                                    if (p[i].quantity !== 0) {
+                                        newPendingOrders.concat(p[i]);
                                     }
                                 } else {
-                                    newPendingOrders.concat(pendingOrders[i]);
+                                    newPendingOrders.concat(p[i]);
                                 }
                             }
                             setPendingOrders([...newPendingOrders]);
-                            console.log("orderIsExecuted End", pendingOrders, executedOrders);
+                            console.log("orderIsExecuted End", p, e);
                         },
                         getHoldings() {
                             let holdings = {}; // stockIndex -> holding
@@ -129,8 +131,6 @@ function OrdersProvider(props) {
                         placeOrder(_order) {
                             return false;
                         },
-                        orderIsExecuted(_order) { },
-                        getHoldings() { }
                     }}>
                         {/* {pendingOrders = []}
                         {setPendingOrders([])}

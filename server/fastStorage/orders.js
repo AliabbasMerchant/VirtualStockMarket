@@ -18,13 +18,13 @@ async function getPendingOrdersOfStock(stockIndex) {
     }
 }
 
-function addPendingOrder(orderId, quantity, rate, stockIndex, userId) {
+async function addPendingOrder(orderId, quantity, rate, stockIndex, userId) {
     const pendingOrder = new pendingOrdersModel({ orderId, quantity, rate, stockIndex, userId });
-    pendingOrder.save()
-        .then(_order => { })
-        .catch(err => {
-            console.log(err);
-        });
+    try {
+        await pendingOrder.save();
+    } catch (err) {
+        console.log(err);
+    }
 }
 
 function cancelPendingOder(stockIndex, orderId) {

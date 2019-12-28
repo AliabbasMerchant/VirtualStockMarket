@@ -20,7 +20,6 @@ function StocksProvider(props) {
                     for (let i = 0; i < s.length; i++) {
                         s[i].prevRate = s[i].rate;
                     }
-                    stocks = s;
                     setStocks([...s]);
                 })
                 .catch(function (error) {
@@ -35,7 +34,7 @@ function StocksProvider(props) {
                 authContext.userToken ?
                     <StocksContext.Provider value={{
                         stocks,
-                        updateStockRate (id, newRate) { // TODO breaks
+                        updateStockRate (id, newRate) { // TODO BREAKS!
                             console.log(stocks, stocks[id]);
                             stocks[id].prevRate = stocks[id].rate;
                             stocks[id].rate = newRate;

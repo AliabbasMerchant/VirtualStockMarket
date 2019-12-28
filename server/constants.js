@@ -8,7 +8,7 @@ module.exports = {
     developer: true,
 
     initialTime,
-    buyingTimeLimit: initialTime + 0*60*1000, // milliseconds
+    buyingTimeLimit: initialTime + 1*60*1000, // milliseconds
     // buyingTimeLimit: initialTime + 5*60*1000, // milliseconds
     breakTimeStart: initialTime + 45*60*1000,
     breakTimeEnd: initialTime + 60*60*1000,
