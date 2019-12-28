@@ -6,16 +6,22 @@ import constants from '../constants';
 function BuyModal(props) {
     let stock = props.stock;
     let stockIndex = props.stockIndex;
+    let keepId = props.keepId;
     let orderPlacedFunction = props.orderPlacedFunction;
+    let buyQuantityInputRef = React.createRef();
+    let buyRateInputRef = React.createRef();
 
     useEffect(() => {
-        window.M.Modal.init(document.querySelectorAll('.modal'));
+        setTimeout(() => {
+            if (document.querySelectorAll('.modal'))
+                window.M.Modal.init(document.querySelectorAll('.modal'));
+        }, 500);
     });
 
     function handleSubmit(event) {
         event.preventDefault();
-        let quantity = document.getElementById("quantityInput").value;
-        let rate = document.getElementById("rateInput").value;
+        let quantity = buyQuantityInputRef.current.value;
+        let rate = buyRateInputRef.current.value;
         if (!quantity || !rate) {
             window.M.toast({ html: "Please fill in all fields", classes: "toast-error" });
             return;
@@ -30,12 +36,13 @@ function BuyModal(props) {
                 userToken: Cookies.get(constants.tokenCookieName),
                 orderId: order.orderId,
                 quantity: order.quantity,
-                rate,
-                stockIndex
+                rate: rate,
+                stockIndex: stockIndex
             })
                 .then(function (response) {
                     response = response.data;
                     if (response.ok) {
+                        window.M.toast({ html: "Pending Order Successfully Placed", classes: "toast-success" });
                         orderPlacedFunction(order);
                     } else {
                         window.M.toast({ html: response.message, classes: "toast-error" });
@@ -47,21 +54,23 @@ function BuyModal(props) {
         }
     }
     return (
-        <div id="buyModal" className="modal">
+        <div id={keepId} className="modal">
             <form onSubmit={handleSubmit}>
                 <div className="modal-content">
                     <h4>Buy '{stock.name}'</h4>
+                    <div>Current Market Rate: {stock.rate}</div>
+
                     <div className="input-field">
-                        <input id="quantityInput" type="number" className="validate" name="quantity" min="1" step="1" />
-                        <label htmlFor="quantity">Quantity</label>
+                        <input ref={buyQuantityInputRef} type="number" className="validate" name="quantity" min="1" step="1" defaultValue={10} />
+                        <label htmlFor="quantity" className="active">Quantity</label>
                     </div>
                     <div className="input-field">
-                        <input id="rateInput" type="number" className="validate" name="rate" value={stock.rate}/>
-                        <label htmlFor="rate">Buying Price</label>
+                        <input ref={buyRateInputRef} type="number" className="validate" name="rate" defaultValue={stock.rate} />
+                        <label htmlFor="rate" className="active">Buying Price</label>
                     </div>
                 </div>
                 <div className="modal-footer">
-                    <button href="#!" className="mx-2 modal-close waves-effect waves-green btn-flat">Close</button>
+                    <a href="#!" className="mx-2 modal-close waves-effect waves-green btn-flat">Close</a>
                     <button href="#!" type="submit" className="mx-2 modal-close waves-effect waves-green btn-flat">Buy</button>
                 </div>
             </form>

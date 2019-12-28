@@ -8,9 +8,11 @@ const AssetsContext = React.createContext();
 
 function AssetsProvider(props) {
     let [funds, setFunds] = useState(0);
+    let [got, setGot] = useState(false);
 
     function initFunds(authContext) {
-        if (funds === 0) {
+        if (!got) {
+            setGot(true);
             axios.post(`${constants.DOMAIN}/getFunds`, {
                 userToken: authContext.userToken,
             })
@@ -36,10 +38,9 @@ function AssetsProvider(props) {
                 authContext.userToken ?
                     <AssetsContext.Provider value={{
                         funds,
-                        changeFunds(newFunds) {
-                            funds = newFunds;
-                            setFunds(newFunds);
-                            return true;
+                        fundsChange(addition) {
+                            funds += addition;
+                            setFunds(funds);
                         }
                     }}>
                         {initFunds(authContext)}

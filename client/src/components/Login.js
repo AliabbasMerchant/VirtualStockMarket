@@ -9,11 +9,13 @@ import constants from '../constants';
 
 function Login() {
     let history = useHistory();
+    let passwordRef = React.createRef();
+    let usernameRef = React.createRef();
     
     function login(authContext) {
         axios.post(`${constants.DOMAIN}/login`, {
-            password: document.getElementById('password').value,
-            username: document.getElementById('username').value,
+            password: passwordRef.current.value,
+            username: usernameRef.current.value,
         })
             .then(function (response) {
                 response = response.data;
@@ -43,11 +45,11 @@ function Login() {
                                 <div>
                                     <h3 className="my-3">Login</h3>
                                     <div className="input-field my-3">
-                                        <input id="username" type="text" className="validate" name="username" required />
+                                        <input ref={usernameRef} type="text" className="validate" name="username" required />
                                         <label htmlFor="username">Username</label>
                                     </div>
                                     <div className="input-field my-3">
-                                        <input id="password" type="password" className="validate" name="password" required />
+                                        <input ref={passwordRef} type="password" className="validate" name="password" required />
                                         <label htmlFor="password">Password</label>
                                     </div>
                                     <div onClick={() => login(authContext)} className="waves-effect waves-light btn my-2" id="login-button">Login</div>

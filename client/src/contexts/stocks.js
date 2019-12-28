@@ -8,9 +8,11 @@ const StocksContext = React.createContext();
 
 function StocksProvider(props) {
     let [stocks, setStocks] = useState([]);
+    let [got, setGot] = useState(false);
 
     const initStocks = () => {
-        if (stocks.length === 0) {
+        if (!got) { // Okay. No prob
+            setGot(true);
             axios.post(`${constants.DOMAIN}/stocks`)
                 .then(function (response) {
                     let s = response.data;
@@ -45,13 +47,12 @@ function StocksProvider(props) {
                     </StocksContext.Provider>
                     :
                     <StocksContext.Provider value={{
-                        stocks: null,
+                        stocks: [],
                         updateStockRate: (_id, _newRate) => {
                             return false;
                         }
                     }}>
-                        {stocks = null}
-                        {setStocks(null)}
+                        {/* {setGot(true)} */}
                         {props.children}
                     </StocksContext.Provider>
             }

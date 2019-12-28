@@ -26,13 +26,19 @@ function addPendingOrder(orderId, quantity, rate, stockIndex, userId) {
     }
 }
 
+function cancelPendingOder(stockIndex, orderId) {
+    delete pendingOrders[stockIndex][orderId];
+}
+
 function pendingOrderExecuted(stockIndex, orderId, quantity) {
     if (0 <= stockIndex < pendingOrders.length) {
-        let q = pendingOrders[stockIndex][orderId];
-        if(q === quantity) 
-            delete pendingOrders[stockIndex][orderId];
-        else 
-            pendingOrders[stockIndex][orderId].quantity = q - quantity;
+        if (pendingOrders[stockIndex][orderId]) {
+            let q = pendingOrders[stockIndex][orderId].quantity;
+            if (q === quantity)
+                delete pendingOrders[stockIndex][orderId];
+            else
+                pendingOrders[stockIndex][orderId].quantity = q - quantity;
+        }
     }
 }
 
@@ -42,10 +48,12 @@ function getOrder(stockIndex, orderId) {
 
 function getPendingOrdersOfUser(userId) {
     let orders = [];
-    pendingOrders.forEach(ordersOfStock => {
+    pendingOrders.forEach((ordersOfStock, stockIndex) => {
         Object.keys(ordersOfStock).forEach((orderId) => {
             let order = ordersOfStock[orderId];
             if (order.userId === userId) {
+                order.stockIndex = stockIndex;
+                order.orderId = orderId;
                 orders.push(order);
             }
         });
@@ -59,6 +67,7 @@ module.exports = {
     getPendingOrdersOfStock,
     getPendingOrdersOfUser,
     addPendingOrder,
+    cancelPendingOder,
     getOrder,
     pendingOrderExecuted
 }

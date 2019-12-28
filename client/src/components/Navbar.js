@@ -1,13 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     Link,
 } from "react-router-dom";
 import { AuthContext } from '../contexts/auth';
 
 function Navbar() {
-    document.addEventListener('DOMContentLoaded', function () {
-        new window.M.Sidenav(document.querySelector('.sidenav'));
+    useEffect(() => {
+        setTimeout(() => {
+            if (document.querySelector('.sidenav'))
+                new window.M.Sidenav(document.querySelector('.sidenav'));
+        }, 5000);
     });
+    // document.addEventListener('DOMContentLoaded', function () {
+    //     new window.M.Sidenav(document.querySelector('.sidenav'));
+    // })
     let list = <AuthContext.Consumer>
         {(authContext) => (
             <div>
@@ -17,7 +23,7 @@ function Navbar() {
                             <Link className="sidenav-close" to="/">About</Link>
                         </li>
                         <li>
-                            <Link className="sidenav-close" to="/vsm">VSM</Link>
+                            <Link className="sidenav-close" to="/vsm">Wallstreet</Link>
                         </li>
                         <li>
                             <Link className="sidenav-close" to="/vsm/portfolio">My Portfolio</Link>
@@ -48,10 +54,10 @@ function Navbar() {
     </AuthContext.Consumer>
 
     return (
-        <div id="appNavbar" className="navbar-fixed">
-            <nav style={{ borderBottom: '1px solid grey' }} className="navbar">
+        <div id="appNavbar">
+            <nav style={{ borderBottom: '1px solid grey' }} className="navbar navbar-fixed">
                 <div className="nav-wrapper">
-                    <Link className="brand-logo mx-3" to="/">VSM</Link>
+                    <Link className="brand-logo mx-3" to="/">Wallstreet</Link>
                     <div data-target="slide-out" className="sidenav-trigger hide-on-large-only"><i className="material-icons">menu</i></div>
                     <div className="right hide-on-med-and-down">
                         {list}

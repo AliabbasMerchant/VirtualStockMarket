@@ -1,6 +1,7 @@
 const express = require('express');
 const auth = require('./auth');
 const stocks = require('./stocks');
+const assets = require('./assets');
 const stocksStorage = require('./fastStorage/stocks');
 const pendingOrdersStorage = require('./fastStorage/orders');
 const usersStorage = require('./fastStorage/users');
@@ -114,7 +115,7 @@ router.post('/stocks', (_req, res) => {
 });
 
 router.post('/getFunds', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
-    usersStorage.getUserFunds(req.body.userId, (err, funds) => {
+    assets.getUserFundsAndHoldings(req.body.userId, (err, funds, _holdings) => {
         if (err) {
             res.json({
                 ok: false, message: err
@@ -153,18 +154,19 @@ router.post('/getPendingOrders', auth.checkIfAuthenticatedAndGetUserId, (req, re
     });
 });
 
-router.post('/getHoldings', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
-    const userId = req.body.userId;
-    // TODO
-});
-
 router.post('/getLeaderboard', (req, res) => {
     // TODO
 });
 
 router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
     const { orderId, quantity, rate, stockIndex, userId } = req.body;
-    console.log(req.body);
+    // console.log("placeOrder", req.body);
+    if (!orderId || !quantity || !rate || !stockIndex) {
+        res.json({
+            ok: false,
+            message: "Please fill in all required fields"
+        })
+    }
     if (0 <= stockIndex < pendingOrdersStorage.getPendingOrders().length) {
         if (quantity == 0) {
             res.json({
@@ -183,6 +185,22 @@ router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, (req, res) => 
         res.json({
             ok: false,
             message: "No such stock"
+        });
+    }
+});
+
+router.post('/cancelOrder', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
+    const { orderId, stockIndex } = req.body;
+    if (!orderId || !stockIndex) {
+        res.json({
+            ok: false,
+            messge: "Please fill in all required fields"
+        });
+    } else {
+        pendingOrdersStorage.cancelPendingOder(stockIndex, orderId);
+        res.json({
+            ok: true,
+            messge: constants.defaultSuccessMessage
         });
     }
 });

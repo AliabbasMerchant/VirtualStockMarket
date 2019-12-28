@@ -9,12 +9,17 @@ import constants from '../constants';
 
 function Register() {
     let history = useHistory();
+    let nameRef = React.createRef();
+    let passwordRef = React.createRef();
+    let password2Ref = React.createRef();
+    let usernameRef = React.createRef();
+
     function registerFunction() {
         axios.post(`${constants.DOMAIN}/register`, {
-            name: document.getElementById('name').value,
-            password: document.getElementById('password').value,
-            password2: document.getElementById('password2').value,
-            username: document.getElementById('username').value,
+            name: nameRef.current.value,
+            password: passwordRef.current.value,
+            password2: password2Ref.current.value,
+            username: usernameRef.current.value,
         })
             .then(function (response) {
                 response = response.data;
@@ -37,19 +42,19 @@ function Register() {
                     <div>
                         <h3 className="my-3">Register</h3>
                         <div className="input-field my-3">
-                            <input id="name" type="text" className="validate" name="name" required />
+                            <input ref={nameRef} type="text" className="validate" name="name" required />
                             <label htmlFor="name">Name</label>
                         </div>
                         <div className="input-field my-3">
-                            <input id="username" type="text" className="validate" name="username" required />
+                            <input ref={usernameRef} type="text" className="validate" name="username" required />
                             <label htmlFor="username">Username</label>
                         </div>
                         <div className="input-field my-3">
-                            <input id="password" type="password" className="validate" name="password" required />
+                            <input ref={passwordRef} type="password" className="validate" name="password" required />
                             <label htmlFor="password">Password</label>
                         </div>
                         <div className="input-field my-3">
-                            <input id="password2" type="password" className="validate" name="password2" required />
+                            <input ref={password2Ref} type="password" className="validate" name="password2" required />
                             <label htmlFor="password2">Confirm Password</label>
                         </div>
                         <div onClick={registerFunction} className="waves-effect waves-light btn my-2">Register</div>

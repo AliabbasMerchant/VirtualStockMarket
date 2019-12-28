@@ -17,17 +17,21 @@ function SocketProvider(props) {
         if (socket === null || !socket.connected) {
             socket = io(constants.DOMAIN);
             socket.on('connect', () => {
-                console.log("socketId", socket.id);
+                console.log("connect socketId", socket.id);
                 socket.emit(constants.eventNewClient, { userToken: authContext.userToken });
             });
             socket.on(constants.eventStockRateUpdate, (data) => {
+                console.log(constants.eventStockRateUpdate, data);
                 stocksContext.updateStockRate(data.stockIndex, data.rate);
             });
             socket.on(constants.eventOrderPlaced, (data) => {
+                console.log(constants.eventOrderPlaced, data);
                 if(data.ok) {
-                    // TODO
+                    window.M.toast({ html: "Pending Order Successfully Executed", classes: "toast-success" });
+                    ordersContext.orderIsExecuted(data.orderId, data.quantity);
+                    assetsContext.fundsChange(data.fundsChange);
                 } else {
-                    // TODO delete from pending orders
+                    ordersContext.deletePendingOrder(data.orderId)
                     window.M.toast({ html: data.message, classes: "toast-error" });
                 }
                 console.log(constants.eventOrderPlaced, data);
