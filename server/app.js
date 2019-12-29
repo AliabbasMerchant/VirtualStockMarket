@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const webSocketHandler = require('./webSocket/webSocket');
+const path = require('path');
 
 mongoose.connect(process.env.MONGO_CONNECTION_STRING, {
     dbName: 'VSM',
@@ -44,6 +45,8 @@ app.use(
 // });
 
 // require('./fastStorage/stocks').initStocks();
+
+app.use(express.static(path.join(__dirname, 'build')));
 
 app.use('/', require('./routes'));
 
