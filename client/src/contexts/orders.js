@@ -11,9 +11,6 @@ function OrdersProvider(props) {
     let [pendingOrders, setPendingOrders] = useState([]);
     let [got, setGot] = useState(false);
 
-    console.log("PO", pendingOrders);
-    console.log("EO", executedOrders);
-
     function initOrders(authContext) {
         if (!got) {
             setGot(true);
@@ -24,7 +21,7 @@ function OrdersProvider(props) {
                     response = response.data;
                     console.log("getExecutedOrders", response);
                     if (response.ok) {
-                        executedOrders = response.executedOrders;
+                        // executedOrders = response.executedOrders;
                         setExecutedOrders([...response.executedOrders]);
                     } else {
                         console.log("getExecutedOrders Error", response.message);
@@ -60,21 +57,46 @@ function OrdersProvider(props) {
                         executedOrders,
                         pendingOrders,
                         placeOrder(order) { // perfect
-                            let p = pendingOrders.concat(order);
+                            setPendingOrders(pendingOrders => [...pendingOrders.concat(order)]);
+                            {/* let p = pendingOrders.concat(order);
                             setPendingOrders([...p]);
-                            return true;
+                            return true; */}
                         },
                         deletePendingOrder(orderId) { // perfect
-                            let p = pendingOrders.filter(pendingOrder =>
+                            setPendingOrders(pendingOrders => {
+                                let p = pendingOrders.filter(pendingOrder =>
+                                    pendingOrder.orderId !== orderId
+                                );
+                                return [...p];
+                            });
+                            {/* let p = pendingOrders.filter(pendingOrder =>
                                 pendingOrder.orderId !== orderId
                             );
                             setPendingOrders([...p]);
-                            return true;
+                            return true; */}
                         },
                         orderIsExecuted(orderId, quantity) {
-                            let p = pendingOrders;
+                            setPendingOrders(pendingOrders => {
+                                console.log("pendingOrders", pendingOrders);
+                                let newPendingOrders = [];
+                                for (let i = 0; i < pendingOrders.length; i++) {
+                                    if (pendingOrders[i].orderId === orderId) {
+                                        setExecutedOrders(executedOrders => {
+                                            return [...executedOrders.concat({ ...pendingOrders[i], quantity })];
+                                        })
+                                        pendingOrders[i].quantity -= quantity;
+                                        if (pendingOrders[i].quantity !== 0) {
+                                            newPendingOrders.concat(pendingOrders[i]);
+                                        }
+                                    } else {
+                                        newPendingOrders.concat(pendingOrders[i]);
+                                    }
+                                }
+                                console.log("newPendingOrders", newPendingOrders);
+                                return [...newPendingOrders];
+                            })
+                            {/* let p = pendingOrders;
                             let e = executedOrders;
-                            console.log("orderIsExecuted", p, e);
                             let newPendingOrders = [];
                             for (let i = 0; i < p.length; i++) {
                                 if (p[i].orderId === orderId) {
@@ -89,8 +111,7 @@ function OrdersProvider(props) {
                                     newPendingOrders.concat(p[i]);
                                 }
                             }
-                            setPendingOrders([...newPendingOrders]);
-                            console.log("orderIsExecuted End", p, e);
+                            setPendingOrders([...newPendingOrders]); */}
                         },
                         getHoldings() {
                             let holdings = {}; // stockIndex -> holding

@@ -1,4 +1,5 @@
 const initialTime = Date.now(); // TODO change
+// const initialTime = "";
 console.log("initialTime", initialTime);
 
 module.exports = {

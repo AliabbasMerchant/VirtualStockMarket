@@ -34,12 +34,13 @@ function StocksProvider(props) {
                 authContext.userToken ?
                     <StocksContext.Provider value={{
                         stocks,
-                        updateStockRate (id, newRate) { // TODO BREAKS!
-                            console.log(stocks, stocks[id]);
-                            stocks[id].prevRate = stocks[id].rate;
-                            stocks[id].rate = newRate;
-                            setStocks([...stocks.slice(0, id),stocks[id], ...stocks.slice(id+1)]);
-                            return true;
+                        updateStockRate: (id, newRate) => { // TODO BREAKS!
+                            setStocks(stocks => {
+                                console.log(stocks, stocks[id]);
+                                stocks[id].prevRate = stocks[id].rate;
+                                stocks[id].rate = newRate;
+                                return [...stocks.slice(0, id), stocks[id], ...stocks.slice(id + 1)];
+                            });
                         }
                     }}>
                         {initStocks(authContext)}
@@ -48,9 +49,7 @@ function StocksProvider(props) {
                     :
                     <StocksContext.Provider value={{
                         stocks: [],
-                        updateStockRate: (_id, _newRate) => {
-                            return false;
-                        }
+                        updateStockRate: (_id, _newRate) => {  }
                     }}>
                         {/* {setGot(true)} */}
                         {props.children}

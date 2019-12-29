@@ -44,9 +44,9 @@ function HoldingsTableRow(props) {
     return <tr>
         <td>{stock.scrip}</td>
         <td>{Math.abs(holding.quantity)}</td>
-        <td>{(holding.rate).toFixed(2)}</td>
-        <td>{(stock.rate).toFixed(2)}</td>
-        <td>{((stock.rate - holding.rate)).toFixed(2) * Math.abs(holding.quantity)}</td>
+        <td>{Number((holding.rate)).toFixed(2)}</td>
+        <td>{Number((stock.rate)).toFixed(2)}</td>
+        <td>{Number((stock.rate - holding.rate) * Math.abs(holding.quantity)).toFixed(2)}</td>
         <td><a className="btn waves-effect waves-light modal-trigger" href={"#sellModal"+holding.stockIndex}>SELL</a>
             <SellModal stock={stock} holding={holding} sellOrderPlacedFunction={sellOrderPlacedFunction} keepId={"sellModal"+holding.stockIndex}/>
         </td>
@@ -67,7 +67,7 @@ function ExecutedOrderTableRow(props) {
         <tr>
             <td>{stock.scrip}</td>
             <td>{Math.abs(order.quantity)}</td>
-            <td>{(order.rate).toFixed(2)}</td>
+            <td>{Number((order.rate)).toFixed(2)}</td>
             {order.quantity > 0 ?
                 <td>Sold</td> :
                 <td>Bought</td>}
@@ -91,7 +91,7 @@ function PendingOrderTableRow(props) {
         <tr>
             <td>{stock.scrip}</td>
             <td>{Math.abs(order.quantity)}</td>
-            <td>{(order.rate).toFixed(2)}</td>
+            <td>{Number((order.rate)).toFixed(2)}</td>
             {order.quantity > 0 ?
                 <td>To Sell</td> :
                 <td>To Buy</td>}
