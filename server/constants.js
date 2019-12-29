@@ -1,5 +1,5 @@
 const initialTime = Date.now(); // TODO change
-// const initialTime = "";
+// const initialTime = ;
 console.log("initialTime", initialTime);
 
 module.exports = {
@@ -9,8 +9,7 @@ module.exports = {
     developer: false,
 
     initialTime,
-    buyingTimeLimit: initialTime + 1*60*1000, // milliseconds
-    // buyingTimeLimit: initialTime + 5*60*1000, // milliseconds
+    buyingTimeLimit: initialTime + 10*60*1000, // milliseconds
     breakTimeStart: initialTime + 45*60*1000,
     breakTimeEnd: initialTime + 60*60*1000,
     endTime: initialTime + 105*60*1000,
