@@ -6,7 +6,7 @@ module.exports = {
     initialFunds: 50000,
     brokerageFees: 10, // per share
     
-    developer: true,
+    developer: false,
 
     initialTime,
     buyingTimeLimit: initialTime + 1*60*1000, // milliseconds

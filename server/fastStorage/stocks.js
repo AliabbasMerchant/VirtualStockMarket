@@ -85,7 +85,7 @@ async function getStockRate(stockIndex) {
 
 async function getStockRateList(stockIndex) {
     try {
-        let result = await stocksModel.findOne({ stockIndex });
+        let result = await stocksModel.findOne({ stockIndex } );
         if (!result) return null;
         return result.rateList;
     } catch (err) {

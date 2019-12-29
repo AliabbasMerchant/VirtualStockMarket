@@ -36,7 +36,8 @@ async function getUserFundsAndHoldings(userId, callback) {
 }
 
 function getBrokerageFees(quantity) {
-    return constants.brokerageFees * Math.abs(quantity);
+    // return constants.brokerageFees * Math.abs(quantity);
+    return constants.brokerageFees;
 }
 
 module.exports = {

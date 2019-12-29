@@ -192,6 +192,16 @@ router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, re
     }
 });
 
+router.post('/getRateList/:stockIndex', async (req, res) => {
+    const stockIndex = req.params.stockIndex;
+    let rateList = await stocksStorage.getStockRateList(stockIndex);
+    let rates = [];
+    for(let i=0;i<rateList.length;i++) {
+        rates.push({rate: rateList[i].rate, time:rateList[i].timestamp - constants.initialTime});
+    }
+    res.json(rates);
+});
+
 router.post('/cancelOrder', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
     const { orderId, stockIndex } = req.body;
     if (!orderId || !stockIndex) {

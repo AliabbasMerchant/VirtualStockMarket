@@ -77,12 +77,12 @@ function OrdersProvider(props) {
                         },
                         orderIsExecuted(orderId, quantity) {
                             setPendingOrders(pendingOrders => {
-                                console.log("pendingOrders", pendingOrders);
                                 let newPendingOrders = [];
                                 for (let i = 0; i < pendingOrders.length; i++) {
                                     if (pendingOrders[i].orderId === orderId) {
                                         setExecutedOrders(executedOrders => {
-                                            return [...executedOrders.concat({ ...pendingOrders[i], quantity })];
+                                            let e = executedOrders.concat({ ...pendingOrders[i], quantity });
+                                            return [...e];
                                         })
                                         pendingOrders[i].quantity -= quantity;
                                         if (pendingOrders[i].quantity !== 0) {
@@ -92,7 +92,6 @@ function OrdersProvider(props) {
                                         newPendingOrders.concat(pendingOrders[i]);
                                     }
                                 }
-                                console.log("newPendingOrders", newPendingOrders);
                                 return [...newPendingOrders];
                             })
                             {/* let p = pendingOrders;
@@ -113,34 +112,6 @@ function OrdersProvider(props) {
                             }
                             setPendingOrders([...newPendingOrders]); */}
                         },
-                        getHoldings() {
-                            let holdings = {}; // stockIndex -> holding
-                            executedOrders.forEach(order => {
-                                let stockIndex = order.stockIndex;
-                                if (!holdings[stockIndex]) {
-                                    holdings[stockIndex] = { stockIndex, rate: 0, quantity: 0 }
-                                }
-                                let holding = holdings[stockIndex];
-                                let quantity = holding.quantity + order.quantity;
-                                if (quantity !== 0) {
-                                    holding.rate = (holding.rate * holding.quantity + order.rate * order.quantity) / quantity;
-                                } else {
-                                    holding.rate = 0;
-                                }
-                                holding.quantity = quantity;
-                            });
-
-                            let holdingsArray = [];
-                            Object.values(holdings).forEach(holding => {
-                                if (holding.quantity !== 0) {
-                                    holding.rate = Math.abs(holding.rate);
-                                    holding.quantity = Math.abs(holding.quantity);
-                                    holding.price = holding.rate * holding.quantity;
-                                    holdingsArray.push(holding);
-                                }
-                            });
-                            return holdingsArray;
-                        }
                     }}>
                         {initOrders(authContext)}
                         {props.children}

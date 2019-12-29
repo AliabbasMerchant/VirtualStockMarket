@@ -100,6 +100,35 @@ function PendingOrderTableRow(props) {
     )
 }
 
+function getHoldings(executedOrders) {
+    let holdings = {}; // stockIndex -> holding
+    executedOrders.forEach(order => {
+        let stockIndex = order.stockIndex;
+        if (!holdings[stockIndex]) {
+            holdings[stockIndex] = { stockIndex, rate: 0, quantity: 0 }
+        }
+        let holding = holdings[stockIndex];
+        let quantity = holding.quantity + order.quantity;
+        if (quantity !== 0) {
+            holding.rate = (holding.rate * holding.quantity + order.rate * order.quantity) / quantity;
+        } else {
+            holding.rate = 0;
+        }
+        holding.quantity = quantity;
+    });
+
+    let holdingsArray = [];
+    Object.values(holdings).forEach(holding => {
+        if (holding.quantity !== 0) {
+            holding.rate = Math.abs(holding.rate);
+            holding.quantity = Math.abs(holding.quantity);
+            holding.price = holding.rate * holding.quantity;
+            holdingsArray.push(holding);
+        }
+    });
+    return holdingsArray;
+}
+
 function Portfolio() {
     return (
         <div className="mx-auto p-3 center container">
@@ -115,11 +144,11 @@ function Portfolio() {
                                                 <h3>Funds Remaining: Rs.{assetsContext.funds}</h3>
                                                 <hr />
                                                 <h4>Holdings</h4>
-                                                {ordersContext.getHoldings() ?
+                                                {getHoldings(ordersContext.executedOrders) ?
                                                     <table className="row">
                                                         <tbody>
                                                             <HoldingsTableHeader />
-                                                            {ordersContext.getHoldings().map((holding, index) => {
+                                                            {getHoldings(ordersContext.executedOrders).map((holding, index) => {
                                                                 return <HoldingsTableRow key={index} stock={stocksContext.stocks[holding.stockIndex]} holding={holding} sellOrderPlacedFunction={ordersContext.placeOrder} />
                                                             })}
                                                         </tbody>
