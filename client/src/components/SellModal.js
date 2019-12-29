@@ -58,7 +58,7 @@ function SellModal(props) {
             <form onSubmit={handleSubmit}>
                 <div className="modal-content">
                     <h4>Sell '{stock.name}'</h4>
-                    <div>Current Market Rate: {stock.rate}</div>
+                    <div>Current Market Rate: {(stock.rate).toFixed(2)}</div>
                     <div className="input-field">
                         <label htmlFor="quantity" className="active">Quantity</label>
                         <input ref={sellQuantityInputRef} type="number" className="validate" name="quantity" min="1" step="1" max={Math.abs(holding.quantity)} defaultValue={Math.abs(holding.quantity)} />

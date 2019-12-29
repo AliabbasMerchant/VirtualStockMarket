@@ -17,8 +17,8 @@ function StocksListElement(props) {
             onClick={() => history.push(`/vsm/stock?stockIndex=${props.id}`)}
             style={{ cursor: 'pointer' }}>
             <td className="px-2"><b>{props.data.scrip}</b></td>
-            <td className="px-2 center">{props.data.rate}</td>
-            {rateChangeDiv(props.data.rate - props.data.prevRate)}
+            <td className="px-2 center">{(props.data.rate).toFixed(2)}</td>
+            {rateChangeDiv((props.data.rate - props.data.prevRate).toFixed(2))}
         </tr>
     );
 }

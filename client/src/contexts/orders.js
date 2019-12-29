@@ -72,8 +72,8 @@ function OrdersProvider(props) {
                             return true;
                         },
                         orderIsExecuted(orderId, quantity) {
-                            let p = pendingOrders.filter(_ => true);
-                            let e = executedOrders.filter(_ => true);
+                            let p = pendingOrders;
+                            let e = executedOrders;
                             console.log("orderIsExecuted", p, e);
                             let newPendingOrders = [];
                             for (let i = 0; i < p.length; i++) {

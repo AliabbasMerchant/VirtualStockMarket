@@ -58,7 +58,7 @@ function BuyModal(props) {
             <form onSubmit={handleSubmit}>
                 <div className="modal-content">
                     <h4>Buy '{stock.name}'</h4>
-                    <div>Current Market Rate: {stock.rate}</div>
+                    <div>Current Market Rate: {(stock.rate).toFixed(2)}</div>
 
                     <div className="input-field">
                         <label htmlFor="quantity" className="active">Quantity</label>
