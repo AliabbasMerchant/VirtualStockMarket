@@ -7,6 +7,17 @@ const cookieParser = require('cookie-parser');
 const webSocketHandler = require('./webSocket/webSocket');
 const path = require('path');
 
+const app = express();
+
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').load();
+} else {
+    const compression = require('compression');
+    const helmet = require('helmet');
+    app.use(helmet());
+    app.use(compression());
+}
+
 mongoose.connect(process.env.MONGO_CONNECTION_STRING, {
     dbName: 'VSM',
     useNewUrlParser: true,
@@ -14,8 +25,6 @@ mongoose.connect(process.env.MONGO_CONNECTION_STRING, {
     useCreateIndex: true,
     useUnifiedTopology: true,
 });
-
-const app = express();
 
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
