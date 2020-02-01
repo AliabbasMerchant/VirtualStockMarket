@@ -3,34 +3,35 @@ import {
     Route,
     Redirect
 } from "react-router-dom";
-import { AuthContext } from '../contexts/auth';
+import { connect } from 'react-redux'
 
 // A wrapper for <Route> that redirects to the login screen if you're not yet authenticated.
-function PrivateRoute({ children, ...rest }) {
+const PrivateRoute = ({ children, loggedIn, ...rest }) => {
     // TODO: Show message via snackbar "Please login to view this page" if not logged in
     return (
-        <AuthContext.Consumer>
-            {(authContext) => {
-                return (
-                    <Route
-                        {...rest}
-                        render={({ location }) =>
-                            authContext.userToken ? (
-                                children
-                            ) : (
-                                    <Redirect
-                                        to={{
-                                            pathname: "/login",
-                                            state: { from: location }
-                                        }}
-                                    />
-                                )
-                        }
-                    />
-                )
-            }}
-        </AuthContext.Consumer>
+        <Route
+            {...rest}
+            render={({ location }) =>
+                loggedIn ? (
+                    children
+                ) : (
+                        <Redirect
+                            to={{
+                                pathname: "/login",
+                                state: { from: location }
+                            }}
+                        />
+                    )
+            }
+        />
     );
 }
 
-export default PrivateRoute;
+const mapStateToProps = (state) => ({
+    loggedIn: Boolean(state.auth)
+});
+
+export default connect(
+    mapStateToProps,
+    null
+)(PrivateRoute);

@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import {
-    Link,
-} from "react-router-dom";
-import { AuthContext } from '../contexts/auth';
+import { connect } from 'react-redux'
+import { Link } from "react-router-dom";
+import { logoutUser } from '../reducers/auth';
 
-function Navbar() {
+
+const Navbar = ({ loggedIn, logoutUser }) => {
     useEffect(() => {
         setTimeout(() => {
             if (document.querySelector('.sidenav'))
@@ -14,44 +14,39 @@ function Navbar() {
     // document.addEventListener('DOMContentLoaded', function () {
     //     new window.M.Sidenav(document.querySelector('.sidenav'));
     // })
-    let list = <AuthContext.Consumer>
-        {(authContext) => (
-            <div>
-                {authContext.userToken
-                    ? <ul>
-                        <li>
-                            <Link className="sidenav-close" to="/">About</Link>
-                        </li>
-                        <li>
-                            <Link className="sidenav-close" to="/vsm">Wallstreet</Link>
-                        </li>
-                        <li>
-                            <Link className="sidenav-close" to="/vsm/portfolio">My Portfolio</Link>
-                        </li>
-                        <li>
-                            <Link
-                                className='mr-3 sidenav-close' to="/login"
-                                onClick={() => { authContext.logout(); window.M.toast({ html: "Successfully Logged Out", classes: "toast-success" }); }}>
-                                Logout
-                            </Link>
-                        </li>
-                    </ul>
-                    : <ul>
-                        <li>
-                            <Link className="sidenav-close" to="/">About</Link>
-                        </li>
-                        <li>
-                            <Link className="sidenav-close" to="/login">Login</Link>
-                        </li>
-                        <li>
-                            <Link className="sidenav-close" to="/register">Register</Link>
-                        </li>
-                    </ul>
-                }
-            </div>
-        )
+    let list = <div>
+        {loggedIn
+            ? <ul>
+                <li>
+                    <Link className="sidenav-close" to="/">About</Link>
+                </li>
+                <li>
+                    <Link className="sidenav-close" to="/vsm">Wallstreet</Link>
+                </li>
+                <li>
+                    <Link className="sidenav-close" to="/vsm/portfolio">My Portfolio</Link>
+                </li>
+                <li>
+                    <Link
+                        className='mr-3 sidenav-close' to="/login"
+                        onClick={() => { logoutUser(); window.M.toast({ html: "Successfully Logged Out", classes: "toast-success" }); }}>
+                        Logout
+                    </Link>
+                </li>
+            </ul>
+            : <ul>
+                <li>
+                    <Link className="sidenav-close" to="/">About</Link>
+                </li>
+                <li>
+                    <Link className="sidenav-close" to="/login">Login</Link>
+                </li>
+                <li>
+                    <Link className="sidenav-close" to="/register">Register</Link>
+                </li>
+            </ul>
         }
-    </AuthContext.Consumer>
+    </div>
 
     return (
         <div id="appNavbar">
@@ -69,6 +64,15 @@ function Navbar() {
             </div>
         </div>
     );
-}
+};
 
-export default Navbar;
+const mapStateToProps = (state) => ({
+    loggedIn: Boolean(state.auth)
+});
+
+const mapDispatchToProps = { logoutUser };
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Navbar);

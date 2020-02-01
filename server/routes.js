@@ -1,5 +1,7 @@
 const express = require('express');
 const auth = require('./auth');
+const path = require('path');
+
 const stocks = require('./stocks');
 const assets = require('./assets');
 const stocksStorage = require('./fastStorage/stocks');
@@ -8,14 +10,8 @@ const constants = require('./constants');
 const trader = require('./trader');
 const userModel = require('./models/user');
 const developer = require('./developer');
-const path = require('path');
 
 const router = express.Router();
-
-router.get('/', (_req, res) => {
-    // res.send("VSM");
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
 
 router.post('/login', (req, res) => {
     const { username, password } = req.body;
@@ -218,10 +214,6 @@ router.post('/cancelOrder', auth.checkIfAuthenticatedAndGetUserId, (req, res) =>
             messge: constants.defaultSuccessMessage
         });
     }
-});
-
-router.get('*', (_req, res) => {
-    res.redirect('/');
 });
 
 module.exports = router;

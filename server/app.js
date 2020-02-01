@@ -4,13 +4,13 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const webSocketHandler = require('./webSocket/webSocket');
 const path = require('path');
+const webSocketHandler = require('./webSocket/webSocket');
 
 const app = express();
 
 if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').load();
+    require('dotenv').config();
 } else {
     const compression = require('compression');
     const helmet = require('helmet');
@@ -29,7 +29,7 @@ mongoose.connect(process.env.MONGO_CONNECTION_STRING, {
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
-webSocketHandler.init(io);
+// webSocketHandler.init(io);
 
 app.use(cors());
 
@@ -45,18 +45,12 @@ app.use(
     })
 );
 
-// app.use((req, res, next) => {
-// res.locals.user = req.user;
-// res.locals.PRESENT = constants.PRESENT;
-// res.locals.ABSENT = constants.ABSENT;
-// res.locals.MIN_DATE = constants.MIN_DATE;
-// next();
-// });
-
 // require('./fastStorage/stocks').initStocks();
 
 app.use(express.static(path.join(__dirname, 'build')));
 
 app.use('/', require('./routes'));
 
-server.listen(process.env.PORT, process.env.IP);
+server.listen(process.env.PORT, process.env.IP, () => {
+    console.log(`Server started on ${process.env.IP} at port ${process.env.PORT}`)
+});
