@@ -10,9 +10,10 @@ import {
 } from "react-router-dom";
 import constants from '../constants';
 import { loginUser } from '../reducers/auth';
+import { connectSocket } from '../reducers/socket';
 
 
-const Login = ({ loggedIn, loginUser }) => {
+const Login = ({ loggedIn, loginUser, connectSocket }) => {
     let history = useHistory();
     let passwordRef = React.createRef();
     let usernameRef = React.createRef();
@@ -28,6 +29,7 @@ const Login = ({ loggedIn, loginUser }) => {
                     window.M.toast({ html: response.message, classes: "toast-success" });
                     history.replace("/vsm");
                     loginUser(response.userToken);
+                    connectSocket(response.userToken);  // Done in PrivateRoute
                 } else {
                     window.M.toast({ html: response.message, classes: "toast-error" });
                 }
@@ -72,7 +74,7 @@ const mapStateToProps = (state) => ({
     loggedIn: Boolean(state.auth)
 });
 
-const mapDispatchToProps = { loginUser };
+const mapDispatchToProps = { loginUser, connectSocket };
 
 export default connect(
     mapStateToProps,

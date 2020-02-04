@@ -8,11 +8,17 @@ function init(io) {
     IO = io;
     io.on('connection', function (socket) {
         socket.on(constants.eventNewClient, (data) => {
+            console.log(constants.eventNewClient, data);
             auth.getUserIdFromToken(data.userToken, (err, userId) => {
-                if (err) socket.disconnect();
-                else {
+                if (err) {
+                    console.log(err);
+                    socket.disconnect();
+                } else {
                     usersStorage.initUser(userId, socket.id);
-                    // messageToUser(userId, constants.eventStockRateUpdate, { stockIndex: 2, rate: 150 }); // For Testing
+                    IO.to(socket.id).emit(constants.eventStockRateUpdate, { stockIndex: 2, rate: 150 }); // For Testing
+                    
+                    // broken
+                    messageToUser(userId, constants.eventStockRateUpdate, { stockIndex: 2, rate: 150 }); // For Testing
                 }
             });
         });

@@ -29,7 +29,7 @@ mongoose.connect(process.env.MONGO_CONNECTION_STRING, {
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
-// webSocketHandler.init(io);
+webSocketHandler.init(io);
 
 app.use(cors());
 

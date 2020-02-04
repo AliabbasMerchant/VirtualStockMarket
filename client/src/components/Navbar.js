@@ -2,9 +2,10 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux'
 import { Link } from "react-router-dom";
 import { logoutUser } from '../reducers/auth';
+import { disconnectSocket } from '../reducers/socket';
 
 
-const Navbar = ({ loggedIn, logoutUser }) => {
+const Navbar = ({ loggedIn, logoutUser, disconnectSocket }) => {
     useEffect(() => {
         setTimeout(() => {
             if (document.querySelector('.sidenav'))
@@ -29,7 +30,7 @@ const Navbar = ({ loggedIn, logoutUser }) => {
                 <li>
                     <Link
                         className='mr-3 sidenav-close' to="/login"
-                        onClick={() => { logoutUser(); window.M.toast({ html: "Successfully Logged Out", classes: "toast-success" }); }}>
+                        onClick={() => { logoutUser(); disconnectSocket(); window.M.toast({ html: "Successfully Logged Out", classes: "toast-success" }); }}>
                         Logout
                     </Link>
                 </li>
@@ -70,7 +71,7 @@ const mapStateToProps = (state) => ({
     loggedIn: Boolean(state.auth)
 });
 
-const mapDispatchToProps = { logoutUser };
+const mapDispatchToProps = { logoutUser, disconnectSocket };
 
 export default connect(
     mapStateToProps,

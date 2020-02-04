@@ -4,7 +4,8 @@ import axios from 'axios';
 
 import constants from '../constants';
 import { setFunds, resetFunds } from './funds';
-import { setPendingOrders, setExecutedOrders, resetOrders } from './orders'
+import { setPendingOrders, setExecutedOrders, resetOrders } from './orders';
+import { setStocks, resetStocks } from './stocks';
 
 let initialState = Cookies.get(constants.tokenCookieName);
 
@@ -17,7 +18,7 @@ const authSlice = createSlice({
             Cookies.set(constants.tokenCookieName, userToken);
             return userToken;
         },
-        logout(_state, action) {
+        logout(_state, _action) {
             Cookies.remove(constants.tokenCookieName);
             return null;
         },
@@ -27,9 +28,9 @@ const authSlice = createSlice({
 const { login, logout } = authSlice.actions;
 
 export const loginUser = (userToken) => {
-    return function (dispatch) {
+    return (dispatch) => {
         dispatch(login(userToken));
-        
+
         axios.post(`${constants.DOMAIN}/getFunds`, { userToken, })
             .then((response) => {
                 response = response.data;
@@ -65,14 +66,28 @@ export const loginUser = (userToken) => {
             .catch(function (error) {
                 console.log(error);
             });
+
+        axios.post(`${constants.DOMAIN}/getStocks`)
+            .then(function (response) {
+                response = response.data;
+                console.log("getStocks", response);
+                for (let i = 0; i < response.length; i++) {
+                    response[i].prevRate = response[i].rate;
+                }
+                dispatch(setStocks(response));
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
     };
 };
 
 export const logoutUser = () => {
-    return function (dispatch) {
+    return (dispatch) => {
         dispatch(logout());
         dispatch(resetFunds());
         dispatch(resetOrders());
+        dispatch(resetStocks());
     };
 };
 

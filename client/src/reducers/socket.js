@@ -1,73 +1,65 @@
-import React, { useState } from 'react';
+import { createSlice } from '@reduxjs/toolkit';
 import io from 'socket.io-client';
 
-import { AuthContext } from './auth';
-import { StocksContext } from './stocks';
-import { OrdersContext } from './orders';
-import { AssetsContext } from './assets';
-
 import constants from '../constants';
+import { fundsChange } from './funds';
+import { orderIsExecuted, deletePendingOrder } from './orders';
+import { updateStockRate } from './stocks';
 
-const SocketContext = React.createContext();
+let socket = null;
 
-function SocketProvider(props) {
-    let [socket] = useState(null);
+let initialState = false;
+const socketSlice = createSlice({
+    name: 'socket',
+    initialState,
+    reducers: {
+        connect(_state, _action) {
+            return true;
+        },
+        disconnect(_state, _action) {
+            return false;
+        },
+    }
+});
 
-    function connect(authContext, stocksContext, ordersContext, assetsContext) {
+const { connect, disconnect } = socketSlice.actions;
+
+export const connectSocket = (userToken) => {
+    return (dispatch) => {
         if (socket === null || !socket.connected) {
             socket = io(constants.WEBSOCKET_DOMAIN);
             socket.on('connect', () => {
-                if (socket.id) {
-                    console.log("connect socketId", socket.id);
-                    socket.emit(constants.eventNewClient, { userToken: authContext.userToken });
-                }
+                console.log("connect socketId", socket.id);
+                dispatch(connect());
+                socket.emit(constants.eventNewClient, { userToken });
             });
             socket.on(constants.eventStockRateUpdate, (data) => {
                 console.log(constants.eventStockRateUpdate, data);
-                console.log(stocksContext.stocks)
-                stocksContext.updateStockRate(Number(data.stockIndex), Number(data.rate));
+                dispatch(updateStockRate({ id: Number(data.stockIndex), newRate: Number(data.rate) }));
             });
             socket.on(constants.eventOrderPlaced, (data) => {
                 console.log(constants.eventOrderPlaced, data);
                 if (data.ok) {
                     window.M.toast({ html: "Pending Order Successfully Executed", classes: "toast-success" });
-                    ordersContext.orderIsExecuted(Number(data.orderId), Number(data.quantity));
-                    assetsContext.fundsChange(Number(data.fundsChange));
+                    dispatch(orderIsExecuted({ orderId: Number(data.orderId), quantity: Number(data.quantity) }));
+                    dispatch(fundsChange(Number(data.fundsChange)));
                 } else {
-                    ordersContext.deletePendingOrder(data.orderId)
+                    dispatch(deletePendingOrder(data.orderId));
                     window.M.toast({ html: data.message, classes: "toast-error" });
                 }
                 console.log(constants.eventOrderPlaced, data);
             });
         }
-    }
-    function disconnect() {
+    };
+};
+
+export const disconnectSocket = () => {
+    return (dispatch) => {
         if (socket !== null && socket.connected) {
             socket.disconnect();
         }
-    }
-    return (
-        <AuthContext.Consumer>
-            {(authContext) =>
-                <StocksContext.Consumer>
-                    {(stocksContext) =>
-                        <OrdersContext.Consumer>
-                            {(ordersContext) =>
-                                <AssetsContext.Consumer>
-                                    {(assetsContext) =>
-                                        <SocketContext.Provider value={{}}>
-                                            {authContext.userToken ? connect(authContext, stocksContext, ordersContext, assetsContext) : disconnect()}
-                                            {props.children}
-                                        </SocketContext.Provider>
-                                    }
-                                </AssetsContext.Consumer>
-                            }
-                        </OrdersContext.Consumer>
-                    }
-                </StocksContext.Consumer>
-            }
-        </AuthContext.Consumer>
-    )
-}
+        dispatch(disconnect());
+    };
+};
 
-export { SocketProvider, SocketContext };
+export default socketSlice.reducer;
