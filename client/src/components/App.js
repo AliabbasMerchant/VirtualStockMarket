@@ -6,19 +6,13 @@ import {
     Redirect,
 } from "react-router-dom";
 
-// import { AuthProvider } from '../contexts/auth';
-// import { StocksProvider } from '../contexts/stocks';
-// import { AssetsProvider } from '../contexts/assets';
-// import { OrdersProvider } from '../contexts/orders';
-// import { SocketProvider } from '../contexts/socket';
-
 import Login from './Login';
 import Main from './Main';
 import Navbar from './Navbar';
-// import Portfolio from './Portfolio';
+import Portfolio from './Portfolio';
 import PrivateRoute from './PrivateRoute';
 import Register from './Register';
-// import Stock from './Stock';
+import Stock from './Stock';
 import VSM from './VSM';
 
 const App = () => {
@@ -41,12 +35,12 @@ const App = () => {
                     <PrivateRoute exact path="/vsm">
                         <VSM />
                     </PrivateRoute>
-                    {/* <PrivateRoute path='/vsm/portfolio'>
+                    <PrivateRoute path='/vsm/portfolio'>
                         <Portfolio />
                     </PrivateRoute>
                     <PrivateRoute path='/vsm/stock'>
                         <Stock />
-                    </PrivateRoute> */}
+                    </PrivateRoute>
                     <Route path="*">
                         <Redirect to="/" />
                     </Route>

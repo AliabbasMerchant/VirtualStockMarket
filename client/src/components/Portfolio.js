@@ -1,11 +1,13 @@
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import React from 'react';
+import { connect } from 'react-redux';
+
 import SellModal from './SellModal';
 import constants from '../constants';
-import { StocksContext } from '../contexts/stocks';
-import { OrdersContext } from '../contexts/orders';
-import { AssetsContext } from '../contexts/assets';
+import { placeOrder, deletePendingOrder } from '../reducers/orders';
+
+// TODO Verify
 
 function cancelOrder(orderId, stockIndex, deletePendingOrderFunction) {
     axios.post(`${constants.DOMAIN}/cancelOrder`, {
@@ -47,8 +49,8 @@ function HoldingsTableRow(props) {
         <td>{Number((holding.rate)).toFixed(2)}</td>
         <td>{Number((stock.rate)).toFixed(2)}</td>
         <td>{Number((stock.rate - holding.rate) * Math.abs(holding.quantity)).toFixed(2)}</td>
-        <td><a className="btn waves-effect waves-light modal-trigger" href={"#sellModal"+holding.stockIndex}>SELL</a>
-            <SellModal stock={stock} holding={holding} sellOrderPlacedFunction={sellOrderPlacedFunction} keepId={"sellModal"+holding.stockIndex}/>
+        <td><a className="btn waves-effect waves-light modal-trigger" href={"#sellModal" + holding.stockIndex}>SELL</a>
+            <SellModal stock={stock} holding={holding} sellOrderPlacedFunction={sellOrderPlacedFunction} keepId={"sellModal" + holding.stockIndex} />
         </td>
     </tr>
 }
@@ -116,7 +118,6 @@ function getHoldings(executedOrders) {
         }
         holding.quantity = quantity;
     });
-
     let holdingsArray = [];
     Object.values(holdings).forEach(holding => {
         if (holding.quantity !== 0) {
@@ -129,66 +130,70 @@ function getHoldings(executedOrders) {
     return holdingsArray;
 }
 
-function Portfolio() {
+const Portfolio = ({ stocks, funds, executedOrders, pendingOrders }) => {
     return (
         <div className="mx-auto p-3 center container">
             <div className="row">
                 <div className="mx-auto col s12 md10 lg8">
-                    <StocksContext.Consumer>
-                        {(stocksContext) =>
-                            <OrdersContext.Consumer>
-                                {(ordersContext) =>
-                                    <AssetsContext.Consumer>
-                                        {(assetsContext) =>
-                                            <div>
-                                                <h3>Funds Remaining: Rs.{assetsContext.funds}</h3>
-                                                <hr />
-                                                <h4>Holdings</h4>
-                                                {getHoldings(ordersContext.executedOrders) ?
-                                                    <table className="row">
-                                                        <tbody>
-                                                            <HoldingsTableHeader />
-                                                            {getHoldings(ordersContext.executedOrders).map((holding, index) => {
-                                                                return <HoldingsTableRow key={index} stock={stocksContext.stocks[holding.stockIndex]} holding={holding} sellOrderPlacedFunction={ordersContext.placeOrder} />
-                                                            })}
-                                                        </tbody>
-                                                    </table> :
-                                                    null}
-                                                <hr />
-                                                <h4>Pending Orders</h4>
-                                                {ordersContext.pendingOrders ?
-                                                    <table className="row">
-                                                        <tbody>
-                                                            <PendingOrderTableHeader />
-                                                            {ordersContext.pendingOrders.map((order, index) => {
-                                                                return <PendingOrderTableRow key={index} stock={stocksContext.stocks[order.stockIndex]} order={order} deletePendingOrderFunction={ordersContext.deletePendingOrder} />
-                                                            })}
-                                                        </tbody>
-                                                    </table> :
-                                                    null}
-                                                <hr />
-                                                <h4>Executed Orders</h4>
-                                                {ordersContext.executedOrders ?
-                                                    <table className="row">
-                                                        <tbody>
-                                                            <ExecutedOrderTableHeader />
-                                                            {ordersContext.executedOrders.map((order, index) => {
-                                                                return <ExecutedOrderTableRow key={index} stock={stocksContext.stocks[order.stockIndex]} order={order} />
-                                                            })}
-                                                        </tbody>
-                                                    </table> :
-                                                    null}
-                                            </div>
-                                        }
-                                    </AssetsContext.Consumer>
-                                }
-                            </OrdersContext.Consumer>
-                        }
-                    </StocksContext.Consumer>
+                    <div>
+                        <h3>Funds Remaining: Rs.{funds}</h3>
+                        <hr />
+                        <h4>Holdings</h4>
+                        {getHoldings(executedOrders) ?
+                            <table className="row">
+                                <tbody>
+                                    <HoldingsTableHeader />
+                                    {getHoldings(executedOrders).map((holding, index) => {
+                                        return <HoldingsTableRow key={index} stock={stocks[holding.stockIndex]} holding={holding} sellOrderPlacedFunction={placeOrder} />
+                                    })}
+                                </tbody>
+                            </table> :
+                            null}
+                        <hr />
+                        <h4>Pending Orders</h4>
+                        {pendingOrders ?
+                            <table className="row">
+                                <tbody>
+                                    <PendingOrderTableHeader />
+                                    {pendingOrders.map((order, index) => {
+                                        return <PendingOrderTableRow key={index} stock={stocks[order.stockIndex]} order={order} deletePendingOrderFunction={deletePendingOrder} />
+                                    })}
+                                </tbody>
+                            </table> :
+                            null}
+                        <hr />
+                        <h4>Executed Orders</h4>
+                        {executedOrders ?
+                            <table className="row">
+                                <tbody>
+                                    <ExecutedOrderTableHeader />
+                                    {executedOrders.map((order, index) => {
+                                        return <ExecutedOrderTableRow key={index} stock={stocks[order.stockIndex]} order={order} />
+                                    })}
+                                </tbody>
+                            </table> :
+                            null}
+                    </div>
                 </div>
             </div>
         </div>
     );
 }
 
-export default Portfolio;
+
+const mapStateToProps = (state) => ({
+    stocks: state.stocks,
+    funds: state.funds,
+    executedOrders: state.orders.executedOrders,
+    pendingOrders: state.orders.pendingOrders
+});
+
+const mapDispatchToProps = {
+    placeOrder,
+    deletePendingOrder
+};
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Portfolio);

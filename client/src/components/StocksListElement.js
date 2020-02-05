@@ -18,7 +18,7 @@ function StocksListElement(props) {
             style={{ cursor: 'pointer' }}>
             <td className="px-2"><b>{props.data.scrip}</b></td>
             <td className="px-2 center">{(props.data.rate).toFixed(2)}</td>
-            {/* {rateChangeDiv((props.data.rate - props.data.prevRate).toFixed(2))} */}
+            {rateChangeDiv((props.data.rate - props.data.prevRate).toFixed(2))}
         </tr>
     );
 }

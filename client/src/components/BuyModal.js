@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import React, { useEffect } from 'react';
+
 import constants from '../constants';
 
 function BuyModal(props) {
