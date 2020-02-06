@@ -1,7 +1,7 @@
 
     General
 250+ users
-No need to refresh (redux?)
+No need to refresh (redux? Yes)
 Should not crash
 Only integers (Round off)
 Restrict number of transactions b/w users
@@ -28,3 +28,24 @@ For displaying pending orders or charts***
 
 Authorization Header
 Apache config
+
+
+-------------------------
+fastStorage:
+pendingOrders // only temporary
+stockRates and changes // cache
+socketIds // only temporary
+
+permanent storage:
+users
+trade
+// stocks // No need as such
+
+Try to use PubSub for stockRate changes
+
+Stable During Running:
+Stocks names and number
+Secrets and all
+initialFunds
+
+Variable:

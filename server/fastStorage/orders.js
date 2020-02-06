@@ -1,17 +1,31 @@
-// TODO Redis
+const Rejson = require('iorejson');
 
-const mongoose = require('mongoose');
-const pendingOrdersModel = mongoose.model('vsm_pending_orders', mongoose.Schema({
-    orderId: { type: String, required: true },
-    quantity: { type: Number, required: true },
-    rate: { type: Number, required: true },
-    stockIndex: { type: Number, required: true },
-    userId: { type: String, required: true },
-}));
+const ORDERS_KEY = 'vsm_pending_orders';
+
+const instance = new Rejson();
+instance.connect();
+
+client.on('connect', function () {
+    console.log('Orders: Redis client connected');
+});
+client.on('error', function (err) {
+    console.log('Orders: Redis Error ' + err);
+});
+
+instance.set(ORDERS_KEY, '.', {});
 
 async function getPendingOrdersOfStock(stockIndex) {
     try {
-        return await pendingOrdersModel.find({ stockIndex });
+        let orders = await instance.get(ORDERS_KEY, '.');
+        let res = [];
+        Object.keys(orders).forEach(orderId => {
+            let order = orders[orderId];
+            if (order.stockIndex == stockIndex) {
+                order.orderId = orderId;
+                res.push(order);
+            }
+        });
+        return res;
     } catch (err) {
         console.log(err);
         return [];
@@ -19,43 +33,47 @@ async function getPendingOrdersOfStock(stockIndex) {
 }
 
 async function addPendingOrder(orderId, quantity, rate, stockIndex, userId) {
-    const pendingOrder = new pendingOrdersModel({ orderId, quantity, rate, stockIndex, userId });
     try {
-        await pendingOrder.save();
+        await instance.set(ORDERS_KEY, orderId, { quantity, rate, stockIndex, userId });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+function cancelPendingOrder(orderId) {
+    try {
+        await instance.del(ORDERS_KEY, orderId);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+function pendingOrderExecuted(orderId, quantity) {
+    try {
+        let order = await instance.get(ORDERS_KEY, orderId);
+        let q = order.quantity;
+        cancelPendingOrder(orderId);
+        if (q != quantity) {
+            order.quantity -= quantity;
+            addPendingOrder(orderId, order.quantity, order.rate, order.stockIndex, order.userId);
+        }
     } catch (err) {
         console.log(err);
     }
 }
 
-function cancelPendingOder(stockIndex, orderId) {
-    pendingOrdersModel.findOneAndDelete({ stockIndex, orderId }, (_err, _doc) => { });
-}
-
-function pendingOrderExecuted(stockIndex, orderId, quantity) {
-    pendingOrdersModel.findOne({ stockIndex, orderId }, (err, order) => {
-        if (err) {
-            console.log(err);
-        } else {
-            if (order) {
-                let q = order.quantity;
-                if (q == quantity) {
-                    cancelPendingOder(stockIndex, orderId);
-                } else {
-                    order.quantity -= quantity;
-                    order.save()
-                        .then(_order => { })
-                        .catch(err => {
-                            console.log(err);
-                        });
-                }
-            }
-        }
-    });
-}
-
 async function getPendingOrdersOfUser(userId) {
     try {
-        return await pendingOrdersModel.find({ userId });
+        let orders = await instance.get(ORDERS_KEY, '.');
+        let res = [];
+        Object.keys(orders).forEach(orderId => {
+            let order = orders[orderId];
+            if (order.userId == userId) {
+                order.orderId = orderId;
+                res.push(order);
+            }
+        });
+        return res;
     } catch (err) {
         console.log(err);
         return [];
@@ -65,8 +83,8 @@ async function getPendingOrdersOfUser(userId) {
 module.exports = {
     getPendingOrdersOfUser,
     addPendingOrder,
-    cancelPendingOder,
+    cancelPendingOrder,
     pendingOrderExecuted,
     getPendingOrdersOfStock,
-    pendingOrdersModel
+    ORDERS_KEY
 }

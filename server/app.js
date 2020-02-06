@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const path = require('path');
+
 const webSocketHandler = require('./webSocket/webSocket');
 
 const app = express();
@@ -45,9 +45,7 @@ app.use(
     })
 );
 
-// require('./fastStorage/stocks').initStocks();
-
-app.use(express.static(path.join(__dirname, 'build')));
+require('./fastStorage/stocks').initStocks();
 
 app.use('/', require('./routes'));
 

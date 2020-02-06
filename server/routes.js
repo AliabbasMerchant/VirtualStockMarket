@@ -1,6 +1,5 @@
 const express = require('express');
 const auth = require('./auth');
-const path = require('path');
 
 const stocks = require('./stocks');
 const assets = require('./assets');

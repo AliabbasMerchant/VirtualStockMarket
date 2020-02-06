@@ -24,6 +24,14 @@ async function leaderboard(req, res) {
 
 }
 
+async function start(req, res) {
+
+}
+
+async function pause(req, res) {
+    
+}
+
 module.exports = {
     initializer,
     leaderboard
