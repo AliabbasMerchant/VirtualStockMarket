@@ -1,4 +1,3 @@
-
     General
 250+ users
 No need to refresh (redux? Yes)
@@ -8,8 +7,8 @@ Restrict number of transactions b/w users
 PWA
 Brokerage in % of rate (0.1%)
 Upper Cap and Lower Cap (20%)
-Initial shares. No free time at start
-Redis
+Starting Distribution
+    Redis
 Message Queue?
 Chart***
 Only 1 device per team

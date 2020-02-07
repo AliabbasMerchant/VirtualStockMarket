@@ -8,9 +8,9 @@ const Rejson = require('iorejson');
 
 const app = express();
 
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config();
-} else {
+require('dotenv').config();
+
+if (process.env.NODE_ENV === 'production') {
     const compression = require('compression');
     const helmet = require('helmet');
     app.use(helmet());
@@ -45,15 +45,12 @@ app.use(
 );
 
 const rejson_client = new Rejson();
-rejson_client.connect();
-rejson_client.on('connect', function () {
-    console.log('Orders: Redis client connected');
-    require('./fastStorage/globals').initGlobals(rejson_client);
-    require('./fastStorage/globals').setInitialTime(Date.now());
-    require('./fastStorage/orders').initOrders(rejson_client);
-    require('./fastStorage/sockets').initSockets(rejson_client);
-    require('./fastStorage/stocks').initStocks(rejson_client);
-});
+rejson_client.connect()
+    .then((_) => {
+        console.log('Orders: Redis client connected');
+        // require('./fastStorage/globals').setInitialTime(Date.now());
+    })
+    .catch(console.log);
 rejson_client.on('error', function (err) {
     console.log('Orders: Redis Error ' + err);
 });

@@ -39,9 +39,7 @@ export const loginUser = (userToken) => {
                     dispatch(setFunds(response.funds));
                 }
             })
-            .catch(function (error) {
-                console.log(error);
-            });
+            .catch(console.log);
 
         axios.post(`${constants.DOMAIN}/getExecutedOrders`, { userToken })
             .then(function (response) {
@@ -51,9 +49,7 @@ export const loginUser = (userToken) => {
                     dispatch(setExecutedOrders(response.executedOrders));
                 }
             })
-            .catch(function (error) {
-                console.log(error);
-            });
+            .catch(console.log);
 
         axios.post(`${constants.DOMAIN}/getPendingOrders`, { userToken })
             .then(function (response) {
@@ -63,9 +59,7 @@ export const loginUser = (userToken) => {
                     dispatch(setPendingOrders(response.pendingOrders));
                 }
             })
-            .catch(function (error) {
-                console.log(error);
-            });
+            .catch(console.log);
 
         axios.post(`${constants.DOMAIN}/getStocks`)
             .then(function (response) {
@@ -76,9 +70,7 @@ export const loginUser = (userToken) => {
                 }
                 dispatch(setStocks(response));
             })
-            .catch(function (error) {
-                console.log(error);
-            });
+            .catch(console.log);
     };
 };
 

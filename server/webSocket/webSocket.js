@@ -1,4 +1,4 @@
-const usersStorage = require('../fastStorage/sockets');
+const socketStorage = require('../fastStorage/sockets');
 const constants = require('../constants');
 const auth = require('../auth');
 
@@ -14,10 +14,7 @@ function init(io) {
                     console.log(err);
                     socket.disconnect();
                 } else {
-                    usersStorage.initUser(userId, socket.id);
-                    IO.to(socket.id).emit(constants.eventStockRateUpdate, { stockIndex: 2, rate: 150 }); // For Testing
-                    
-                    // broken
+                    socketStorage.setUserSocketId(userId, socket.id);
                     messageToUser(userId, constants.eventStockRateUpdate, { stockIndex: 2, rate: 150 }); // For Testing
                 }
             });
@@ -25,14 +22,21 @@ function init(io) {
     });
 }
 
-async function messageToUser(userId, eventName, data) {
-    let userSocketId = await usersStorage.getUserSocketId(userId);
-    if (userSocketId) {
-        IO.to(userSocketId).emit(eventName, data);
-    }
+function messageToUser(userId, eventName, data) {
+    // TODO PubSub
+    socketStorage.getUserSocketId(userId)
+        .then(userSocketId => {
+            if (userSocketId) {
+                IO.to(userSocketId).emit(eventName, data);
+            }
+        })
+        .catch(err => {
+            console.log(err);
+        });
 }
 
 function messageToEveryone(eventName, data) {
+    // TODO PubSub
     IO.emit(eventName, data);
 }
 

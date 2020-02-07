@@ -1,16 +1,19 @@
 const GLOBALS_KEY = 'vsm_globals';
 
-let instance;
+instance = null;
 
 function initGlobals(redis_client) {
     instance = redis_client;
+}
+
+function initialize() {
     instance.del(GLOBALS_KEY, '.')
         .then()
-        .catch(e => console.log(e))
+        .catch(console.log)
         .finally(() => {
             instance.set(GLOBALS_KEY, '.', {})
                 .then()
-                .catch(e => console.log(e));
+                .catch(console.log);
         });
 }
 
@@ -26,9 +29,37 @@ async function setInitialTime(initial_time) {
     }
 }
 
+function getPlayingStatus() {
+    return instance.get(GLOBALS_KEY, "PLAYING_STATUS");
+}
+
+async function setPlayingStatus(status) {
+    try {
+        await instance.set(GLOBALS_KEY, "PLAYING_STATUS", status);
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+function getStartPeriod() {
+    return instance.get(GLOBALS_KEY, "START_PERIOD");
+}
+
+async function setStartPeriod(start_period) {
+    try {
+        await instance.set(GLOBALS_KEY, "START_PERIOD", start_period);
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 module.exports = {
     initGlobals,
     getInitialTime,
     setInitialTime,
-    GLOBALS_KEY
+    getPlayingStatus,
+    setPlayingStatus,
+    getStartPeriod,
+    setStartPeriod,
+    initialize
 }

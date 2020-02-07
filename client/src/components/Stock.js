@@ -57,9 +57,7 @@ const Stock = ({ stocks, placeOrder }) => {
                         }
                     });
                 })
-                .catch(function (error) {
-                    console.log(error);
-                });
+                .catch(console.log);
         }, 1000);
     });
     */

@@ -5,9 +5,10 @@ const stocks = require('./stocks');
 const assets = require('./assets');
 const stocksStorage = require('./fastStorage/stocks');
 const pendingOrdersStorage = require('./fastStorage/orders');
+const globalStorage = require('./fastStorage/globals');
 const constants = require('./constants');
 const trader = require('./trader');
-const userModel = require('./models/user');
+const userModel = require('./models/users');
 const developer = require('./developer');
 
 const router = express.Router();
@@ -103,11 +104,15 @@ router.post('/register', (req, res) => {
 });
 
 router.post('/getStocks', async (_req, res) => {
-    let rates = await stocksStorage.getStocks();
-    for (let i = 0; i < rates.length; i++) {
-        stocks[i].rate = rates[i].rate;
+    try {
+        let rates = await stocksStorage.getStocks();
+        for (let i = 0; i < rates.length; i++) {
+            stocks[i].rate = rates[i].rate;
+        }
+        res.json(stocks);
+    } catch (err) {
+        console.log(err);
     }
-    res.json(stocks);
 });
 
 router.post('/getFunds', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
@@ -125,40 +130,59 @@ router.post('/getFunds', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
 });
 
 router.post('/getExecutedOrders', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
-    userModel.findById(req.body.userId, (err, user) => {
-        if (err || !user) {
+    tradesModel.find().or([{ buyerId: userId }, { sellerId: userId }])
+        .then(trades => {
+            let executedOrders = [];
+            trades.forEach(trade => {
+                if (trade.sellerId == userId) {
+                    trade.quantity *= -1;
+                }
+                executedOrders.push(trade);
+            });
+            if (trades.length == 0) {
+                res.json({
+                    ok: false,
+                    message: "No such user",
+                });
+            } else {
+                res.json({
+                    ok: true,
+                    message: constants.defaultSuccessMessage,
+                    executedOrders
+                });
+            }
+        })
+        .catch(err => {
+            console.log(err);
             res.json({
                 ok: false,
                 message: "No such user",
             });
-        } else {
+        });
+});
+
+router.post('/getPendingOrders', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
+    const userId = req.body.userId;
+    pendingOrdersStorage.getPendingOrdersOfUser(userId)
+        .then(pendingOrders => {
             res.json({
                 ok: true,
                 message: constants.defaultSuccessMessage,
-                executedOrders: user.executedOrders
+                pendingOrders
             });
-        }
-    });
+        }).catch(err => {
+            console.log(err);
+            res.json({
+                ok: false,
+                message: constants.defaultErrorMessage,
+                pendingOrders: []
+            });
+        })
 });
-
-router.post('/getPendingOrders', auth.checkIfAuthenticatedAndGetUserId, async (req, res) => {
-    const userId = req.body.userId;
-    res.json({
-        ok: true,
-        message: constants.defaultSuccessMessage,
-        pendingOrders: await pendingOrdersStorage.getPendingOrdersOfUser(userId)
-    });
-});
-
-if (constants.developer) {
-    router.get('/getLeaderboard', developer.leaderboard);
-
-    router.get('/initialize', developer.initializer);
-}
 
 router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, res) => {
-    const { orderId, quantity, rate, stockIndex, userId } = req.body;
     // console.log("placeOrder", req.body);
+    const { orderId, quantity, rate, stockIndex, userId } = req.body;
     if (!orderId || !quantity || !rate || !stockIndex) {
         if (stockIndex !== 0) {
             res.json({
@@ -189,30 +213,51 @@ router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, re
     }
 });
 
-router.post('/getRateList/:stockIndex', async (req, res) => {
+router.post('/getRateList/:stockIndex', (req, res) => {
     const stockIndex = req.params.stockIndex;
-    let rateList = await stocksStorage.getStockRateList(stockIndex);
-    let rates = [];
-    for(let i=0;i<rateList.length;i++) {
-        rates.push({rate: rateList[i].rate, time:rateList[i].timestamp - constants.initialTime});
-    }
-    res.json(rates);
+    stocksStorage.getStockRateList(stockIndex)
+        .then(rateList => {
+            globalStorage.getInitialTime
+                .then(initialTime => {
+                    for (let i = 0; i < rateList.length; i++) {
+                        rateList[i].time = rateList[i].timestamp - initialTime;
+                    };
+                }).catch(err => {
+                    console.log(err);
+                }).finally(() => {
+                    res.json({
+                        ok: true,
+                        message: constants.defaultSuccessMessage,
+                        rateList
+                    })
+                })
+        })
+        .catch(err => {
+            console.log(err);
+            res.json({
+                ok: false,
+                message: constants.defaultErrorMessage,
+                rateList: []
+            })
+        });
 });
 
 router.post('/cancelOrder', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
-    const { orderId, stockIndex } = req.body;
-    if (!orderId || !stockIndex) {
+    const { orderId } = req.body;
+    if (!orderId) {
         res.json({
             ok: false,
             messge: "Please fill in all required fields"
         });
     } else {
-        pendingOrdersStorage.cancelPendingOder(stockIndex, orderId);
+        pendingOrdersStorage.cancelPendingOrder(orderId);
         res.json({
             ok: true,
             messge: constants.defaultSuccessMessage
         });
     }
 });
+
+router.use('/dev', developer);
 
 module.exports = router;

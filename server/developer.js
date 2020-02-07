@@ -1,38 +1,89 @@
-const { pendingOrdersModel } = require('./fastStorage/orders');
-const { initStocks } = require('./fastStorage/stocks');
-const { userSocketModel } = require('./fastStorage/users');
-const userModel = require('./models/user');
+const express = require("express");
 
-async function initializer(_req, res) {
-    try {
-        console.log("pendingOrdersModel.deleteMany({})", await pendingOrdersModel.deleteMany({}));
-        await initStocks();
-        console.log("userSocketModel.deleteMany({})", await userSocketModel.deleteMany({}));
-        let users = await userModel.find({});
-        users.forEach(user => {
-            user.executedOrders = [];
-            user.save();
-        });
-        // console.log("userModel.deleteMany({})", await userModel.deleteMany({}));
-        res.send("ok");
-    } catch (err) {
-        res.send(err);
+const router = express.Router();
+
+const globalStorage = require('./fastStorage/globals');
+const stocksStorage = require('./fastStorage/stocks');
+const userModel = require('./models/users');
+const tradeModel = require('./models/trades');
+const auth = require('./auth');
+
+const stocks = require('./stocks');
+
+function checkIfDeveloper(req, res, next) {
+    const { userToken } = req.body;
+    auth.verifyToken(userToken, (err, decoded) => {
+        if (err) {
+            console.log(err);
+            res.json({
+                ok: false,
+                message: "Only Developers can access this",
+            });
+        } else {
+            if (decoded.content = "I AM THE DEVELOPER") {
+                next();
+            } else {
+                res.json({
+                    ok: false,
+                    message: "Only Developers can access this",
+                });
+            }
+        }
+    });
+}
+
+router.post('/init', checkIfDeveloper, (req, res) => {
+    // clear all storage
+    // init memory
+    // set initial time
+    // set startPeriod to true
+    // set playing to true // required for testing, but no problem even if in production
+    const { safe } = req.body;
+    if (!safe) {
+        userModel.deleteMany({}).then().catch(console.log);
     }
-}
+    tradeModel.deleteMany({}).then().catch(console.log);
+    require('./fastStorage/orders').initialize();
+    require('./fastStorage/sockets').initialize();
+    stocksStorage.initialize();
+    globalStorage.initialize();
+    globalStorage.setInitialTime(Date.now());
+    globalStorage.setStartPeriod(true);
+    globalStorage.setPlayingStatus(true);
+    res.send('OK');
+});
 
-async function leaderboard(req, res) {
+router.post('/startTrading', checkIfDeveloper, (req, res) => {
+    tradeModel.deleteMany({}).then().catch(console.log);
+    globalStorage.setStartPeriod(false);
+    stocks.forEach((stock, stockIndex) => {
+        let initial_quantity = stock.initialQuantity;
+        let current_left_quantity = 0;
+        stocksStorage.getStockQuantity(stockIndex)
+            .then(q => { current_left_quantity = q; })
+            .catch(console.log)
+            .finally(() => {
+                stocksStorage.setStockQuantity(stockIndex, initial_quantity - current_left_quantity);
+            });
+    })
+    res.send('OK');
+});
 
-}
+router.post('/break', checkIfDeveloper, (req, res) => {
+    globalStorage.setPlayingStatus(false);
+    res.send('OK');
+});
 
-async function start(req, res) {
+router.post('/restart', checkIfDeveloper, (req, res) => {
+    globalStorage.setPlayingStatus(true);
+    res.send('OK');
+});
 
-}
+router.post('/leaderboard', checkIfDeveloper, (req, res) => {
+    res.json({
+        ok: true,
+        message: "Not yet implemented"
+    })
+});
 
-async function pause(req, res) {
-    
-}
-
-module.exports = {
-    initializer,
-    leaderboard
-}
+module.exports = router;

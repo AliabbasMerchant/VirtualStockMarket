@@ -14,10 +14,6 @@ function verifyToken(token, handler) {
     jwt.verify(token, process.env.JWT_SECRET, handler);
 }
 
-function decodeToken(token) {
-    return jwt.decode(token);
-}
-
 function createUserToken(userId) {
     return createToken({ userId });
 }

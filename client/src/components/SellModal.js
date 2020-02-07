@@ -48,9 +48,7 @@ function SellModal(props) {
                         window.M.toast({ html: response.message, classes: "toast-error" });
                     }
                 })
-                .catch(function (error) {
-                    console.log(error);
-                });
+                .catch(console.log);
         }
     }
     return (

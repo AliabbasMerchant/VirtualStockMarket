@@ -1,18 +1,12 @@
-const initialTime = Date.now(); // TODO change
-// const initialTime = ;
-console.log("initialTime", initialTime);
-
 module.exports = {
     initialFunds: 50000,
-    brokerageFees: 10, // per share
-    
-    developer: false,
+    brokerageRateFraction: 0.001,
 
-    initialTime,
-    buyingTimeLimit: initialTime + 10*60*1000, // milliseconds
-    breakTimeStart: initialTime + 45*60*1000,
-    breakTimeEnd: initialTime + 60*60*1000,
-    endTime: initialTime + 105*60*1000,
+    // initialTime,
+    // buyingTimeLimit: initialTime + 10*60*1000, // milliseconds
+    // breakTimeStart: initialTime + 45*60*1000,
+    // breakTimeEnd: initialTime + 60*60*1000,
+    // endTime: initialTime + 105*60*1000,
 
     eventNewClient: "newClient",
     eventStockRateUpdate: "stockRateUpdate",

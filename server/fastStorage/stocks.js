@@ -3,17 +3,20 @@ const stocksData = require('../stocks');
 
 const STOCKS_KEY = 'vsm_stocks';
 
-let instance;
+instance = null;
 
 function initStocks(redis_client) {
     instance = redis_client;
+}
+
+function initialize() {
     instance.del(STOCKS_KEY, '.')
         .then()
-        .catch(e => console.log(e))
+        .catch(console.log)
         .finally(() => {
             instance.set(STOCKS_KEY, '.', {})
                 .then()
-                .catch(e => console.log(e))
+                .catch(console.log)
                 .finally(() => {
                     stocksData.forEach((stock, stockIndex) => {
                         let newStock = { rate: stock.rate, quantity: stock.initialQuantity };
@@ -29,7 +32,7 @@ function initStocks(redis_client) {
                             .finally(() => {
                                 instance.set(STOCKS_KEY, stockIndex, newStock)
                                     .then()
-                                    .catch(e => console.log(e));
+                                    .catch(console.log);
                             });
                     });
                 });
@@ -49,6 +52,17 @@ function getStockQuantity(stockIndex) {
                 reject(err);
             })
     });
+}
+
+async function deductStockQuantity(stockIndex, quantity) {
+    try {
+        let res = await instance.get(STOCKS_KEY, stockIndex);
+        await instance.del(STOCKS_KEY, stockIndex);
+        res.quantity -= quantity;
+        await instance.set(STOCKS_KEY, res);
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 async function setStockQuantity(stockIndex, quantity) {
@@ -89,7 +103,6 @@ async function setStockRate(stockIndex, rate) {
     }
 }
 
-
 function getStockRateList(stockIndex) {
     return new Promise((resolve, reject) => {
         instance.get(STOCKS_KEY, stockIndex)
@@ -107,15 +120,31 @@ function getStockRateList(stockIndex) {
 }
 
 function getStocks() {
-    return instance.get(STOCKS_KEY, '.');
+    return new Promise((resolve, reject) => {
+        instance.get(STOCKS_KEY, '.')
+            .then(stocks => {
+                let res = new Array(Object.keys(stocks).length);
+                Object.keys(stocks).forEach(stockIndex => {
+                    let stock = stocks[stockIndex];
+                    stock.stockIndex = stockIndex;
+                    res[stockIndex] = stock;
+                });
+                resolve(res);
+            })
+            .catch(err => {
+                reject(err);
+            });
+    });
 }
 
 module.exports = {
     setStockQuantity,
+    deductStockQuantity,
     getStockQuantity,
     setStockRate,
     getStockRate,
     getStocks,
     getStockRateList,
-    initStocks
+    initStocks,
+    initialize
 }

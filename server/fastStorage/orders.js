@@ -1,45 +1,38 @@
 const ORDERS_KEY = 'vsm_pending_orders';
 
-let instance;
+instance = null;
 
 function initOrders(redis_client) {
     instance = redis_client;
+}
+
+function initialize() {
     instance.del(ORDERS_KEY, '.')
         .then()
-        .catch(e => console.log(e))
+        .catch(console.log)
         .finally(() => {
             instance.set(ORDERS_KEY, '.', {})
                 .then()
-                .catch(e => console.log(e));
+                .catch(console.log);
         });
 }
 
-async function getPendingOrdersOfStock(stockIndex) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            let orders = await instance.get(ORDERS_KEY, '.');
-            let res = [];
-            Object.keys(orders).forEach(orderId => {
-                let order = orders[orderId];
-                if (order.stockIndex == stockIndex) {
-                    order.orderId = orderId;
-                    res.push(order);
-                }
+function getPendingOrdersOfStock(stockIndex) {
+    return new Promise((resolve, reject) => {
+        instance.get(ORDERS_KEY, '.')
+            .then(orders => {
+                let res = [];
+                Object.keys(orders).forEach(orderId => {
+                    let order = orders[orderId];
+                    if (order.stockIndex == stockIndex) {
+                        order.orderId = orderId;
+                        res.push(order);
+                    }
+                });
+                resolve(res);
+            }).catch(err => {
+                reject(err);
             });
-        } catch (err) {
-            console.log(err);
-            return [];
-        }
-        try {
-            let res = await instance.get(STOCKS_KEY, stockIndex);
-            if (!res.rateList) {
-                reject("No such stock");
-            } else {
-                resolve(res.rateList);
-            }
-        } catch (err) {
-            reject(err);
-        }
     });
 }
 
@@ -73,22 +66,24 @@ async function pendingOrderExecuted(orderId, quantity) {
     }
 }
 
-async function getPendingOrdersOfUser(userId) {
-    try {
-        let orders = await instance.get(ORDERS_KEY, '.');
-        let res = [];
-        Object.keys(orders).forEach(orderId => {
-            let order = orders[orderId];
-            if (order.userId == userId) {
-                order.orderId = orderId;
-                res.push(order);
-            }
+function getPendingOrdersOfUser(userId) {
+    return new Promise((resolve, reject) => {
+        instance.get(ORDERS_KEY, '.')
+        .then(orders => {
+            let res = [];
+            Object.keys(orders).forEach(orderId => {
+                let order = orders[orderId];
+                if (order.userId == userId) {
+                    order.orderId = orderId;
+                    res.push(order);
+                }
+            });
+            resolve(res);
+        })
+        .catch(err => {
+            reject(err);
         });
-        return res;
-    } catch (err) {
-        console.log(err);
-        return [];
-    }
+    });
 }
 
 module.exports = {
@@ -98,5 +93,5 @@ module.exports = {
     cancelPendingOrder,
     pendingOrderExecuted,
     getPendingOrdersOfStock,
-    ORDERS_KEY
+    initialize
 }

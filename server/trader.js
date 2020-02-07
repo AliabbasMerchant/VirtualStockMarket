@@ -3,7 +3,7 @@ const stocksStorage = require('./fastStorage/stocks');
 const pendingOrdersStorage = require('./fastStorage/orders');
 const webSocketHandler = require('./webSocket/webSocket');
 const constants = require('./constants');
-const userModel = require('./models/user');
+const userModel = require('./models/users');
 
 async function tryToTrade(orderId, quantity, rate, stockIndex, userId) {
     const currentTime = Date.now();
@@ -80,7 +80,7 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
                     console.log(err);
                     webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
                 } else {
-                    pendingOrdersStorage.pendingOrderExecuted(stockIndex, orderId, quantity);
+                    pendingOrdersStorage.pendingOrderExecuted(orderId, quantity);
                     if (changeRate && quantity > 0) { // calc only on selling, otherwise we will end up at same price, for each pair of trades
                         let initialQuantity = stocksStorage.getInitialStockQuantity(stockIndex);
                         // should never be null. Hence, not checking if(null)

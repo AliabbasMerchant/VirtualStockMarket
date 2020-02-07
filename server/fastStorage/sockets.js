@@ -1,16 +1,19 @@
 const SOCKETS_KEY = 'vsm_sockets';
 
-let instance;
+instance = null;
 
 function initSockets(redis_client) {
     instance = redis_client;
+}
+
+function initialize() {
     instance.del(SOCKETS_KEY, '.')
         .then()
-        .catch(e => console.log(e))
+        .catch(console.log)
         .finally(() => {
             instance.set(SOCKETS_KEY, '.', {})
                 .then()
-                .catch(e => console.log(e));
+                .catch(console.log);
         });
 }
 
@@ -30,5 +33,5 @@ module.exports = {
     initSockets,
     getUserSocketId,
     setUserSocketId,
-    SOCKETS_KEY
+    initialize
 }
