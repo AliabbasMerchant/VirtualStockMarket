@@ -1,37 +1,33 @@
-const Rejson = require('iorejson');
-
 const SOCKETS_KEY = 'vsm_sockets';
 
-const instance = new Rejson();
-instance.connect();
+let instance;
 
-client.on('connect', function () {
-    console.log('Sockets: Redis client connected');
-});
-client.on('error', function (err) {
-    console.log('Sockets: Redis Error ' + err);
-});
-
-instance.set(SOCKETS_KEY, '.', {});
-
-async function getUserSocketId(userId) {
-    try {
-        return await instance.get(SOCKETS_KEY, userId);
-    } catch (err) {
-        console.log(err);
-        return null;
-    }
+function initSockets(redis_client) {
+    instance = redis_client;
+    instance.del(SOCKETS_KEY, '.')
+        .then()
+        .catch(e => console.log(e))
+        .finally(() => {
+            instance.set(SOCKETS_KEY, '.', {})
+                .then()
+                .catch(e => console.log(e));
+        });
 }
 
-function setUserSocketId(userId, socketId) {
+function getUserSocketId(userId) {
+    return instance.get(SOCKETS_KEY, userId);
+}
+
+async function setUserSocketId(userId, socketId) {
     try {
-        instance.set(SOCKETS_KEY, userId, socketId);
+        await instance.set(SOCKETS_KEY, userId, socketId);
     } catch (error) {
         console.log(error);
     }
 }
 
 module.exports = {
+    initSockets,
     getUserSocketId,
     setUserSocketId,
     SOCKETS_KEY

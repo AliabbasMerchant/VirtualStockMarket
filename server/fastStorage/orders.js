@@ -1,35 +1,46 @@
-const Rejson = require('iorejson');
-
 const ORDERS_KEY = 'vsm_pending_orders';
 
-const instance = new Rejson();
-instance.connect();
+let instance;
 
-client.on('connect', function () {
-    console.log('Orders: Redis client connected');
-});
-client.on('error', function (err) {
-    console.log('Orders: Redis Error ' + err);
-});
-
-instance.set(ORDERS_KEY, '.', {});
+function initOrders(redis_client) {
+    instance = redis_client;
+    instance.del(ORDERS_KEY, '.')
+        .then()
+        .catch(e => console.log(e))
+        .finally(() => {
+            instance.set(ORDERS_KEY, '.', {})
+                .then()
+                .catch(e => console.log(e));
+        });
+}
 
 async function getPendingOrdersOfStock(stockIndex) {
-    try {
-        let orders = await instance.get(ORDERS_KEY, '.');
-        let res = [];
-        Object.keys(orders).forEach(orderId => {
-            let order = orders[orderId];
-            if (order.stockIndex == stockIndex) {
-                order.orderId = orderId;
-                res.push(order);
+    return new Promise(async (resolve, reject) => {
+        try {
+            let orders = await instance.get(ORDERS_KEY, '.');
+            let res = [];
+            Object.keys(orders).forEach(orderId => {
+                let order = orders[orderId];
+                if (order.stockIndex == stockIndex) {
+                    order.orderId = orderId;
+                    res.push(order);
+                }
+            });
+        } catch (err) {
+            console.log(err);
+            return [];
+        }
+        try {
+            let res = await instance.get(STOCKS_KEY, stockIndex);
+            if (!res.rateList) {
+                reject("No such stock");
+            } else {
+                resolve(res.rateList);
             }
-        });
-        return res;
-    } catch (err) {
-        console.log(err);
-        return [];
-    }
+        } catch (err) {
+            reject(err);
+        }
+    });
 }
 
 async function addPendingOrder(orderId, quantity, rate, stockIndex, userId) {
@@ -40,7 +51,7 @@ async function addPendingOrder(orderId, quantity, rate, stockIndex, userId) {
     }
 }
 
-function cancelPendingOrder(orderId) {
+async function cancelPendingOrder(orderId) {
     try {
         await instance.del(ORDERS_KEY, orderId);
     } catch (error) {
@@ -48,14 +59,14 @@ function cancelPendingOrder(orderId) {
     }
 }
 
-function pendingOrderExecuted(orderId, quantity) {
+async function pendingOrderExecuted(orderId, quantity) {
     try {
         let order = await instance.get(ORDERS_KEY, orderId);
         let q = order.quantity;
-        cancelPendingOrder(orderId);
+        await cancelPendingOrder(orderId);
         if (q != quantity) {
             order.quantity -= quantity;
-            addPendingOrder(orderId, order.quantity, order.rate, order.stockIndex, order.userId);
+            await addPendingOrder(orderId, order.quantity, order.rate, order.stockIndex, order.userId);
         }
     } catch (err) {
         console.log(err);
@@ -81,6 +92,7 @@ async function getPendingOrdersOfUser(userId) {
 }
 
 module.exports = {
+    initOrders,
     getPendingOrdersOfUser,
     addPendingOrder,
     cancelPendingOrder,

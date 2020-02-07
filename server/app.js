@@ -4,8 +4,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-
-const webSocketHandler = require('./webSocket/webSocket');
+const Rejson = require('iorejson');
 
 const app = express();
 
@@ -29,7 +28,7 @@ mongoose.connect(process.env.MONGO_CONNECTION_STRING, {
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
-webSocketHandler.init(io);
+require('./webSocket/webSocket').init(io);
 
 app.use(cors());
 
@@ -45,7 +44,19 @@ app.use(
     })
 );
 
-require('./fastStorage/stocks').initStocks();
+const rejson_client = new Rejson();
+rejson_client.connect();
+rejson_client.on('connect', function () {
+    console.log('Orders: Redis client connected');
+    require('./fastStorage/globals').initGlobals(rejson_client);
+    require('./fastStorage/globals').setInitialTime(Date.now());
+    require('./fastStorage/orders').initOrders(rejson_client);
+    require('./fastStorage/sockets').initSockets(rejson_client);
+    require('./fastStorage/stocks').initStocks(rejson_client);
+});
+rejson_client.on('error', function (err) {
+    console.log('Orders: Redis Error ' + err);
+});
 
 app.use('/', require('./routes'));
 

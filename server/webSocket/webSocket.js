@@ -1,4 +1,4 @@
-const usersStorage = require('../fastStorage/users');
+const usersStorage = require('../fastStorage/sockets');
 const constants = require('../constants');
 const auth = require('../auth');
 

@@ -1,36 +1,34 @@
-const Rejson = require('iorejson');
-
 const GLOBALS_KEY = 'vsm_globals';
 
-const instance = new Rejson();
-instance.connect();
+let instance;
 
-client.on('connect', function () {
-    console.log('Globals: Redis client connected');
-});
-client.on('error', function (err) {
-    console.log('Globals: Redis Error ' + err);
-});
-
-async function getInitialTime() {
-    try {
-        return await instance.get(GLOBALS_KEY, "INITIAL_TIME");
-    } catch (err) {
-        console.log(err);
-        return 0;
-    }
+function initGlobals(redis_client) {
+    instance = redis_client;
+    instance.del(GLOBALS_KEY, '.')
+        .then()
+        .catch(e => console.log(e))
+        .finally(() => {
+            instance.set(GLOBALS_KEY, '.', {})
+                .then()
+                .catch(e => console.log(e));
+        });
 }
 
-function setInitialTime(initial_time) {
+function getInitialTime() {
+    return instance.get(GLOBALS_KEY, "INITIAL_TIME");
+}
+
+async function setInitialTime(initial_time) {
     try {
         await instance.set(GLOBALS_KEY, "INITIAL_TIME", initial_time);
-    } catch(e) {
-        console.log(e);
+    } catch (err) {
+        console.log(err);
     }
 }
 
 module.exports = {
+    initGlobals,
     getInitialTime,
-    setInitialTime  ,
+    setInitialTime,
     GLOBALS_KEY
 }
