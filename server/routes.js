@@ -116,7 +116,7 @@ router.post('/getStocks', async (_req, res) => {
 });
 
 router.post('/getFunds', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
-    assets.getUserFundsAndHoldings(req.body.userId, (err, funds, _holdings) => {
+    assets.getUserFunds(req.body.userId, (err, funds) => {
         if (err) {
             res.json({
                 ok: false, message: err
@@ -130,35 +130,22 @@ router.post('/getFunds', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
 });
 
 router.post('/getExecutedOrders', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
-    tradesModel.find().or([{ buyerId: userId }, { sellerId: userId }])
-        .then(trades => {
-            let executedOrders = [];
-            trades.forEach(trade => {
-                if (trade.sellerId == userId) {
-                    trade.quantity *= -1;
-                }
-                executedOrders.push(trade);
-            });
-            if (trades.length == 0) {
-                res.json({
-                    ok: false,
-                    message: "No such user",
-                });
-            } else {
-                res.json({
-                    ok: true,
-                    message: constants.defaultSuccessMessage,
-                    executedOrders
-                });
-            }
-        })
-        .catch(err => {
+    const { userId } = req.body;
+    userModel.findById(userId, (err, user) => {
+        if (err || !user) {
             console.log(err);
             res.json({
                 ok: false,
                 message: "No such user",
             });
-        });
+        } else {
+            res.json({
+                ok: true,
+                message: constants.defaultSuccessMessage,
+                executedOrders: user.executedOrders
+            });
+        }
+    });
 });
 
 router.post('/getPendingOrders', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
@@ -185,12 +172,17 @@ router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, re
     const { orderId, quantity, rate, stockIndex, userId } = req.body;
     if (!orderId || !quantity || !rate || !stockIndex) {
         if (stockIndex !== 0) {
-            res.json({
+            return res.json({
                 ok: false,
                 message: "Please fill in all required fields"
             });
-            return;
         }
+    }
+    if(rate <= 0) {
+        return res.json({
+            ok: false,
+            message: "Rate cannot be negative"
+        });
     }
     trader.tryToTrade(orderId, quantity, rate, stockIndex, userId, (ok, message) => {
         res.json({

@@ -40,7 +40,7 @@ users
 trade
 // stocks // No need as such
 
-Try to use PubSub for stockRate changes
+Try to use PubSub for websockets
 
 Stable During Running:
 Stocks names and number
@@ -49,9 +49,11 @@ initialFunds
 
 Variable:
 
-
+Default values of redis variables // It should ideally give an error, so need?
 
 
 
 Selling -> quantity: positive
 Buying -> quantity: negative
+
+TODO set parameter of sell and buy

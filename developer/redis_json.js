@@ -11,9 +11,9 @@ async function f() {
     // console.log(value);
     value = await instance.set('abcd', '.', {});
     console.log(value);
-    value = await instance.del('abcd', 'xyz');
-    console.log(value);
-    value = await instance.set('abcd', 'pqr', 456);
+    // value = await instance.del('abcd', 'xyz');
+    // console.log(value);
+    value = await instance.get('abcd', 'pqr');
     console.log(value);
     value = await instance.del('abcd', 'pqr');
     console.log(value);

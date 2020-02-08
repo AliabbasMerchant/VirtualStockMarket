@@ -1,47 +1,49 @@
-const tradesModel = require('./models/trades');
+const userModel = require('./models/users');
 const constants = require('./constants');
 const stocks = require('./stocks');
 
-function getUserFundsAndHoldings(userId, callback) {
-    tradesModel.find().or([{ buyerId: userId }, { sellerId: userId }])
-        .then(trades => {
-            let funds = constants.initialFunds;
-            let holdings = [];
-            for (let i = 0; i < stocks.length; i++) {
-                holdings.push({ stockIndex: i, rate: 0, quantity: 0 });
+function getUserFunds(userId) {
+    return new Promise((resolve, reject) => {
+        userModel.findById(userId, 'funds', (err, funds) => {
+            if (err) {
+                console.log(err);
+                reject("No Such User");
+            } else {
+                resolve(funds);
             }
-            trades.forEach(trade => {
-                let i = trade.stockIndex;
-                let brokerageFees = getBrokerageFees(trade.rate, trade.quantity);
-                funds -= brokerageFees;
-                if (trade.buyerId == userId) { // buyer
-                    funds -= (trade.quantity * trade.rate);
-                    let quantity = holdings[i].quantity + trade.quantity;
-                    if (quantity !== 0) {
-                        holdings[i].rate = (holdings[i].rate * holdings[i].quantity + trade.rate * trade.quantity) / (holdings[i].quantity + trade.quantity);
-                    } else {
-                        holdings[i].rate = 0;
-                    }
-                    holdings[i].quantity = quantity;
-                } else { // seller
-                    funds += (trade.quantity * trade.rate);
-                    let quantity = holdings[i].quantity - trade.quantity;
-                    if (quantity !== 0) {
-                        holdings[i].rate = (holdings[i].rate * holdings[i].quantity - trade.rate * trade.quantity) / (holdings[i].quantity - trade.quantity);
-                    } else {
-                        holdings[i].rate = 0;
-                    }
-                    holdings[i].quantity = quantity;
-                }
-            });
-            for (let i = 0; i < holdings.length; i++) {
-                holdings[i].price = holdings[i].rate * holdings[i].quantity;
-            };
-            callback(null, funds, holdings);
-        })
-        .catch(err => {
-            callback(err, null, null);
         });
+    });
+}
+
+function getUserHoldings(userId) {
+    return new Promise((resolve, reject) => {
+        userModel.findById(userId, (err, user) => {
+            if (err) {
+                console.log(err);
+                reject("No such user");
+            } else {
+                let holdings = [];
+                stocks.forEach((_stock, stockIndex) => {
+                    holdings.push({ stockIndex, rate: 0, quantity: 0 });
+                });
+                user.executedOrders.forEach(order => {
+                    let i = order.stockIndex;
+                    let quantity = holdings[i].quantity + order.quantity;
+                    if (quantity !== 0) {
+                        holdings[i].rate = (holdings[i].rate * holdings[i].quantity + order.rate * order.quantity) / (holdings[i].quantity + order.quantity);
+                    } else {
+                        holdings[i].rate = 0;
+                    }
+                    holdings[i].quantity = quantity;
+                });
+                for (let i = 0; i < holdings.length; i++) {
+                    holdings[i].quantity *= -1;
+                    holdings[i].price = holdings[i].rate * holdings[i].quantity;
+                };
+                resolve(holdings);
+            }
+        }); 
+    });
 }
 
 function getBrokerageFees(ratePerShare, quantity) {
@@ -49,6 +51,7 @@ function getBrokerageFees(ratePerShare, quantity) {
 }
 
 module.exports = {
-    getUserFundsAndHoldings,
+    getUserFunds,
+    getUserHoldings,
     getBrokerageFees
 };

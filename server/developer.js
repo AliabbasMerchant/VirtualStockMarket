@@ -5,7 +5,6 @@ const router = express.Router();
 const globalStorage = require('./fastStorage/globals');
 const stocksStorage = require('./fastStorage/stocks');
 const userModel = require('./models/users');
-const tradeModel = require('./models/trades');
 const auth = require('./auth');
 
 const stocks = require('./stocks');
@@ -41,8 +40,16 @@ router.post('/init', checkIfDeveloper, (req, res) => {
     const { safe } = req.body;
     if (!safe) {
         userModel.deleteMany({}).then().catch(console.log);
+    } else {
+        userModel.find({})
+            .then(users => {
+                users.forEach(user => {
+                    user.executedOrders = [];
+                    user.save();
+                });
+            })
+            .catch(console.log);
     }
-    tradeModel.deleteMany({}).then().catch(console.log);
     require('./fastStorage/orders').initialize();
     require('./fastStorage/sockets').initialize();
     stocksStorage.initialize();
@@ -54,7 +61,14 @@ router.post('/init', checkIfDeveloper, (req, res) => {
 });
 
 router.post('/startTrading', checkIfDeveloper, (req, res) => {
-    tradeModel.deleteMany({}).then().catch(console.log);
+    userModel.find({})
+        .then(users => {
+            users.forEach(user => {
+                user.executedOrders = [];
+                user.save();
+            });
+        })
+        .catch(console.log);
     globalStorage.setPlayingStatus(true);
     globalStorage.setBuyingPeriod(false);
     stocks.forEach((stock, stockIndex) => {

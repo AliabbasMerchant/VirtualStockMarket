@@ -58,6 +58,8 @@ async function pendingOrderExecuted(orderId, quantity) {
         let q = order.quantity;
         await cancelPendingOrder(orderId);
         if (q != quantity) {
+            // selling: ok
+            // buying: initial = -10 exec = -6, rem =  -10 - -6 = -10 + 6 = -4; ok
             order.quantity -= quantity;
             await addPendingOrder(orderId, order.quantity, order.rate, order.stockIndex, order.userId);
         }
@@ -86,6 +88,10 @@ function getPendingOrdersOfUser(userId) {
     });
 }
 
+function getPendingOrders() {
+    return instance.get(ORDERS_KEY, '.');
+}
+
 module.exports = {
     initOrders,
     getPendingOrdersOfUser,
@@ -93,5 +99,6 @@ module.exports = {
     cancelPendingOrder,
     pendingOrderExecuted,
     getPendingOrdersOfStock,
+    getPendingOrders,
     initialize
 }

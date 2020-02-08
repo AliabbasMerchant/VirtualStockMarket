@@ -32,16 +32,16 @@ function tryToTrade(orderId, quantity, rate, stockIndex, userId, callback) {
                 .finally(() => {
                     if (buyingPeriod) {
                         if (!buying) {
-                            return callback(false, "Cannot sell in buying period");
+                            callback(false, "Cannot sell in buying period");
                         } else {
                             // buying, buy at price
                             okToTrade(orderId, quantity, rate, stockIndex, userId, buying, true);
-                            return callback(true, constants.defaultSuccessMessage);
+                            callback(true, constants.defaultSuccessMessage);
                         }
+                    } else { // normal trading, with user
+                        okToTrade(orderId, quantity, rate, stockIndex, userId, buying, false);
+                        callback(true, constants.defaultSuccessMessage);
                     }
-                    // normal trading, with user
-                    okToTrade(orderId, quantity, rate, stockIndex, userId, buying, false);
-                    return callback(true, constants.defaultSuccessMessage);
                 });
         });
 }
@@ -51,140 +51,179 @@ function notifyUser(userId, event, payload) {
 }
 
 function notifyUsers(event, payload) {
-
+    webSocketHandler.messageToEveryone(event, payload);
 }
 
-function okToTrade(orderId, quantity, rate, stockIndex, userId, buying, buyFromMarket) {
+async function triggerOrderMatcher(stockIndex, userId) {
+    // TODO Some message queue?
+    orderMatcher(stockIndex, userId);
+}
+
+async function okToTrade(orderId, quantity, rate, stockIndex, userId, buying, buyFromMarket) {
     if (buyFromMarket) {
-        // check funds and available stock quantity in market. If ok, just trade it
+        // check funds and available stock quantity in market. If ok,trade it
         stocksStorage.getStockQuantity(stockIndex)
             .then(stockQuantity => {
                 if (stockQuantity != null && stockQuantity >= quantity) { // qtty less than total available quantity
                     stocksStorage.getStockRate(stockIndex)
                         .then(stockRate => {
-                            if (stockRate != null) {
-                                if (rate == stockRate) {
-                                    executeOrder(orderId, quantity, rate, stockIndex, userId, false, true);
-                                } else {
-                                    notifyUser(userId, constants.eventOrderPlaced, { ok: false, message: "In this period, you can only buy at market rate", orderId });
-                                }
+                            if (stockRate != null && rate == stockRate) {
+                                assets.getUserFunds(userId, (err, funds) => {
+                                    if (err) {
+                                        console.log(err)
+                                    } else {
+                                        if (funds >= (stockRate * quantity + assets.getBrokerageFees(stockRate, quantity))) {
+                                            executeOrder(orderId, quantity * -1, rate, stockIndex, userId, false, true);
+                                        } else {
+                                            notifyUser(userId, constants.eventOrderPlaced, { ok: false, message: "Insufficient Funds", orderId });
+                                        }
+                                    }
+                                });
+                            } else {
+                                notifyUser(userId, constants.eventOrderPlaced, { ok: false, message: "In this period, you can only buy at market rate", orderId });
                             }
                         })
                         .catch(console.log);
                 } else {
-                    webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "Quantity too high", orderId });
+                    notifyUser(userId, constants.eventOrderPlaced, { ok: false, message: "Quantity too high", orderId });
                 }
             })
-            .catch(console.log)
+            .catch(console.log);
     } else {
-        // put in trader
+        if (buying) quantity *= -1; // set quantity to negative
+        pendingOrdersStorage.addPendingOrder(orderId, quantity, rate, stockIndex, userId);
+        triggerOrderMatcher(stockIndex, userId);
     }
-    if (buying) {
-
-    } else {
-        // check holdings
-        if (quantity > 0) { // selling
-            if (quantity <= holdings[stockIndex].quantity) {
-                await pendingOrdersStorage.addPendingOrder(orderId, quantity, rate, stockIndex, userId);
-                trade(stockIndex, orderId);
-            } else {
-                webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "You don't have those many stocks. Short selling is not allowed", orderId });
-            }
-        } else {
-            await pendingOrdersStorage.addPendingOrder(orderId, quantity, rate, stockIndex, userId);
-            trade(stockIndex, orderId);
-        }
-    }
-    // Not here
-    let buying = quantity < 0;
-    assets.getUserFundsAndHoldings(userId, (err, funds, holdings) => {
-        if (err) {
-            console.log(err);
-            webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
-        } else {
-            let fundsOk = false;
-            if (buying) {
-                // check
-                fundsOk = funds >= (rate * quantity) + assets.getBrokerageFees(rate, quantity);
-            } else { // selling
-                // no need to check funds, except for brokerageFees
-                fundsOk = funds >= assets.getBrokerageFees(rate, quantity);
-            }
-            if (fundsOk) {
-
-            } else {
-                webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "Insufficient Funds", orderId });
-            }
-        }
-    });
 }
 
 async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeRate = true, stockQuantityChange = false) {
-    // * funds and holdings already checked
-    // * stockIndex valid
     // put into executed orders
     // delete from pendingOrders
     // change stock quantity true/false
     // change rate true/false
     // notify user
-    userModel.findById(userId, async (err, user) => {
+    userModel.findById(userId, (err, user) => {
         if (err) {
             console.log(err);
-            webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
+            notifyUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
         } else {
-            user.executedOrders.push({ orderId, quantity, rate, stockIndex, changeRate });
-            user.save(async (err, _user) => {
+            let fundsChange = quantity * rate - assets.getBrokerageFees(rate, quantity);
+            user.funds += fundsChange;
+            user.executedOrders.push({ orderId, quantity, rate, stockIndex, tradeTime: Date.now() });
+            user.save((err, _user) => {
                 if (err) {
                     console.log(err);
-                    webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
+                    notifyUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
                 } else {
-                    pendingOrdersStorage.pendingOrderExecuted(orderId, quantity);
                     if (changeRate && quantity > 0) { // calc only on selling, otherwise we will end up at same price, for each pair of trades
-                        let initialQuantity = stocksStorage.getInitialStockQuantity(stockIndex);
-                        // should never be null. Hence, not checking if(null)
-                        let currentRate = await stocksStorage.getStockRate(stockIndex);
-                        let rateDiff = rate - currentRate;
-                        let newRate = currentRate + (rateDiff * quantity / initialQuantity);
-                        if (newRate !== currentRate) {
-                            stocksStorage.setStockRate(stockIndex, newRate);
-                            webSocketHandler.messageToEveryone(constants.eventStockRateUpdate, { stockIndex, rate: newRate });
-                        }
+                        // will never occur in buying period. Always occurs in trading time
+                        stocksStorage.getStockRate(stockIndex)
+                            .then(currentRate => {
+                                stocksStorage.getStockQuantity(stockIndex)
+                                    .then(currentQuantity => {
+                                        let rateDiff = rate - currentRate;
+                                        let newRate = currentRate + (rateDiff * quantity / currentQuantity);
+                                        if (newRate !== currentRate) {
+                                            stocksStorage.setStockRate(stockIndex, newRate);
+                                            notifyUsers(constants.eventStockRateUpdate, { stockIndex, rate: newRate });
+                                        }
+                                    })
+                                    .catch(console.log("Danger", err)); // lets hope this never happens
+                            })
+                            .catch(console.log("Danger", err)); // lets hope this never happens
                     }
-                    if (stockQuantityChange) {
-                        let stockQuantity = await stocksStorage.getStockQuantity(stockIndex);
-                        if (stockQuantity != null) {
-                            stocksStorage.setStockQuantity(stockIndex, stockQuantity + quantity);
-                        }
+                    if (stockQuantityChange && quantity < 0) { // will occur only in buying period
+                        stocksStorage.deductStockQuantity(stockIndex, quantity);
                     }
-                    let fundsChange = quantity * rate - assets.getBrokerageFees(quantity);
-                    webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: true, message: constants.defaultSuccessMessage, orderId, quantity, fundsChange });
+                    notifyUser(userId, constants.eventOrderPlaced, { ok: true, message: constants.defaultSuccessMessage, orderId, quantity, fundsChange });
                 }
             });
         }
     });
 }
 
-async function trade(stockIndex, orderId) {
-    let orders = await pendingOrdersStorage.getPendingOrdersOfStock(stockIndex);
-    console.log("ordersPool", orders);
-    for (let i = 0; i < orders.length; i++) {
-        let order1 = orders[i];
-        if (order1.orderId == orderId) {
-            for (let j = 0; j < orders.length; j++) {
-                let order2 = orders[j];
-                if (j != i && order2.rate == order1.rate) {
-                    if (order1.quantity * order2.quantity < 0) { // any 1 one wants to sell and the other is buying
-                        let quantity = Math.min(Math.abs(order1.quantity), Math.abs(order2.quantity));
-                        let quantity1 = quantity * Math.sign(order1.quantity);
-                        let quantity2 = quantity * Math.sign(order2.quantity);
-                        executeOrder(order1.orderId, quantity1, order1.rate, stockIndex, order1.userId);
-                        executeOrder(order2.orderId, quantity2, order2.rate, stockIndex, order2.userId);
+async function orderMatcher(stockIndex, userId) {
+    let someOrderHasExecuted = false;
+    do {
+        someOrderHasExecuted = false;
+        try {
+            let orders = await pendingOrdersStorage.getPendingOrders();
+            console.log("ordersPool", orders);
+
+            for (const param in { stockIndex, userId }) {
+                const value = matcher[param];
+                for (const order1 of orders) {
+                    if (order1[param] == value) {
+                        try {
+                            let funds = await assets.getUserFunds(order1.userId);
+                            let ok = false;
+                            if (order1.quantity < 0) { // buying
+                                ok = funds >= (order1.rate * Math.abs(order1.quantity) + assets.getBrokerageFees(order1.rate, order1.quantity));
+                            } else {
+                                if (funds >= assets.getBrokerageFees(order1.rate, order1.quantity)) {
+                                    try {
+                                        let holdings = await assets.getUserHoldings(order1.userId);
+                                        if (holdings[stockIndex].quantity > 0) {
+                                            ok = true;
+                                            order1.quantity = Math.min(holdings[stockIndex].quantity, order1.quantity);
+                                        }
+                                    } catch (e) {
+                                        // ignore
+                                    }
+                                }
+                            }
+                            if (ok) {
+                                for (const order2 of orders) {
+                                    if (order2.rate === order1.rate && order2.stockIndex === order1.stockIndex && order1.userId !== order2.userId) {
+                                        if (order1.quantity * order2.quantity < 0) { // one wants to sell and the other is buying
+                                            try {
+                                                let funds = await assets.getUserFunds(order2.userId);
+                                                let ok = false;
+                                                if (order2.quantity < 0) { // buying
+                                                    ok = funds >= (order2.rate * Math.abs(order2.quantity) + assets.getBrokerageFees(order2.rate, order2.quantity));
+                                                } else {
+                                                    if (funds >= assets.getBrokerageFees(order2.rate, order2.quantity)) {
+                                                        try {
+                                                            let holdings = await assets.getUserHoldings(order2.userId);
+                                                            if (holdings[stockIndex].quantity > 0) {
+                                                                ok = true;
+                                                                order2.quantity = Math.min(holdings[stockIndex].quantity, order2.quantity);
+                                                            }
+                                                        } catch (e) {
+                                                            // ignore
+                                                        }
+                                                    }
+                                                }
+                                                if (ok) {
+                                                    let quantity = Math.min(Math.abs(order1.quantity), Math.abs(order2.quantity));
+                                                    let quantity1 = quantity * Math.sign(order1.quantity);
+                                                    let quantity2 = quantity * Math.sign(order2.quantity);
+                                                    executeOrder(order1.orderId, quantity1, order1.rate, stockIndex, order1.userId);
+                                                    pendingOrdersStorage.pendingOrderExecuted(order1.orderId, quantity);
+                                                    executeOrder(order2.orderId, quantity2, order2.rate, stockIndex, order2.userId);
+                                                    pendingOrdersStorage.pendingOrderExecuted(order2.orderId, quantity);
+                                                    someOrderHasExecuted = true;
+                                                }
+                                            } catch (e) {
+                                                // ignore
+                                            }
+                                        }
+                                    }
+                                    if (someOrderHasExecuted) break;
+                                }
+                            }
+                        } catch (e) {
+                            // ignore
+                        }
                     }
+                    if (someOrderHasExecuted) break;
                 }
+                if (someOrderHasExecuted) break;
             }
-            break;
+        } catch (err) {
+            console.log(err);
         }
-    }
+    } while (someOrderHasExecuted);
 }
 
 module.exports = {
