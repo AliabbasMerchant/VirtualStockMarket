@@ -49,6 +49,10 @@ rejson_client.connect()
     .then((_) => {
         console.log('Orders: Redis client connected');
         // require('./fastStorage/globals').setInitialTime(Date.now());
+        require('./fastStorage/globals').initGlobals(rejson_client);
+        require('./fastStorage/orders').initOrders(rejson_client);
+        require('./fastStorage/sockets').initSockets(rejson_client);
+        require('./fastStorage/stocks').initStocks(rejson_client);
     })
     .catch(console.log);
 rejson_client.on('error', function (err) {

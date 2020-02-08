@@ -48,3 +48,10 @@ Secrets and all
 initialFunds
 
 Variable:
+
+
+
+
+
+Selling -> quantity: positive
+Buying -> quantity: negative

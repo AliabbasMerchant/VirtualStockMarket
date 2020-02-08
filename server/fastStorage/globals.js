@@ -41,11 +41,11 @@ async function setPlayingStatus(status) {
     }
 }
 
-function getStartPeriod() {
+function getBuyingPeriod() {
     return instance.get(GLOBALS_KEY, "START_PERIOD");
 }
 
-async function setStartPeriod(start_period) {
+async function setBuyingPeriod(start_period) {
     try {
         await instance.set(GLOBALS_KEY, "START_PERIOD", start_period);
     } catch (err) {
@@ -59,7 +59,7 @@ module.exports = {
     setInitialTime,
     getPlayingStatus,
     setPlayingStatus,
-    getStartPeriod,
-    setStartPeriod,
+    getBuyingPeriod,
+    setBuyingPeriod,
     initialize
 }

@@ -192,25 +192,12 @@ router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, re
             return;
         }
     }
-    if (0 <= stockIndex < stocks.length) {
-        if (quantity == 0) {
-            res.json({
-                ok: false,
-                message: "Quantity cannot be zero"
-            });
-        } else {
-            trader.tryToTrade(orderId, quantity, rate, stockIndex, userId);
-            res.json({
-                ok: true,
-                message: constants.defaultSuccessMessage
-            });
-        }
-    } else {
+    trader.tryToTrade(orderId, quantity, rate, stockIndex, userId, (ok, message) => {
         res.json({
-            ok: false,
-            message: "No such stock"
-        });
-    }
+            ok,
+            message
+        })
+    });
 });
 
 router.post('/getRateList/:stockIndex', (req, res) => {

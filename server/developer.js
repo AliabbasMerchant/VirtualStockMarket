@@ -36,8 +36,8 @@ router.post('/init', checkIfDeveloper, (req, res) => {
     // clear all storage
     // init memory
     // set initial time
-    // set startPeriod to true
-    // set playing to true // required for testing, but no problem even if in production
+    // set buyingPeriod to true
+    // set playing to true
     const { safe } = req.body;
     if (!safe) {
         userModel.deleteMany({}).then().catch(console.log);
@@ -48,14 +48,15 @@ router.post('/init', checkIfDeveloper, (req, res) => {
     stocksStorage.initialize();
     globalStorage.initialize();
     globalStorage.setInitialTime(Date.now());
-    globalStorage.setStartPeriod(true);
+    globalStorage.setBuyingPeriod(true);
     globalStorage.setPlayingStatus(true);
     res.send('OK');
 });
 
 router.post('/startTrading', checkIfDeveloper, (req, res) => {
     tradeModel.deleteMany({}).then().catch(console.log);
-    globalStorage.setStartPeriod(false);
+    globalStorage.setPlayingStatus(true);
+    globalStorage.setBuyingPeriod(false);
     stocks.forEach((stock, stockIndex) => {
         let initial_quantity = stock.initialQuantity;
         let current_left_quantity = 0;

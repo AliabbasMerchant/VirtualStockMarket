@@ -45,7 +45,7 @@ function getUserFundsAndHoldings(userId, callback) {
 }
 
 function getBrokerageFees(ratePerShare, quantity) {
-    return constants.brokerageRateFraction * ratePerShare * quantity;
+    return Math.abs(constants.brokerageRateFraction * ratePerShare * quantity);
 }
 
 module.exports = {

@@ -1,64 +1,122 @@
 const assets = require('./assets');
 const stocksStorage = require('./fastStorage/stocks');
 const pendingOrdersStorage = require('./fastStorage/orders');
+const globalStorage = require('./fastStorage/globals');
 const webSocketHandler = require('./webSocket/webSocket');
 const constants = require('./constants');
 const userModel = require('./models/users');
 
-async function tryToTrade(orderId, quantity, rate, stockIndex, userId) {
+// callback(ok, message)
+function tryToTrade(orderId, quantity, rate, stockIndex, userId, callback) {
     const currentTime = Date.now();
     console.log("gotOrder", orderId, quantity, rate, stockIndex, userId, currentTime);
-    if (0 <= stockIndex < require('./stocks').length) {
-        if (currentTime <= constants.buyingTimeLimit || constants.buyingTimeLimit < currentTime <= constants.breakTimeStart || constants.breakTimeEnd < currentTime <= constants.endTime) {
-            assets.getUserFundsAndHoldings(userId, async (err, funds, holdings) => {
-                if (err) {
-                    webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
-                } else {
-                    if (funds + (quantity * rate) - assets.getBrokerageFees(quantity) >= 0) {
-                        if (currentTime <= constants.buyingTimeLimit) {
-                            if (quantity < 0) { // buying
-                                let stockQuantity = await stocksStorage.getStockQuantity(stockIndex);
-                                if (stockQuantity != null) {
-                                    if (quantity + stockQuantity >= 0) { // qtty less than total available quantity
-                                        let stockRate = await stocksStorage.getStockRate(stockIndex);
-                                        if (rate == stockRate) {
-                                            pendingOrdersStorage.addPendingOrder(orderId, quantity, rate, stockIndex, userId);
-                                            executeOrder(orderId, quantity, rate, stockIndex, userId, false, true);
-                                        } else {
-                                            webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "In this period, you can only buy at market rate", orderId });
-                                        }
-                                    } else {
-                                        webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "Quantity too high", orderId });
-                                    }
-                                }
-                            } else { // quantity >= 0 // selling
-                                webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "Cannot sell in buying period", orderId });
-                            }
-                        } else {
-                            // check holdings
-                            if (quantity > 0) { // selling
-                                if (quantity <= holdings[stockIndex].quantity) {
-                                    await pendingOrdersStorage.addPendingOrder(orderId, quantity, rate, stockIndex, userId);
-                                    trade(stockIndex, orderId);
-                                } else {
-                                    webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "You don't have those many stocks. Short selling is not allowed", orderId });
-                                }
-                            } else {
-                                await pendingOrdersStorage.addPendingOrder(orderId, quantity, rate, stockIndex, userId);
-                                trade(stockIndex, orderId);
-                            }
-                        }
-                    } else {
-                        webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "Insufficient Funds", orderId });
-                    }
-                }
-            });
-        } else {
-            webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "Cannot trade in this period", orderId });
-        }
-    } else {
-        webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "No such stock", orderId });
+    if (quantity == 0) {
+        return callback(false, "Quantity cannot be zero");
     }
+    quantity = Math.abs(quantity);
+    if (!(0 <= stockIndex < require('./stocks').length)) {
+        return callback(false, "No such stock");
+    }
+    let playingStatus = false;
+    globalStorage.getPlayingStatus()
+        .then(status => playingStatus = status)
+        .catch(console.log)
+        .finally(() => {
+            if (!playingStatus) {
+                return callback(false, "Cannot trade in this period");
+            }
+            let buyingPeriod = false;
+            globalStorage.getBuyingPeriod()
+                .then(status => buyingPeriod = status)
+                .catch(console.log)
+                .finally(() => {
+                    if (buyingPeriod) {
+                        if (!buying) {
+                            return callback(false, "Cannot sell in buying period");
+                        } else {
+                            // buying, buy at price
+                            okToTrade(orderId, quantity, rate, stockIndex, userId, buying, true);
+                            return callback(true, constants.defaultSuccessMessage);
+                        }
+                    }
+                    // normal trading, with user
+                    okToTrade(orderId, quantity, rate, stockIndex, userId, buying, false);
+                    return callback(true, constants.defaultSuccessMessage);
+                });
+        });
+}
+
+function notifyUser(userId, event, payload) {
+    webSocketHandler.messageToUser(userId, event, payload);
+}
+
+function notifyUsers(event, payload) {
+
+}
+
+function okToTrade(orderId, quantity, rate, stockIndex, userId, buying, buyFromMarket) {
+    if (buyFromMarket) {
+        // check funds and available stock quantity in market. If ok, just trade it
+        stocksStorage.getStockQuantity(stockIndex)
+            .then(stockQuantity => {
+                if (stockQuantity != null && stockQuantity >= quantity) { // qtty less than total available quantity
+                    stocksStorage.getStockRate(stockIndex)
+                        .then(stockRate => {
+                            if (stockRate != null) {
+                                if (rate == stockRate) {
+                                    executeOrder(orderId, quantity, rate, stockIndex, userId, false, true);
+                                } else {
+                                    notifyUser(userId, constants.eventOrderPlaced, { ok: false, message: "In this period, you can only buy at market rate", orderId });
+                                }
+                            }
+                        })
+                        .catch(console.log);
+                } else {
+                    webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "Quantity too high", orderId });
+                }
+            })
+            .catch(console.log)
+    } else {
+        // put in trader
+    }
+    if (buying) {
+
+    } else {
+        // check holdings
+        if (quantity > 0) { // selling
+            if (quantity <= holdings[stockIndex].quantity) {
+                await pendingOrdersStorage.addPendingOrder(orderId, quantity, rate, stockIndex, userId);
+                trade(stockIndex, orderId);
+            } else {
+                webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "You don't have those many stocks. Short selling is not allowed", orderId });
+            }
+        } else {
+            await pendingOrdersStorage.addPendingOrder(orderId, quantity, rate, stockIndex, userId);
+            trade(stockIndex, orderId);
+        }
+    }
+    // Not here
+    let buying = quantity < 0;
+    assets.getUserFundsAndHoldings(userId, (err, funds, holdings) => {
+        if (err) {
+            console.log(err);
+            webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
+        } else {
+            let fundsOk = false;
+            if (buying) {
+                // check
+                fundsOk = funds >= (rate * quantity) + assets.getBrokerageFees(rate, quantity);
+            } else { // selling
+                // no need to check funds, except for brokerageFees
+                fundsOk = funds >= assets.getBrokerageFees(rate, quantity);
+            }
+            if (fundsOk) {
+
+            } else {
+                webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "Insufficient Funds", orderId });
+            }
+        }
+    });
 }
 
 async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeRate = true, stockQuantityChange = false) {

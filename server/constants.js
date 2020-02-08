@@ -8,6 +8,8 @@ module.exports = {
     // breakTimeEnd: initialTime + 60*60*1000,
     // endTime: initialTime + 105*60*1000,
 
+    internalEventTrade: "tradeEvent",
+
     eventNewClient: "newClient",
     eventStockRateUpdate: "stockRateUpdate",
     eventOrderPlaced: "orderPlaced",
