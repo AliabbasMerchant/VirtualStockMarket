@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+const constants = require('../constants');
+
 const userSchema = mongoose.Schema({
     name: { type: String, required: true },
     username: { type: String, required: true },

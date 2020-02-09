@@ -31,7 +31,7 @@ function checkIfDeveloper(req, res, next) {
     });
 }
 
-router.post('/init', checkIfDeveloper, (req, res) => {
+router.post('/init', checkIfDeveloper, async (req, res) => {
     // clear all storage
     // init memory
     // set initial time
@@ -50,14 +50,14 @@ router.post('/init', checkIfDeveloper, (req, res) => {
             })
             .catch(console.log);
     }
-    require('./fastStorage/orders').initialize();
-    require('./fastStorage/sockets').initialize();
-    stocksStorage.initialize();
-    globalStorage.initialize();
-    globalStorage.setInitialTime(Date.now());
-    globalStorage.setBuyingPeriod(true);
-    globalStorage.setPlayingStatus(true);
-    res.send('OK');
+    await globalStorage.initialize();
+    await globalStorage.setInitialTime(Date.now());
+    await globalStorage.setBuyingPeriod(true);
+    await globalStorage.setPlayingStatus(true);
+    await require('./fastStorage/orders').initialize();
+    await require('./fastStorage/sockets').initialize();
+    await stocksStorage.initialize();
+    return res.send('OK');
 });
 
 router.post('/startTrading', checkIfDeveloper, (req, res) => {

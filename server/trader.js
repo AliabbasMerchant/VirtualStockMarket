@@ -174,16 +174,18 @@ async function orderMatcher(stockIndex, userId) {
                 const value = matcher[param];
                 for (const order1 of orders) {
                     if (order1[param] == value) {
-                        let ok, qtty1 = await sufficientFundsAndHoldings(order1.userId, order1.quantity, order1.rate);
+                        let ok;
+                        [ok, order1.quantity] = await sufficientFundsAndHoldings(order1.userId, order1.quantity, order1.rate);
                         if (ok) {
                             for (const order2 of orders) {
                                 if (order2.rate === order1.rate && order2.stockIndex === order1.stockIndex && order1.userId !== order2.userId) {
                                     if (order1.quantity * order2.quantity < 0) { // one wants to sell and the other is buying
-                                        let ok, qtty2 = await sufficientFundsAndHoldings(order2.userId, order2.quantity, order2.rate);
+                                        let ok;
+                                        [ok, order2.quantity] = await sufficientFundsAndHoldings(order2.userId, order2.quantity, order2.rate);
                                         if (ok) {
-                                            let quantity = Math.min(Math.abs(qtty1), Math.abs(qtty2));
-                                            let quantity1 = quantity * Math.sign(qtty1);
-                                            let quantity2 = quantity * Math.sign(qtty2);
+                                            let quantity = Math.min(Math.abs(order1.quantity), Math.abs(order2.quantity));
+                                            let quantity1 = quantity * Math.sign(order1.quantity);
+                                            let quantity2 = quantity * Math.sign(order2.quantity);
                                             executeOrder(order1.orderId, quantity1, order1.rate, stockIndex, order1.userId);
                                             pendingOrdersStorage.pendingOrderExecuted(order1.orderId, quantity);
                                             executeOrder(order2.orderId, quantity2, order2.rate, stockIndex, order2.userId);

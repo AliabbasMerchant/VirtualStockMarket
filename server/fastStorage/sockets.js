@@ -6,15 +6,17 @@ function initSockets(redis_client) {
     instance = redis_client;
 }
 
-function initialize() {
-    instance.del(SOCKETS_KEY, '.')
-        .then()
-        .catch(console.log)
-        .finally(() => {
-            instance.set(SOCKETS_KEY, '.', {})
-                .then()
-                .catch(console.log);
-        });
+async function initialize() {
+    try {
+        await instance.del(SOCKETS_KEY, '.');
+    } catch (err) {
+        // ignore
+    }
+    try {
+        await instance.set(SOCKETS_KEY, '.', {});
+    } catch (err) {
+        console.log(err)
+    }
 }
 
 function getUserSocketId(userId) {

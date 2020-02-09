@@ -9,34 +9,31 @@ function initStocks(redis_client) {
     instance = redis_client;
 }
 
-function initialize() {
-    instance.del(STOCKS_KEY, '.')
-        .then()
-        .catch(console.log)
-        .finally(() => {
-            instance.set(STOCKS_KEY, '.', {})
+async function initialize() {
+    try {
+        await instance.del(STOCKS_KEY, '.');
+    } catch (err) {
+        // ignore
+    }
+    try {
+        await instance.set(STOCKS_KEY, '.', {});
+        for (const stockIndex in stocksData) {
+            const stock = stocksData[stockIndex];
+            let newStock = { rate: stock.rate, quantity: stock.initialQuantity, rateList: [] };
+            let time = Date.now();
+            try {
+                time = await globals.getInitialTime();
+            } catch (err) {
+                console.log(err);
+            }
+            newStock.rateList.push({ rate: stock.rate, timestamp: time });
+            instance.set(STOCKS_KEY, stockIndex, newStock)
                 .then()
-                .catch(console.log)
-                .finally(() => {
-                    stocksData.forEach((stock, stockIndex) => {
-                        let newStock = { rate: stock.rate, quantity: stock.initialQuantity };
-                        newStock.rateList = [];
-                        globals.getInitialTime()
-                            .then(time => {
-                                newStock.rateList.push({ rate: stock.rate, timestamp: time });
-                            })
-                            .catch(err => {
-                                console.log(err);
-                                newStock.rateList.push({ rate: stock.rate, timestamp: Date.now() });
-                            })
-                            .finally(() => {
-                                instance.set(STOCKS_KEY, stockIndex, newStock)
-                                    .then()
-                                    .catch(console.log);
-                            });
-                    });
-                });
-        });
+                .catch(console.log);
+        }
+    } catch (err) {
+        console.log(err)
+    }
 }
 
 function getStockQuantity(stockIndex) {

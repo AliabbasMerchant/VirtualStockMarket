@@ -44,6 +44,7 @@ function checkIfAuthenticatedAndGetUserId(req, res, next) {
 
 module.exports = {
     hash,
+    verifyToken,
     createUserToken,
     getUserIdFromToken,
     checkIfAuthenticatedAndGetUserId

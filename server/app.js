@@ -39,9 +39,6 @@ app.use(
     })
 );
 
-const server = require('http').Server(app);
-const io = require('socket.io')(server);
-
 const rejson_client = new Rejson();
 rejson_client.connect()
     .then((_) => {
@@ -51,10 +48,23 @@ rejson_client.connect()
         require('./fastStorage/orders').initOrders(rejson_client);
         require('./fastStorage/sockets').initSockets(rejson_client);
         require('./fastStorage/stocks').initStocks(rejson_client);
-        require('./webSocket/webSocket').init(io, rejson_client);
     })
     .catch(console.log);
 rejson_client.on('error', function (err) {
+    console.log('Orders: Redis Error ' + err);
+});
+
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+
+const rejson_subs_client = new Rejson();
+rejson_subs_client.connect()
+    .then((_) => {
+        console.log('Orders: Redis Subscriber client connected');
+        require('./webSocket/webSocket').init(io, rejson_subs_client);
+    })
+    .catch(console.log);
+    rejson_subs_client.on('error', function (err) {
     console.log('Orders: Redis Error ' + err);
 });
 

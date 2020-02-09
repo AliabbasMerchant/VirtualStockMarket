@@ -6,15 +6,17 @@ function initOrders(redis_client) {
     instance = redis_client;
 }
 
-function initialize() {
-    instance.del(ORDERS_KEY, '.')
-        .then()
-        .catch(console.log)
-        .finally(() => {
-            instance.set(ORDERS_KEY, '.', {})
-                .then()
-                .catch(console.log);
-        });
+async function initialize() {
+    try {
+        await instance.del(ORDERS_KEY, '.');
+    } catch (err) {
+        // ignore
+    }
+    try {
+        await instance.set(ORDERS_KEY, '.', {});
+    } catch (err) {
+        console.log(err)
+    }
 }
 
 function getPendingOrdersOfStock(stockIndex) {
@@ -71,20 +73,20 @@ async function pendingOrderExecuted(orderId, quantity) {
 function getPendingOrdersOfUser(userId) {
     return new Promise((resolve, reject) => {
         instance.get(ORDERS_KEY, '.')
-        .then(orders => {
-            let res = [];
-            Object.keys(orders).forEach(orderId => {
-                let order = orders[orderId];
-                if (order.userId == userId) {
-                    order.orderId = orderId;
-                    res.push(order);
-                }
+            .then(orders => {
+                let res = [];
+                Object.keys(orders).forEach(orderId => {
+                    let order = orders[orderId];
+                    if (order.userId == userId) {
+                        order.orderId = orderId;
+                        res.push(order);
+                    }
+                });
+                resolve(res);
+            })
+            .catch(err => {
+                reject(err);
             });
-            resolve(res);
-        })
-        .catch(err => {
-            reject(err);
-        });
     });
 }
 
