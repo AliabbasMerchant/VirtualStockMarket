@@ -142,6 +142,26 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
     });
 }
 
+async function sufficientFundsAndHoldings(userId, quantity, rate) {
+    try {
+        let funds = await assets.getUserFunds(userId);
+        if (quantity < 0) { // buying
+            return [funds >= (rate * Math.abs(quantity) + assets.getBrokerageFees(rate, quantity)), quantity];
+        } else { // selling
+            if (funds >= assets.getBrokerageFees(rate, quantity)) {
+                let holdings = await assets.getUserHoldings(userId);
+                if (holdings[stockIndex].quantity > 0) {
+                    quantity = Math.min(holdings[stockIndex].quantity, quantity); // holdingsQtty is never -ve. And since it is selling, qtty is also not -ve.
+                    return [true, quantity];
+                }
+            }
+        }
+    } catch (e) {
+        console.log(e);
+    }
+    return [false, quantity];
+}
+
 async function orderMatcher(stockIndex, userId) {
     let someOrderHasExecuted = false;
     do {
@@ -154,66 +174,27 @@ async function orderMatcher(stockIndex, userId) {
                 const value = matcher[param];
                 for (const order1 of orders) {
                     if (order1[param] == value) {
-                        try {
-                            let funds = await assets.getUserFunds(order1.userId);
-                            let ok = false;
-                            if (order1.quantity < 0) { // buying
-                                ok = funds >= (order1.rate * Math.abs(order1.quantity) + assets.getBrokerageFees(order1.rate, order1.quantity));
-                            } else {
-                                if (funds >= assets.getBrokerageFees(order1.rate, order1.quantity)) {
-                                    try {
-                                        let holdings = await assets.getUserHoldings(order1.userId);
-                                        if (holdings[stockIndex].quantity > 0) {
-                                            ok = true;
-                                            order1.quantity = Math.min(holdings[stockIndex].quantity, order1.quantity);
-                                        }
-                                    } catch (e) {
-                                        // ignore
-                                    }
-                                }
-                            }
-                            if (ok) {
-                                for (const order2 of orders) {
-                                    if (order2.rate === order1.rate && order2.stockIndex === order1.stockIndex && order1.userId !== order2.userId) {
-                                        if (order1.quantity * order2.quantity < 0) { // one wants to sell and the other is buying
-                                            try {
-                                                let funds = await assets.getUserFunds(order2.userId);
-                                                let ok = false;
-                                                if (order2.quantity < 0) { // buying
-                                                    ok = funds >= (order2.rate * Math.abs(order2.quantity) + assets.getBrokerageFees(order2.rate, order2.quantity));
-                                                } else {
-                                                    if (funds >= assets.getBrokerageFees(order2.rate, order2.quantity)) {
-                                                        try {
-                                                            let holdings = await assets.getUserHoldings(order2.userId);
-                                                            if (holdings[stockIndex].quantity > 0) {
-                                                                ok = true;
-                                                                order2.quantity = Math.min(holdings[stockIndex].quantity, order2.quantity);
-                                                            }
-                                                        } catch (e) {
-                                                            // ignore
-                                                        }
-                                                    }
-                                                }
-                                                if (ok) {
-                                                    let quantity = Math.min(Math.abs(order1.quantity), Math.abs(order2.quantity));
-                                                    let quantity1 = quantity * Math.sign(order1.quantity);
-                                                    let quantity2 = quantity * Math.sign(order2.quantity);
-                                                    executeOrder(order1.orderId, quantity1, order1.rate, stockIndex, order1.userId);
-                                                    pendingOrdersStorage.pendingOrderExecuted(order1.orderId, quantity);
-                                                    executeOrder(order2.orderId, quantity2, order2.rate, stockIndex, order2.userId);
-                                                    pendingOrdersStorage.pendingOrderExecuted(order2.orderId, quantity);
-                                                    someOrderHasExecuted = true;
-                                                }
-                                            } catch (e) {
-                                                // ignore
-                                            }
+                        let ok, qtty1 = await sufficientFundsAndHoldings(order1.userId, order1.quantity, order1.rate);
+                        if (ok) {
+                            for (const order2 of orders) {
+                                if (order2.rate === order1.rate && order2.stockIndex === order1.stockIndex && order1.userId !== order2.userId) {
+                                    if (order1.quantity * order2.quantity < 0) { // one wants to sell and the other is buying
+                                        let ok, qtty2 = await sufficientFundsAndHoldings(order2.userId, order2.quantity, order2.rate);
+                                        if (ok) {
+                                            let quantity = Math.min(Math.abs(qtty1), Math.abs(qtty2));
+                                            let quantity1 = quantity * Math.sign(qtty1);
+                                            let quantity2 = quantity * Math.sign(qtty2);
+                                            executeOrder(order1.orderId, quantity1, order1.rate, stockIndex, order1.userId);
+                                            pendingOrdersStorage.pendingOrderExecuted(order1.orderId, quantity);
+                                            executeOrder(order2.orderId, quantity2, order2.rate, stockIndex, order2.userId);
+                                            pendingOrdersStorage.pendingOrderExecuted(order2.orderId, quantity);
+                                            // no need to triggerOrderMatcher again, because we have the do...while loop
+                                            someOrderHasExecuted = true;
                                         }
                                     }
-                                    if (someOrderHasExecuted) break;
                                 }
+                                if (someOrderHasExecuted) break;
                             }
-                        } catch (e) {
-                            // ignore
                         }
                     }
                     if (someOrderHasExecuted) break;

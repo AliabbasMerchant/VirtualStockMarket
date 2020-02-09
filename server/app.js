@@ -25,11 +25,6 @@ mongoose.connect(process.env.MONGO_CONNECTION_STRING, {
     useUnifiedTopology: true,
 });
 
-const server = require('http').Server(app);
-const io = require('socket.io')(server);
-
-require('./webSocket/webSocket').init(io);
-
 app.use(cors());
 
 app.use(bodyParser.json()); // support json encoded bodies
@@ -44,6 +39,9 @@ app.use(
     })
 );
 
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+
 const rejson_client = new Rejson();
 rejson_client.connect()
     .then((_) => {
@@ -53,6 +51,7 @@ rejson_client.connect()
         require('./fastStorage/orders').initOrders(rejson_client);
         require('./fastStorage/sockets').initSockets(rejson_client);
         require('./fastStorage/stocks').initStocks(rejson_client);
+        require('./webSocket/webSocket').init(io, rejson_client);
     })
     .catch(console.log);
 rejson_client.on('error', function (err) {

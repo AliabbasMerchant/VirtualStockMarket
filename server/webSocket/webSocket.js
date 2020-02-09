@@ -3,9 +3,24 @@ const constants = require('../constants');
 const auth = require('../auth');
 
 IO = null;
+rejson_instance = null;
 
-function init(io) {
+function init(io, rejson_client) {
     IO = io;
+    rejson_instance = rejson_client;
+    instance.client.on("message", (channel, message) => {
+        message = JSON.parse(message);
+        if (channel == constants.internalEventNotifyUser) {
+            const { userSocketId, eventName, data } = message;
+            IO.to(userSocketId).emit(eventName, data);
+        } else if (channel == constants.internalEventNotifyEveryone) {
+            const { eventName, data } = message;
+            IO.emit(eventName, data);
+        }
+    })
+    rejson_client.client.subscribe(constants.internalEventNotifyUser);
+    rejson_client.client.subscribe(constants.internalEventNotifyEveryone);
+
     io.on('connection', function (socket) {
         socket.on(constants.eventNewClient, (data) => {
             console.log(constants.eventNewClient, data);
@@ -23,11 +38,10 @@ function init(io) {
 }
 
 function messageToUser(userId, eventName, data) {
-    // TODO PubSub
     socketStorage.getUserSocketId(userId)
         .then(userSocketId => {
             if (userSocketId) {
-                IO.to(userSocketId).emit(eventName, data);
+                rejson_instance.client.publish(constants.internalEventNotifyUser, JSON.stringify({ userSocketId, eventName, data }));
             }
         })
         .catch(err => {
@@ -36,8 +50,7 @@ function messageToUser(userId, eventName, data) {
 }
 
 function messageToEveryone(eventName, data) {
-    // TODO PubSub
-    IO.emit(eventName, data);
+    rejson_instance.client.publish(constants.internalEventNotifyEveryone, JSON.stringify({ eventName, data }));
 }
 
 module.exports = {
