@@ -4,12 +4,12 @@ const stocks = require('./stocks');
 
 function getUserFunds(userId) {
     return new Promise((resolve, reject) => {
-        userModel.findById(userId, 'funds', (err, funds) => {
-            if (err) {
+        userModel.findById(userId, (err, user) => {
+            if (err || !user) {
                 console.log(err);
                 reject("No Such User");
             } else {
-                resolve(funds);
+                resolve(user.funds);
             }
         });
     });
@@ -42,7 +42,7 @@ function getUserHoldings(userId) {
                 };
                 resolve(holdings);
             }
-        }); 
+        });
     });
 }
 

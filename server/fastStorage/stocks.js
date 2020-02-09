@@ -56,7 +56,7 @@ async function deductStockQuantity(stockIndex, quantity) {
         let res = await instance.get(STOCKS_KEY, stockIndex);
         await instance.del(STOCKS_KEY, stockIndex);
         res.quantity -= quantity;
-        await instance.set(STOCKS_KEY, res);
+        await instance.set(STOCKS_KEY, stockIndex, res);
     } catch (error) {
         console.log(error);
     }
@@ -67,7 +67,7 @@ async function setStockQuantity(stockIndex, quantity) {
         let res = await instance.get(STOCKS_KEY, stockIndex);
         await instance.del(STOCKS_KEY, stockIndex);
         res.quantity = quantity;
-        await instance.set(STOCKS_KEY, res);
+        await instance.set(STOCKS_KEY, stockIndex, res);
     } catch (error) {
         console.log(error);
     }

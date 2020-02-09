@@ -43,7 +43,6 @@ const rejson_client = new Rejson();
 rejson_client.connect()
     .then((_) => {
         console.log('Orders: Redis client connected');
-        // require('./fastStorage/globals').setInitialTime(Date.now());
         require('./fastStorage/globals').initGlobals(rejson_client);
         require('./fastStorage/orders').initOrders(rejson_client);
         require('./fastStorage/sockets').initSockets(rejson_client);
@@ -55,16 +54,25 @@ rejson_client.on('error', function (err) {
 });
 
 const server = require('http').Server(app);
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {
+    handlePreflightRequest: (req, res) => {
+        res.writeHead(200, {
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Allow-Origin": req.headers.origin, //or the specific origin you want to give access to,
+            "Access-Control-Allow-Credentials": true
+        });
+        res.end();
+    }
+});
 
 const rejson_subs_client = new Rejson();
 rejson_subs_client.connect()
     .then((_) => {
-        console.log('Orders: Redis Subscriber client connected');
-        require('./webSocket/webSocket').init(io, rejson_subs_client);
+        console.log('Orders: Redis subscriber client connected');
+        require('./webSocket/webSocket').init(io, rejson_client, rejson_subs_client);
     })
     .catch(console.log);
-    rejson_subs_client.on('error', function (err) {
+rejson_subs_client.on('error', function (err) {
     console.log('Orders: Redis Error ' + err);
 });
 

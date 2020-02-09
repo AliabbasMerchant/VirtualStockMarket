@@ -34,10 +34,7 @@ function SellModal(props) {
             }
             axios.post(`${constants.DOMAIN}/placeOrder`, {
                 userToken: Cookies.get(constants.tokenCookieName),
-                orderId: order.orderId,
-                quantity: quantity,
-                rate: rate,
-                stockIndex: holding.stockIndex
+                ...order
             })
                 .then(function (response) {
                     response = response.data;

@@ -21,7 +21,7 @@ const Stock = ({ stocks, placeOrder }) => {
     /*
     useEffect(() => { // TODO Change
         setTimeout(() => {
-            axios.post(`${constants.DOMAIN}/getRateList/${stockIndex}`)
+            axios.post(`${constants.DOMAIN}/getRateList/${stockIndex}`, { userToken })
                 .then(function (response) {
                     let ratesList = response.data;
                     for (let i = 0; i < ratesList.length; i++) {

@@ -31,7 +31,7 @@ export const loginUser = (userToken) => {
     return (dispatch) => {
         dispatch(login(userToken));
 
-        axios.post(`${constants.DOMAIN}/getFunds`, { userToken, })
+        axios.post(`${constants.DOMAIN}/getFunds`, { userToken })
             .then((response) => {
                 response = response.data;
                 console.log("getFunds", response);
@@ -61,7 +61,7 @@ export const loginUser = (userToken) => {
             })
             .catch(console.log);
 
-        axios.post(`${constants.DOMAIN}/getStocks`)
+        axios.post(`${constants.DOMAIN}/getStocks`, { userToken })
             .then(function (response) {
                 response = response.data;
                 console.log("getStocks", response);

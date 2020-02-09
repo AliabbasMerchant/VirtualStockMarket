@@ -13,6 +13,11 @@ const developer = require('./developer');
 
 const router = express.Router();
 
+router.use((req, res, next) => {
+    console.log(req.url, req.body);
+    next();
+})
+
 router.post('/login', (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -103,7 +108,7 @@ router.post('/register', (req, res) => {
     });
 });
 
-router.post('/getStocks', async (_req, res) => {
+router.post('/getStocks', auth.checkIfAuthenticatedAndGetUserId, async (_req, res) => {
     try {
         let rates = await stocksStorage.getStocks();
         for (let i = 0; i < rates.length; i++) {
@@ -116,17 +121,17 @@ router.post('/getStocks', async (_req, res) => {
 });
 
 router.post('/getFunds', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
-    assets.getUserFunds(req.body.userId, (err, funds) => {
-        if (err) {
-            res.json({
-                ok: false, message: err
-            });
-        } else {
+    assets.getUserFunds(req.body.userId)
+        .then(funds => {
             res.json({
                 ok: true, message: constants.defaultSuccessMessage, funds
             });
-        }
-    });
+        })
+        .catch(err => {
+            res.json({
+                ok: false, message: err
+            });
+        });
 });
 
 router.post('/getExecutedOrders', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
@@ -178,7 +183,7 @@ router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, re
             });
         }
     }
-    if(rate <= 0) {
+    if (rate <= 0) {
         return res.json({
             ok: false,
             message: "Rate cannot be negative"
@@ -192,7 +197,7 @@ router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, re
     });
 });
 
-router.post('/getRateList/:stockIndex', (req, res) => {
+router.post('/getRateList/:stockIndex', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
     const stockIndex = req.params.stockIndex;
     stocksStorage.getStockRateList(stockIndex)
         .then(rateList => {

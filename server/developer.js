@@ -37,10 +37,8 @@ router.post('/init', checkIfDeveloper, async (req, res) => {
     // set initial time
     // set buyingPeriod to true
     // set playing to true
-    const { safe } = req.body;
-    if (!safe) {
-        userModel.deleteMany({}).then().catch(console.log);
-    } else {
+    const { unsafe } = req.body;
+    if (!unsafe) {
         userModel.find({})
             .then(users => {
                 users.forEach(user => {
@@ -49,6 +47,8 @@ router.post('/init', checkIfDeveloper, async (req, res) => {
                 });
             })
             .catch(console.log);
+    } else {
+        userModel.deleteMany({}).then().catch(console.log);
     }
     await globalStorage.initialize();
     await globalStorage.setInitialTime(Date.now());
@@ -60,17 +60,9 @@ router.post('/init', checkIfDeveloper, async (req, res) => {
     return res.send('OK');
 });
 
-router.post('/startTrading', checkIfDeveloper, (req, res) => {
-    userModel.find({})
-        .then(users => {
-            users.forEach(user => {
-                user.executedOrders = [];
-                user.save();
-            });
-        })
-        .catch(console.log);
-    globalStorage.setPlayingStatus(true);
-    globalStorage.setBuyingPeriod(false);
+router.post('/startTrading', checkIfDeveloper, async (req, res) => {
+    await globalStorage.setPlayingStatus(true);
+    await globalStorage.setBuyingPeriod(false);
     stocks.forEach((stock, stockIndex) => {
         let initial_quantity = stock.initialQuantity;
         let current_left_quantity = 0;
@@ -78,7 +70,8 @@ router.post('/startTrading', checkIfDeveloper, (req, res) => {
             .then(q => { current_left_quantity = q; })
             .catch(console.log)
             .finally(() => {
-                stocksStorage.setStockQuantity(stockIndex, initial_quantity - current_left_quantity);
+                console.log(initial_quantity, current_left_quantity);
+                stocksStorage.setStockQuantity(stockIndex, Math.abs(initial_quantity - current_left_quantity));
             });
     })
     res.send('OK');
@@ -92,6 +85,22 @@ router.post('/break', checkIfDeveloper, (req, res) => {
 router.post('/restart', checkIfDeveloper, (req, res) => {
     globalStorage.setPlayingStatus(true);
     res.send('OK');
+});
+
+router.post('/getMemory', checkIfDeveloper, (req, res) => {
+    res.json({
+        ok: true,
+        message: "Not yet implemented"
+    })
+});
+
+router.post('/getDB', checkIfDeveloper, (req, res) => {
+    userModel.find({}, (err, users) => {
+        res.json({
+            err,
+            users
+        })
+    })
 });
 
 router.post('/leaderboard', checkIfDeveloper, (req, res) => {

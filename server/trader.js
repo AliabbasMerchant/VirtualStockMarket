@@ -13,6 +13,7 @@ function tryToTrade(orderId, quantity, rate, stockIndex, userId, callback) {
     if (quantity == 0) {
         return callback(false, "Quantity cannot be zero");
     }
+    let buying = quantity < 0;
     quantity = Math.abs(quantity);
     if (!(0 <= stockIndex < require('./stocks').length)) {
         return callback(false, "No such stock");
@@ -34,7 +35,7 @@ function tryToTrade(orderId, quantity, rate, stockIndex, userId, callback) {
                         if (!buying) {
                             callback(false, "Cannot sell in buying period");
                         } else {
-                            // buying, buy at price
+                            // buying in buying period: buy at price
                             okToTrade(orderId, quantity, rate, stockIndex, userId, buying, true);
                             callback(true, constants.defaultSuccessMessage);
                         }
@@ -46,20 +47,13 @@ function tryToTrade(orderId, quantity, rate, stockIndex, userId, callback) {
         });
 }
 
-function notifyUser(userId, event, payload) {
-    webSocketHandler.messageToUser(userId, event, payload);
-}
-
-function notifyUsers(event, payload) {
-    webSocketHandler.messageToEveryone(event, payload);
-}
-
 async function triggerOrderMatcher(stockIndex, userId) {
     // TODO Some message queue?
     orderMatcher(stockIndex, userId);
 }
 
 async function okToTrade(orderId, quantity, rate, stockIndex, userId, buying, buyFromMarket) {
+    console.log('okToTrade', orderId, quantity, rate, stockIndex, userId, buying, buyFromMarket)
     if (buyFromMarket) {
         // check funds and available stock quantity in market. If ok,trade it
         stocksStorage.getStockQuantity(stockIndex)
@@ -68,24 +62,24 @@ async function okToTrade(orderId, quantity, rate, stockIndex, userId, buying, bu
                     stocksStorage.getStockRate(stockIndex)
                         .then(stockRate => {
                             if (stockRate != null && rate == stockRate) {
-                                assets.getUserFunds(userId, (err, funds) => {
-                                    if (err) {
-                                        console.log(err)
-                                    } else {
+                                assets.getUserFunds(userId)
+                                    .then(funds => {
                                         if (funds >= (stockRate * quantity + assets.getBrokerageFees(stockRate, quantity))) {
                                             executeOrder(orderId, quantity * -1, rate, stockIndex, userId, false, true);
                                         } else {
-                                            notifyUser(userId, constants.eventOrderPlaced, { ok: false, message: "Insufficient Funds", orderId });
+                                            webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "Insufficient Funds", orderId });
                                         }
-                                    }
-                                });
+                                    })
+                                    .catch(err => {
+                                        console.log(err);
+                                    });
                             } else {
-                                notifyUser(userId, constants.eventOrderPlaced, { ok: false, message: "In this period, you can only buy at market rate", orderId });
+                                webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "In this period, you can only buy at market rate", orderId });
                             }
                         })
                         .catch(console.log);
                 } else {
-                    notifyUser(userId, constants.eventOrderPlaced, { ok: false, message: "Quantity too high", orderId });
+                    webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: "Quantity too high", orderId });
                 }
             })
             .catch(console.log);
@@ -102,10 +96,11 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
     // change stock quantity true/false
     // change rate true/false
     // notify user
+    console.log('executeOrder', orderId, quantity, rate, stockIndex, userId, changeRate, stockQuantityChange);
     userModel.findById(userId, (err, user) => {
         if (err) {
             console.log(err);
-            notifyUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
+            webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
         } else {
             let fundsChange = quantity * rate - assets.getBrokerageFees(rate, quantity);
             user.funds += fundsChange;
@@ -113,7 +108,7 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
             user.save((err, _user) => {
                 if (err) {
                     console.log(err);
-                    notifyUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
+                    webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
                 } else {
                     if (changeRate && quantity > 0) { // calc only on selling, otherwise we will end up at same price, for each pair of trades
                         // will never occur in buying period. Always occurs in trading time
@@ -125,7 +120,7 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
                                         let newRate = currentRate + (rateDiff * quantity / currentQuantity);
                                         if (newRate !== currentRate) {
                                             stocksStorage.setStockRate(stockIndex, newRate);
-                                            notifyUsers(constants.eventStockRateUpdate, { stockIndex, rate: newRate });
+                                            webSocketHandler.messageToEveryone(constants.eventStockRateUpdate, { stockIndex, rate: newRate });
                                         }
                                     })
                                     .catch(console.log("Danger", err)); // lets hope this never happens
@@ -133,9 +128,9 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
                             .catch(console.log("Danger", err)); // lets hope this never happens
                     }
                     if (stockQuantityChange && quantity < 0) { // will occur only in buying period
-                        stocksStorage.deductStockQuantity(stockIndex, quantity);
+                        stocksStorage.deductStockQuantity(stockIndex, Math.abs(quantity));
                     }
-                    notifyUser(userId, constants.eventOrderPlaced, { ok: true, message: constants.defaultSuccessMessage, orderId, quantity, fundsChange });
+                    webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: true, message: constants.defaultSuccessMessage, orderId, quantity, fundsChange });
                 }
             });
         }

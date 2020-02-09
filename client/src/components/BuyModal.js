@@ -30,15 +30,12 @@ function BuyModal(props) {
             let order = {
                 orderId: String(Math.round(Math.random() * 1000000)),
                 quantity: -1 * quantity,
-                rate,
+                rate: Number(rate),
                 stockIndex
             }
             axios.post(`${constants.DOMAIN}/placeOrder`, {
                 userToken: Cookies.get(constants.tokenCookieName),
-                orderId: order.orderId,
-                quantity: order.quantity,
-                rate,
-                stockIndex
+                ...order
             })
                 .then(function (response) {
                     response = response.data;

@@ -56,4 +56,7 @@ Default values of redis variables // It should ideally give an error, so need?
 Selling -> quantity: positive
 Buying -> quantity: negative
 
-TODO set parameter of sell and buy
+TODO set parameter of sell and buy?
+
+
+Cancel order needs refresh

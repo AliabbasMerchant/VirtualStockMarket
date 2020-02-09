@@ -29,7 +29,7 @@ const Login = ({ loggedIn, loginUser, connectSocket }) => {
                     window.M.toast({ html: response.message, classes: "toast-success" });
                     history.replace("/vsm");
                     loginUser(response.userToken);
-                    connectSocket(response.userToken);  // Done in PrivateRoute
+                    connectSocket(response.userToken);  // Done in PrivateRoute also
                 } else {
                     window.M.toast({ html: response.message, classes: "toast-error" });
                 }

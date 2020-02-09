@@ -5,21 +5,23 @@ const auth = require('../auth');
 IO = null;
 rejson_instance = null;
 
-function init(io, rejson_client) {
+function init(io, rejson_client, rejson_subs_client) {
     IO = io;
     rejson_instance = rejson_client;
-    instance.client.on("message", (channel, message) => {
+    rejson_subs_client.client.on("message", (channel, message) => {
         message = JSON.parse(message);
         if (channel == constants.internalEventNotifyUser) {
             const { userSocketId, eventName, data } = message;
+            console.log('notifyUser', userSocketId, eventName, data);
             IO.to(userSocketId).emit(eventName, data);
         } else if (channel == constants.internalEventNotifyEveryone) {
             const { eventName, data } = message;
+            console.log('notifyEveryone', eventName, data);
             IO.emit(eventName, data);
         }
     })
-    rejson_client.client.subscribe(constants.internalEventNotifyUser);
-    rejson_client.client.subscribe(constants.internalEventNotifyEveryone);
+    rejson_subs_client.client.subscribe(constants.internalEventNotifyUser);
+    rejson_subs_client.client.subscribe(constants.internalEventNotifyEveryone);
 
     io.on('connection', function (socket) {
         socket.on(constants.eventNewClient, (data) => {
@@ -30,7 +32,7 @@ function init(io, rejson_client) {
                     socket.disconnect();
                 } else {
                     socketStorage.setUserSocketId(userId, socket.id);
-                    messageToUser(userId, constants.eventStockRateUpdate, { stockIndex: 2, rate: 150 }); // For Testing
+                    // messageToUser(userId, constants.eventStockRateUpdate, { stockIndex: 2, rate: 150 }); // For Testing
                 }
             });
         });
@@ -50,6 +52,7 @@ function messageToUser(userId, eventName, data) {
 }
 
 function messageToEveryone(eventName, data) {
+    console.log('messageToEveryone', eventName, data);
     rejson_instance.client.publish(constants.internalEventNotifyEveryone, JSON.stringify({ eventName, data }));
 }
 

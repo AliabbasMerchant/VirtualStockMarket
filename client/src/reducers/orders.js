@@ -13,6 +13,7 @@ const ordersSlice = createSlice({
             });
         },
         deletePendingOrder(state, action) {
+            console.log('deletePendingOrder');
             const orderId = action.payload
             return Object.assign({}, state, {
                 pendingOrders: state.pendingOrders.filter(pendingOrder =>

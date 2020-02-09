@@ -29,7 +29,6 @@ export const connectSocket = (userToken) => {
         if (socket === null || !socket.connected) {
             socket = io(constants.WEBSOCKET_DOMAIN);
             socket.on('connect', () => {
-                console.log("connect socketId", socket.id);
                 dispatch(connect());
                 socket.emit(constants.eventNewClient, { userToken });
             });
@@ -47,7 +46,6 @@ export const connectSocket = (userToken) => {
                     dispatch(deletePendingOrder(data.orderId));
                     window.M.toast({ html: data.message, classes: "toast-error" });
                 }
-                console.log(constants.eventOrderPlaced, data);
             });
         }
     };
