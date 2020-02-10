@@ -4,6 +4,8 @@ const router = express.Router();
 
 const globalStorage = require('./fastStorage/globals');
 const stocksStorage = require('./fastStorage/stocks');
+const ordersStorage = require('./fastStorage/orders');
+const socketStorage = require('./fastStorage/sockets');
 const userModel = require('./models/users');
 const auth = require('./auth');
 
@@ -54,8 +56,8 @@ router.post('/init', checkIfDeveloper, async (req, res) => {
     await globalStorage.setInitialTime(Date.now());
     await globalStorage.setBuyingPeriod(true);
     await globalStorage.setPlayingStatus(true);
-    await require('./fastStorage/orders').initialize();
-    await require('./fastStorage/sockets').initialize();
+    await ordersStorage.initialize();
+    await socketStorage.initialize();
     await stocksStorage.initialize();
     return res.send('OK');
 });
@@ -88,10 +90,31 @@ router.post('/restart', checkIfDeveloper, (req, res) => {
 });
 
 router.post('/getMemory', checkIfDeveloper, (req, res) => {
-    res.json({
-        ok: true,
-        message: "Not yet implemented"
-    })
+    let result = {};
+    stocksStorage.getStocksRaw()
+        .then(stocks => result.stocks = stocks)
+        .catch(err => result.stocks = err)
+        .finally(() => {
+            ordersStorage.getPendingOrders()
+                .then(orders => result.orders = orders)
+                .catch(err => result.orders = err)
+                .finally(() => {
+                    socketStorage.getSockets()
+                        .then(sockets => result.sockets = sockets)
+                        .catch(err => result.sockets = err)
+                        .finally(() => {
+                            globalStorage.getGlobals()
+                                .then(globals => result.globals = globals)
+                                .catch(err => result.globals = err)
+                                .finally(() => {
+                                    res.json({
+                                        ok: true,
+                                        result
+                                    })
+                                });
+                        });
+                });
+        });
 });
 
 router.post('/getDB', checkIfDeveloper, (req, res) => {

@@ -1,9 +1,10 @@
 from config import DEVELOPER_TOKEN, URL
+from pprint import pprint
 
 import requests
 
 
-def init(unsafe=False):
+def init(unsafe='false'):
     r = requests.post(f"{URL}/dev/init",
                       {'userToken': DEVELOPER_TOKEN, 'unsafe': unsafe})
     print(r.text)
@@ -27,7 +28,7 @@ def restart():
 
 def getMemory():
     r = requests.post(f"{URL}/dev/getMemory", {'userToken': DEVELOPER_TOKEN})
-    print(r.text)
+    pprint(r.json())
 
 
 def getDB():
@@ -37,8 +38,8 @@ def getDB():
 
 if __name__ == "__main__":
     # init()
-    startTrading()
+    # startTrading()
     # take_a_break()
     # restart()
     getMemory()
-    getDB()
+    # getDB()

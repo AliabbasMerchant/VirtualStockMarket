@@ -15,17 +15,15 @@ Only 1 device per team
 
 
     Developer mode:
-For starting and pausing the event
-For changing constants?
-For displaying pending orders or charts***
+Done For starting and pausing the event
+Done For changing constants?
+Done For displaying pending orders or charts***
 
     Testing****************
 
-
 (If there is an error, remove Cancel button. Its okay)
 
-
-Authorization Header
+Not required, but recommended: Authorization Header
 Apache config
 
 
@@ -36,21 +34,15 @@ stockRates and changes // cache
 socketIds // only temporary
 
 permanent storage:
-users
-trade
+users and trades
 // stocks // No need as such
 
-Try to use PubSub for websockets
-
 Stable During Running:
-Stocks names and number
+Stocks names and count
 Secrets and all
 initialFunds
 
-Variable:
-
 Default values of redis variables // It should ideally give an error, so need?
-
 
 
 Selling -> quantity: positive
@@ -60,3 +52,4 @@ TODO set parameter of sell and buy?
 
 
 Cancel order needs refresh
+Chart

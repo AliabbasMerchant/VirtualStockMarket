@@ -55,6 +55,10 @@ async function setBuyingPeriod(start_period) {
     }
 }
 
+function getGlobals() {
+    return instance.get(GLOBALS_KEY, ".");
+}
+
 module.exports = {
     initGlobals,
     getInitialTime,
@@ -63,5 +67,6 @@ module.exports = {
     setPlayingStatus,
     getBuyingPeriod,
     setBuyingPeriod,
+    getGlobals,
     initialize
 }

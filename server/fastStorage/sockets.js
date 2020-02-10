@@ -31,9 +31,14 @@ async function setUserSocketId(userId, socketId) {
     }
 }
 
+function getSockets() {
+    return instance.get(SOCKETS_KEY, ".");
+}
+
 module.exports = {
     initSockets,
     getUserSocketId,
     setUserSocketId,
+    getSockets,
     initialize
 }

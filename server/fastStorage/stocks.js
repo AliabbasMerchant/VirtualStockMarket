@@ -134,6 +134,10 @@ function getStocks() {
     });
 }
 
+function getStocksRaw() {
+    return instance.get(STOCKS_KEY, ".");
+}
+
 module.exports = {
     setStockQuantity,
     deductStockQuantity,
@@ -142,6 +146,7 @@ module.exports = {
     getStockRate,
     getStocks,
     getStockRateList,
+    getStocksRaw,
     initStocks,
     initialize
 }
