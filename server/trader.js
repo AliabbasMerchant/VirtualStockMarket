@@ -117,7 +117,7 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
                                 stocksStorage.getStockQuantity(stockIndex)
                                     .then(currentQuantity => {
                                         let rateDiff = rate - currentRate;
-                                        let newRate = currentRate + (rateDiff * quantity / currentQuantity);
+                                        let newRate = Number(currentRate + (rateDiff * quantity / currentQuantity)).toFixed(2);
                                         if (newRate !== currentRate) {
                                             stocksStorage.setStockRate(stockIndex, newRate);
                                             webSocketHandler.messageToEveryone(constants.eventStockRateUpdate, { stockIndex, rate: newRate });
@@ -137,7 +137,7 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
     });
 }
 
-async function sufficientFundsAndHoldings(userId, quantity, rate) {
+async function sufficientFundsAndHoldings(userId, quantity, rate, stockIndex) {
     try {
         let funds = await assets.getUserFunds(userId);
         if (quantity < 0) { // buying
@@ -170,13 +170,13 @@ async function orderMatcher(stockIndex, userId) {
                 for (const order1 of orders) {
                     if (order1[param] == value) {
                         let ok;
-                        [ok, order1.quantity] = await sufficientFundsAndHoldings(order1.userId, order1.quantity, order1.rate);
+                        [ok, order1.quantity] = await sufficientFundsAndHoldings(order1.userId, order1.quantity, order1.rate, order1.stockIndex);
                         if (ok) {
                             for (const order2 of orders) {
                                 if (order2.rate === order1.rate && order2.stockIndex === order1.stockIndex && order1.userId !== order2.userId) {
                                     if (order1.quantity * order2.quantity < 0) { // one wants to sell and the other is buying
                                         let ok;
-                                        [ok, order2.quantity] = await sufficientFundsAndHoldings(order2.userId, order2.quantity, order2.rate);
+                                        [ok, order2.quantity] = await sufficientFundsAndHoldings(order2.userId, order2.quantity, order2.rate, order2.stockIndex);
                                         if (ok) {
                                             let quantity = Math.min(Math.abs(order1.quantity), Math.abs(order2.quantity));
                                             let quantity1 = quantity * Math.sign(order1.quantity);

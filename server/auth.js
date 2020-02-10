@@ -11,7 +11,10 @@ function createToken(payload) {
 
 // function handler(err, decoded);
 function verifyToken(token, handler) {
-    jwt.verify(token, process.env.JWT_SECRET, handler);
+    if(token)
+        jwt.verify(token, process.env.JWT_SECRET, handler);
+    else
+        handler("JWT cannot be null", null);
 }
 
 function createUserToken(userId) {

@@ -28,8 +28,8 @@ function SellModal(props) {
         } else {
             let order = {
                 orderId: String(Math.round(Math.random() * 1000000)),
-                quantity,
-                rate,
+                quantity: Number(quantity),
+                rate: Number(rate),
                 stockIndex: holding.stockIndex
             }
             axios.post(`${constants.DOMAIN}/placeOrder`, {

@@ -29,7 +29,7 @@ function BuyModal(props) {
         } else {
             let order = {
                 orderId: String(Math.round(Math.random() * 1000000)),
-                quantity: -1 * quantity,
+                quantity: -1 * Number(quantity),
                 rate: Number(rate),
                 stockIndex
             }

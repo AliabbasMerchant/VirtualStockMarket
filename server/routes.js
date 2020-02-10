@@ -173,7 +173,6 @@ router.post('/getPendingOrders', auth.checkIfAuthenticatedAndGetUserId, (req, re
 });
 
 router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, res) => {
-    // console.log("placeOrder", req.body);
     const { orderId, quantity, rate, stockIndex, userId } = req.body;
     if (!orderId || !quantity || !rate || !stockIndex) {
         if (stockIndex !== 0) {
@@ -189,12 +188,30 @@ router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, re
             message: "Rate cannot be negative"
         });
     }
-    trader.tryToTrade(orderId, quantity, rate, stockIndex, userId, (ok, message) => {
-        res.json({
-            ok,
-            message
+    stocksStorage.getStockRate(stockIndex)
+        .then(currentRate => {
+            let capValue = currentRate * constants.capFraction;
+            if (currentRate - capValue <= rate && rate <= currentRate + capValue) {
+                trader.tryToTrade(orderId, quantity, rate, stockIndex, userId, (ok, message) => {
+                    res.json({
+                        ok,
+                        message
+                    })
+                });
+            } else {
+                return res.json({
+                    ok: false,
+                    message: "Rate cannot be so different from current market rate"
+                });
+            }
         })
-    });
+        .catch(e => {
+            console.log(e);
+            return res.json({
+                ok: false,
+                message: constants.defaultErrorMessage
+            });
+        });
 });
 
 router.post('/getRateList/:stockIndex', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {

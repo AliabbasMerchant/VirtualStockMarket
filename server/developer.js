@@ -40,6 +40,7 @@ router.post('/init', checkIfDeveloper, async (req, res) => {
     // set buyingPeriod to true
     // set playing to true
     const { unsafe } = req.body;
+    console.log('Unsafe: ' + unsafe, Boolean(unsafe))
     if (!unsafe) {
         userModel.find({})
             .then(users => {

@@ -17,4 +17,6 @@ module.exports = {
 
     defaultSuccessMessage: "Success",
     defaultErrorMessage: "Sorry, there was an error processing your request",
+
+    capFraction: 0.2,
 }

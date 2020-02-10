@@ -74,7 +74,6 @@ function PendingOrderTableRow(props) {
     let order = props.order;
     let stock = props.stock;
     let cancelOrderFunction = props.cancelOrderFunction;
-    let deletePendingOrderFunction = props.deletePendingOrderFunction;
     try {
         return (
             <tr>
@@ -84,7 +83,7 @@ function PendingOrderTableRow(props) {
                 {order.quantity > 0 ?
                     <td>To Sell</td> :
                     <td>To Buy</td>}
-                <td><button className="btn waves-effect waves-light" onClick={() => cancelOrderFunction(order.orderId, order.stockIndex, deletePendingOrderFunction)}>CANCEL</button></td>
+                <td><button className="btn waves-effect waves-light" onClick={() => cancelOrderFunction(order.orderId)}>CANCEL</button></td>
             </tr>
         )
     } catch (e) {
@@ -125,11 +124,10 @@ function getHoldings(executedOrders) { // TODO Check
 }
 
 const Portfolio = ({ stocks, funds, executedOrders, pendingOrders, userToken, placeOrder, deletePendingOrder }) => {
-    function cancelOrder(orderId, stockIndex) {
+    function cancelOrder(orderId) {
         axios.post(`${constants.DOMAIN}/cancelOrder`, {
             userToken,
-            orderId,
-            stockIndex
+            orderId
         })
             .then(function (response) {
                 response = response.data;

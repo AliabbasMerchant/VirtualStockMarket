@@ -1,22 +1,22 @@
     General
 250+ users
-No need to refresh (redux? Yes)
+        No need to refresh (redux? Yes)
 Should not crash
-Only integers (Round off)
+        Only integers (Round off) [I dont think we need this currently]
 Restrict number of transactions b/w users
 PWA
-Brokerage in % of rate (0.1%)
-Upper Cap and Lower Cap (20%)
-Starting Distribution
-    Redis
+        Brokerage in % of rate (0.1%)
+        Upper Cap and Lower Cap (20%)
+        Starting Distribution
+        Redis
 Message Queue?
 Chart***
-Only 1 device per team
+        Only 1 device per team
 
 
     Developer mode:
-Done For starting and pausing the event
-Done For changing constants?
+        Done For starting and pausing the event
+        Done For changing constants?
 Done For displaying pending orders or charts***
 
     Testing****************
@@ -42,7 +42,7 @@ Stocks names and count
 Secrets and all
 initialFunds
 
-Default values of redis variables // It should ideally give an error, so need?
+Default values of redis variables // It should ideally give an error, so no need?
 
 
 Selling -> quantity: positive
@@ -51,6 +51,4 @@ Buying -> quantity: negative
 TODO set parameter of sell and buy?
 
 
-Cancel order needs refresh
 Chart
-Update order overwrites quantity

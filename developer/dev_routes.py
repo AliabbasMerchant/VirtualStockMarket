@@ -4,9 +4,12 @@ from pprint import pprint
 import requests
 
 
-def init(unsafe='false'):
-    r = requests.post(f"{URL}/dev/init",
-                      {'userToken': DEVELOPER_TOKEN, 'unsafe': unsafe})
+def init(unsafe=False):
+    if unsafe:
+        r = requests.post(f"{URL}/dev/init", {'userToken': DEVELOPER_TOKEN, 'unsafe': 'unsafe'})
+        # This is because JS cannot understand 'False' as boolean false. It takes it as a string, hence considering it true
+    else:
+        r = requests.post(f"{URL}/dev/init", {'userToken': DEVELOPER_TOKEN})
     print(r.text)
 
 
@@ -34,12 +37,3 @@ def getMemory():
 def getDB():
     r = requests.post(f"{URL}/dev/getDB", {'userToken': DEVELOPER_TOKEN})
     pprint(r.text)
-
-
-if __name__ == "__main__":
-    # init()
-    # startTrading()
-    # take_a_break()
-    # restart()
-    getMemory()
-    getDB()

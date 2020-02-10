@@ -40,7 +40,7 @@ export const connectSocket = (userToken) => {
                 console.log(constants.eventOrderPlaced, data);
                 if (data.ok) {
                     window.M.toast({ html: "Pending Order Successfully Executed", classes: "toast-success" });
-                    dispatch(orderIsExecuted({ orderId: Number(data.orderId), quantity: Number(data.quantity) }));
+                    dispatch(orderIsExecuted({ orderId: data.orderId, quantity: Number(data.quantity) }));
                     dispatch(fundsChange(Number(data.fundsChange)));
                 } else {
                     dispatch(deletePendingOrder(data.orderId));
