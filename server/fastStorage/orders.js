@@ -90,6 +90,24 @@ function getPendingOrdersOfUser(userId) {
     });
 }
 
+function getPendingOrdersList(userId) {
+    return new Promise((resolve, reject) => {
+        instance.get(ORDERS_KEY, '.')
+            .then(orders => {
+                let res = [];
+                Object.keys(orders).forEach(orderId => {
+                    let order = orders[orderId];
+                    order.orderId = orderId;
+                    res.push(order);
+                });
+                resolve(res);
+            })
+            .catch(err => {
+                reject(err);
+            });
+    });
+}
+
 function getPendingOrders() {
     return instance.get(ORDERS_KEY, '.');
 }
@@ -102,5 +120,6 @@ module.exports = {
     pendingOrderExecuted,
     getPendingOrdersOfStock,
     getPendingOrders,
+    getPendingOrdersList,
     initialize
 }

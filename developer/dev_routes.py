@@ -33,7 +33,7 @@ def getMemory():
 
 def getDB():
     r = requests.post(f"{URL}/dev/getDB", {'userToken': DEVELOPER_TOKEN})
-    print(r.text)
+    pprint(r.text)
 
 
 if __name__ == "__main__":
@@ -42,4 +42,4 @@ if __name__ == "__main__":
     # take_a_break()
     # restart()
     getMemory()
-    # getDB()
+    getDB()

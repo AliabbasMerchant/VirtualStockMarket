@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie';
 import axios from 'axios';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -6,24 +5,6 @@ import { connect } from 'react-redux';
 import SellModal from './SellModal';
 import constants from '../constants';
 import { placeOrder, deletePendingOrder } from '../reducers/orders';
-
-function cancelOrder(orderId, stockIndex, deletePendingOrderFunction) {
-    axios.post(`${constants.DOMAIN}/cancelOrder`, {
-        userToken: Cookies.get(constants.tokenCookieName),
-        orderId,
-        stockIndex
-    })
-        .then(function (response) {
-            response = response.data;
-            if (response.ok) {
-                window.M.toast({ html: "Pending Order Successfully Cancelled", classes: "toast-success" });
-                deletePendingOrderFunction(orderId);
-            } else {
-                window.M.toast({ html: response.message, classes: "toast-error" });
-            }
-        })
-        .catch(console.log);
-}
 
 function HoldingsTableHeader() {
     return <tr>
@@ -92,17 +73,18 @@ function PendingOrderTableHeader() {
 function PendingOrderTableRow(props) {
     let order = props.order;
     let stock = props.stock;
+    let cancelOrderFunction = props.cancelOrderFunction;
     let deletePendingOrderFunction = props.deletePendingOrderFunction;
     try {
         return (
             <tr>
                 <td>{stock.scrip}</td>
                 <td>{Math.abs(order.quantity)}</td>
-                <td>{Number((order.rate)).toFixed(2)}</td>
+                <td>{Number(order.rate).toFixed(2)}</td>
                 {order.quantity > 0 ?
                     <td>To Sell</td> :
                     <td>To Buy</td>}
-                <td><button className="btn waves-effect waves-light" onClick={() => cancelOrder(order.orderId, order.stockIndex, deletePendingOrderFunction)}>CANCEL</button></td>
+                <td><button className="btn waves-effect waves-light" onClick={() => cancelOrderFunction(order.orderId, order.stockIndex, deletePendingOrderFunction)}>CANCEL</button></td>
             </tr>
         )
     } catch (e) {
@@ -110,10 +92,10 @@ function PendingOrderTableRow(props) {
     }
 }
 
-function getHoldings(executedOrders) {
+function getHoldings(executedOrders) { // TODO Check
     let holdings = {}; // stockIndex -> holding
     executedOrders.forEach(order => {
-        if (order != null) {
+        try {
             let stockIndex = order.stockIndex;
             if (!holdings[stockIndex]) {
                 holdings[stockIndex] = { stockIndex, rate: 0, quantity: 0 }
@@ -126,6 +108,8 @@ function getHoldings(executedOrders) {
                 holding.rate = 0;
             }
             holding.quantity = quantity;
+        } catch (e) {
+
         }
     });
     let holdingsArray = [];
@@ -140,13 +124,31 @@ function getHoldings(executedOrders) {
     return holdingsArray;
 }
 
-const Portfolio = ({ stocks, funds, executedOrders, pendingOrders }) => {
+const Portfolio = ({ stocks, funds, executedOrders, pendingOrders, userToken, placeOrder, deletePendingOrder }) => {
+    function cancelOrder(orderId, stockIndex) {
+        axios.post(`${constants.DOMAIN}/cancelOrder`, {
+            userToken,
+            orderId,
+            stockIndex
+        })
+            .then(function (response) {
+                response = response.data;
+                if (response.ok) {
+                    window.M.toast({ html: "Pending Order Successfully Cancelled", classes: "toast-success" });
+                    deletePendingOrder(orderId);
+                } else {
+                    window.M.toast({ html: response.message, classes: "toast-error" });
+                }
+            })
+            .catch(console.log);
+    }
+
     return (
         <div className="mx-auto p-3 center container">
             <div className="row">
                 <div className="mx-auto col s12 md10 lg8">
                     <div>
-                        <h3>Funds Remaining: Rs. {funds}</h3>
+                        <h3>Funds Remaining: Rs. {Number(funds).toFixed(2)}</h3>
                         <hr />
                         <h4>Holdings</h4>
                         {getHoldings(executedOrders).length ?
@@ -154,8 +156,11 @@ const Portfolio = ({ stocks, funds, executedOrders, pendingOrders }) => {
                                 <tbody>
                                     <HoldingsTableHeader />
                                     {getHoldings(executedOrders).map((holding, index) => {
-                                        if (stocks[holding.stockIndex])
+                                        try {
                                             return <HoldingsTableRow key={index} stock={stocks[holding.stockIndex]} holding={holding} sellOrderPlacedFunction={placeOrder} />
+                                        } catch (e) {
+                                            return null;
+                                        }
                                     })}
                                 </tbody>
                             </table> :
@@ -167,8 +172,11 @@ const Portfolio = ({ stocks, funds, executedOrders, pendingOrders }) => {
                                 <tbody>
                                     <PendingOrderTableHeader />
                                     {pendingOrders.map((order, index) => {
-                                        if (stocks[order.stockIndex])
-                                            return <PendingOrderTableRow key={index} stock={stocks[order.stockIndex]} order={order} deletePendingOrderFunction={deletePendingOrder} />
+                                        try {
+                                            return <PendingOrderTableRow key={index} stock={stocks[order.stockIndex]} order={order} cancelOrderFunction={cancelOrder} />
+                                        } catch (e) {
+                                            return null;
+                                        }
                                     })}
                                 </tbody>
                             </table> :
@@ -180,8 +188,11 @@ const Portfolio = ({ stocks, funds, executedOrders, pendingOrders }) => {
                                 <tbody>
                                     <ExecutedOrderTableHeader />
                                     {executedOrders.map((order, index) => {
-                                        if (stocks[order.stockIndex])
+                                        try {
                                             return <ExecutedOrderTableRow key={index} stock={stocks[order.stockIndex]} order={order} />
+                                        } catch (e) {
+                                            return null;
+                                        }
                                     })}
                                 </tbody>
                             </table> :
@@ -198,13 +209,11 @@ const mapStateToProps = (state) => ({
     stocks: state.stocks,
     funds: state.funds,
     executedOrders: state.orders.executedOrders,
-    pendingOrders: state.orders.pendingOrders
+    pendingOrders: state.orders.pendingOrders,
+    userToken: state.auth
 });
 
-const mapDispatchToProps = {
-    placeOrder,
-    deletePendingOrder
-};
+const mapDispatchToProps = { placeOrder, deletePendingOrder };
 
 export default connect(
     mapStateToProps,

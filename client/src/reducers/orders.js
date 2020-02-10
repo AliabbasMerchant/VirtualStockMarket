@@ -23,14 +23,16 @@ const ordersSlice = createSlice({
         },
         orderIsExecuted(state, action) {
             const { orderId, quantity } = action.payload;
+            console.log(orderId, quantity);
             let newPendingOrders = [];
             let executedOrder;
             for (let i = 0; i < state.pendingOrders.length; i++) {
-                let temp = state.pendingOrders[i];
-                if (temp.orderId === orderId) {
+                let temp = {...state.pendingOrders[i]};
+                console.log(temp);
+                if (temp.orderId == orderId) {
                     executedOrder = { ...temp, quantity };
                     temp.quantity -= quantity;
-                    if (temp.quantity !== 0) {
+                    if (temp.quantity != 0) {
                         newPendingOrders.concat(temp);
                     }
                 } else {

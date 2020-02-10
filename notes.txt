@@ -53,3 +53,4 @@ TODO set parameter of sell and buy?
 
 Cancel order needs refresh
 Chart
+Update order overwrites quantity

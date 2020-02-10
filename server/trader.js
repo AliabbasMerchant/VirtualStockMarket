@@ -162,10 +162,10 @@ async function orderMatcher(stockIndex, userId) {
     do {
         someOrderHasExecuted = false;
         try {
-            let orders = await pendingOrdersStorage.getPendingOrders();
+            let orders = await pendingOrdersStorage.getPendingOrdersList();
             console.log("ordersPool", orders);
-
-            for (const param in { stockIndex, userId }) {
+            const matcher = { stockIndex, userId }
+            for (const param in matcher) {
                 const value = matcher[param];
                 for (const order1 of orders) {
                     if (order1[param] == value) {
