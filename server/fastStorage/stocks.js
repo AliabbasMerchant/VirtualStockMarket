@@ -1,4 +1,3 @@
-const globals = require('./globals');
 const stocksData = require('../stocks');
 
 const STOCKS_KEY = 'vsm_stocks';
@@ -19,14 +18,7 @@ async function initialize() {
         await instance.set(STOCKS_KEY, '.', {});
         for (const stockIndex in stocksData) {
             const stock = stocksData[stockIndex];
-            let newStock = { rate: stock.rate, quantity: stock.initialQuantity, rateList: [] };
-            let time = Date.now();
-            try {
-                time = await globals.getInitialTime();
-            } catch (err) {
-                console.log(err);
-            }
-            newStock.rateList.push({ rate: stock.rate, timestamp: time });
+            let newStock = { rate: stock.rate, quantity: stock.initialQuantity, ratesObject: { [Date.now()]: stock.rate } };
             instance.set(STOCKS_KEY, stockIndex, newStock)
                 .then()
                 .catch(console.log);
@@ -93,21 +85,21 @@ async function setStockRate(stockIndex, rate) {
         let res = await instance.get(STOCKS_KEY, stockIndex);
         await instance.del(STOCKS_KEY, stockIndex);
         res.rate = rate;
-        res.rateList.push({ rate, timestamp: Date.now() });
-        await instance.set(STOCKS_KEY, res);
+        res.ratesObject[[Date.now()]] = rate;
+        await instance.set(STOCKS_KEY, stockIndex, res);
     } catch (error) {
         console.log(error);
     }
 }
 
-function getStockRateList(stockIndex) {
+function getStockRatesObject(stockIndex) {
     return new Promise((resolve, reject) => {
         instance.get(STOCKS_KEY, stockIndex)
             .then(res => {
-                if (!res.rateList) {
+                if (!res.ratesObject) {
                     reject("No such stock");
                 } else {
-                    resolve(res.rateList);
+                    resolve(res.ratesObject);
                 }
             })
             .catch(err => {
@@ -145,7 +137,7 @@ module.exports = {
     setStockRate,
     getStockRate,
     getStocks,
-    getStockRateList,
+    getStockRatesObject,
     getStocksRaw,
     initStocks,
     initialize

@@ -2,14 +2,13 @@ const assets = require('./assets');
 const stocksStorage = require('./fastStorage/stocks');
 const pendingOrdersStorage = require('./fastStorage/orders');
 const globalStorage = require('./fastStorage/globals');
-const webSocketHandler = require('./webSocket/webSocket');
+const webSocketHandler = require('./webSocket');
 const constants = require('./constants');
 const userModel = require('./models/users');
 
 // callback(ok, message)
 function tryToTrade(orderId, quantity, rate, stockIndex, userId, callback) {
-    const currentTime = Date.now();
-    console.log("gotOrder", orderId, quantity, rate, stockIndex, userId, currentTime);
+    console.log("gotOrder", orderId, quantity, rate, stockIndex, userId);
     if (quantity == 0) {
         return callback(false, "Quantity cannot be zero");
     }
@@ -104,7 +103,8 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
         } else {
             let fundsChange = quantity * rate - assets.getBrokerageFees(rate, quantity);
             user.funds += fundsChange;
-            user.executedOrders.push({ orderId, quantity, rate, stockIndex, tradeTime: Date.now() });
+            let tradeTime = Date.now();
+            user.executedOrders.push({ orderId, quantity, rate, stockIndex, tradeTime });
             user.save((err, _user) => {
                 if (err) {
                     console.log(err);
@@ -117,15 +117,21 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
                                 stocksStorage.getStockQuantity(stockIndex)
                                     .then(currentQuantity => {
                                         let rateDiff = rate - currentRate;
-                                        let newRate = Number(currentRate + (rateDiff * quantity / currentQuantity)).toFixed(2);
+                                        let newRate = Number(Number(currentRate + (rateDiff * quantity / currentQuantity)).toFixed(2));
                                         if (newRate !== currentRate) {
                                             stocksStorage.setStockRate(stockIndex, newRate);
-                                            webSocketHandler.messageToEveryone(constants.eventStockRateUpdate, { stockIndex, rate: newRate });
+                                            let initialTime = Date.now() - 1000 * 60 * 60 * 2; // 2 hours ago (Some random safe time)
+                                            globalStorage.getInitialTime()
+                                            .then(time => initialTime = time)
+                                            .catch(console.log) // would be quite problematic
+                                            .finally(() => {
+                                                webSocketHandler.messageToEveryone(constants.eventStockRateUpdate, { stockIndex, rate: newRate, time: tradeTime - initialTime });
+                                            });
                                         }
                                     })
-                                    .catch(console.log("Danger", err)); // lets hope this never happens
+                                    .catch((err) => console.log("Danger", err)); // lets hope this never happens
                             })
-                            .catch(console.log("Danger", err)); // lets hope this never happens
+                            .catch((err) => console.log("Danger", err)); // lets hope this never happens
                     }
                     if (stockQuantityChange && quantity < 0) { // will occur only in buying period
                         stocksStorage.deductStockQuantity(stockIndex, Math.abs(quantity));

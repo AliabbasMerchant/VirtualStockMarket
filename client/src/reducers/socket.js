@@ -34,7 +34,7 @@ export const connectSocket = (userToken) => {
             });
             socket.on(constants.eventStockRateUpdate, (data) => {
                 console.log(constants.eventStockRateUpdate, data);
-                dispatch(updateStockRate({ id: Number(data.stockIndex), newRate: Number(data.rate) }));
+                dispatch(updateStockRate({ stockIndex: Number(data.stockIndex), newRate: Number(data.rate), time: data.time }));
             });
             socket.on(constants.eventOrderPlaced, (data) => {
                 console.log(constants.eventOrderPlaced, data);

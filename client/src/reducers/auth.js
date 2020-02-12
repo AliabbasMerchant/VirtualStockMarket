@@ -7,7 +7,8 @@ import { setFunds, resetFunds } from './funds';
 import { setPendingOrders, setExecutedOrders, resetOrders } from './orders';
 import { setStocks, resetStocks } from './stocks';
 
-let initialState = Cookies.get(constants.tokenCookieName);
+let token = Cookies.get(constants.tokenCookieName);
+let initialState = token ? token : null;
 
 const authSlice = createSlice({
     name: 'auth',
@@ -65,10 +66,20 @@ export const loginUser = (userToken) => {
             .then(function (response) {
                 response = response.data;
                 console.log("getStocks", response);
-                for (let i = 0; i < response.length; i++) {
-                    response[i].prevRate = response[i].rate;
+                if (response.ok) {
+                    let stocks = response.stocks;
+                    for (let i = 0; i < stocks.length; i++) {
+                        let times = Object.keys(stocks[i].ratesObject);
+                        if(times.length > 1) {
+                            times.sort();
+                            // last one is current rate, so we need the 2nd last one
+                            stocks[i].prevRate = stocks[i].ratesObject[times[times.length - 2]];
+                        } else {
+                            stocks[i].prevRate = stocks[i].rate;
+                        }
+                    }
+                    dispatch(setStocks(stocks));
                 }
-                dispatch(setStocks(response));
             })
             .catch(console.log);
     };

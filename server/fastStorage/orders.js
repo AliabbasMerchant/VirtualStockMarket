@@ -48,7 +48,7 @@ async function addPendingOrder(orderId, quantity, rate, stockIndex, userId) {
 
 async function cancelPendingOrder(orderId) {
     try {
-        await instance.del(ORDERS_KEY, orderId);
+        return await instance.del(ORDERS_KEY, orderId);
     } catch (error) {
         console.log(error);
     }
@@ -90,7 +90,7 @@ function getPendingOrdersOfUser(userId) {
     });
 }
 
-function getPendingOrdersList(userId) {
+function getPendingOrdersList() {
     return new Promise((resolve, reject) => {
         instance.get(ORDERS_KEY, '.')
             .then(orders => {

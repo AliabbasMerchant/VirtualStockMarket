@@ -69,7 +69,7 @@ const rejson_subs_client = new Rejson();
 rejson_subs_client.connect()
     .then((_) => {
         console.log('Orders: Redis subscriber client connected');
-        require('./webSocket/webSocket').init(io, rejson_client, rejson_subs_client);
+        require('./webSocket').init(io, rejson_client, rejson_subs_client);
     })
     .catch(console.log);
 rejson_subs_client.on('error', function (err) {

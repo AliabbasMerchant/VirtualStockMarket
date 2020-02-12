@@ -21,7 +21,7 @@ stock = {
     "name": "Mno Company",
     "scrip": "String",
     "rate": "float",
-    "prevRate": "float"
+    "rates": {"time":"rate"}
 }
 
 // Buying -> quantity is -ve

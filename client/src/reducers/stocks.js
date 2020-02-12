@@ -6,12 +6,17 @@ const stocksSlice = createSlice({
     name: 'stocks',
     initialState,
     reducers: {
-        updateStockRate: (state, action) => { // TODO BREAKS!
-            const { id, newRate } = action.payload;
-            let s = {...state[id]};
-            s.prevRate = s.rate;
-            s.rate = newRate;
-            return [...state.slice(0, id), s, ...state.slice(id + 1)];
+        updateStockRate: (state, action) => {
+            const { stockIndex, newRate, time } = action.payload;
+            console.log(stockIndex, newRate, time)
+            let s = { ...state[stockIndex] };
+            if (newRate !== s.rate) {
+                s.prevRate = s.rate;
+                s.rate = newRate;
+            }
+            s.ratesObject = {...s.ratesObject, [time]: newRate };
+            let temp = [...state.slice(0, stockIndex), s, ...state.slice(stockIndex + 1)];
+            return temp;
         },
         setStocks(_state, action) {
             return action.payload;

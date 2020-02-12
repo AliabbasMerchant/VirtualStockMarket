@@ -1,13 +1,11 @@
-import Cookies from 'js-cookie';
 import axios from 'axios';
 import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
+
+import { placeOrder, deletePendingOrder } from '../reducers/orders';
 import constants from '../constants';
 
-function SellModal(props) {
-    let stock = props.stock;
-    let holding = props.holding;
-    let keepId = props.keepId;
-    let sellOrderPlacedFunction = props.sellOrderPlacedFunction;
+const SellModal = ({ stock, holding, keepId, placeOrder, userToken, deletePendingOrder }) => {
     let sellQuantityInputRef = React.createRef();
     let sellRateInputRef = React.createRef();
 
@@ -32,20 +30,25 @@ function SellModal(props) {
                 rate: Number(rate),
                 stockIndex: holding.stockIndex
             }
+            placeOrder(order);
             axios.post(`${constants.DOMAIN}/placeOrder`, {
-                userToken: Cookies.get(constants.tokenCookieName),
+                userToken,
                 ...order
             })
                 .then(function (response) {
                     response = response.data;
                     if (response.ok) {
                         window.M.toast({ html: "Pending Order Successfully Placed", classes: "toast-success" });
-                        sellOrderPlacedFunction(order);
+                        // placeOrder(order);
                     } else {
                         window.M.toast({ html: response.message, classes: "toast-error" });
+                        deletePendingOrder(order.orderId);
                     }
                 })
-                .catch(console.log);
+                .catch(err => {
+                    console.log(err);
+                    deletePendingOrder(order.orderId);
+                });
         }
     }
     return (
@@ -72,4 +75,13 @@ function SellModal(props) {
     );
 }
 
-export default SellModal;
+const mapStateToProps = (state) => ({
+    userToken: state.auth
+});
+
+const mapDispatchToProps = { placeOrder, deletePendingOrder };
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(SellModal);

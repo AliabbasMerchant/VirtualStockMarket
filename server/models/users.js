@@ -11,7 +11,7 @@ const userSchema = mongoose.Schema({
         orderId: { type: String, required: true },
         quantity: { type: Number, required: true },
         rate: { type: Number, required: true },
-        stockIndex: { type: Number, required: true }, // TODO Shift to DB?
+        stockIndex: { type: Number, required: true },
         tradeTime: { type: Date, default: Date.now },
         // changeRate: { type: Boolean, required: true, default: true }
     }],

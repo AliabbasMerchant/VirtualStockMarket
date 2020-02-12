@@ -1,14 +1,11 @@
-import Cookies from 'js-cookie';
 import axios from 'axios';
 import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
 
+import { placeOrder, deletePendingOrder } from '../reducers/orders';
 import constants from '../constants';
 
-function BuyModal(props) {
-    let stock = props.stock;
-    let stockIndex = props.stockIndex;
-    let keepId = props.keepId;
-    let orderPlacedFunction = props.orderPlacedFunction;
+const BuyModal = ({ stock, stockIndex, keepId, placeOrder, userToken, deletePendingOrder }) => {
     let buyQuantityInputRef = React.createRef();
     let buyRateInputRef = React.createRef();
 
@@ -33,20 +30,25 @@ function BuyModal(props) {
                 rate: Number(rate),
                 stockIndex
             }
+            placeOrder(order);
             axios.post(`${constants.DOMAIN}/placeOrder`, {
-                userToken: Cookies.get(constants.tokenCookieName),
+                userToken,
                 ...order
             })
                 .then(function (response) {
                     response = response.data;
                     if (response.ok) {
                         window.M.toast({ html: "Pending Order Successfully Placed", classes: "toast-success" });
-                        orderPlacedFunction(order);
+                        // placeOrder(order);
                     } else {
                         window.M.toast({ html: response.message, classes: "toast-error" });
+                        deletePendingOrder(order.orderId);
                     }
                 })
-                .catch(console.log);
+                .catch(err => {
+                    console.log(err);
+                    deletePendingOrder(order.orderId);
+                });
         }
     }
     return (
@@ -74,4 +76,13 @@ function BuyModal(props) {
     );
 }
 
-export default BuyModal;
+const mapStateToProps = (state) => ({
+    userToken: state.auth
+});
+
+const mapDispatchToProps = { placeOrder, deletePendingOrder };
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(BuyModal);

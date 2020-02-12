@@ -25,7 +25,7 @@ const ordersSlice = createSlice({
             let newPendingOrders = [];
             let executedOrder;
             for (let i = 0; i < state.pendingOrders.length; i++) {
-                let temp = {...state.pendingOrders[i]};
+                let temp = { ...state.pendingOrders[i] };
                 if (temp.orderId === orderId) {
                     executedOrder = { ...temp, quantity };
                     temp.quantity -= quantity;

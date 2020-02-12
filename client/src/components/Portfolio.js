@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 import SellModal from './SellModal';
 import constants from '../constants';
-import { placeOrder, deletePendingOrder } from '../reducers/orders';
+import { deletePendingOrder } from '../reducers/orders';
 
 function HoldingsTableHeader() {
     return <tr>
@@ -19,7 +19,6 @@ function HoldingsTableHeader() {
 function HoldingsTableRow(props) {
     let holding = props.holding;
     let stock = props.stock;
-    let sellOrderPlacedFunction = props.sellOrderPlacedFunction;
     try {
         return <tr>
             <td>{stock.scrip}</td>
@@ -28,7 +27,7 @@ function HoldingsTableRow(props) {
             <td>{Number((stock.rate)).toFixed(2)}</td>
             <td>{Number((stock.rate - holding.rate) * Math.abs(holding.quantity)).toFixed(2)}</td>
             <td><a className="btn waves-effect waves-light modal-trigger" href={"#sellModal" + holding.stockIndex}>SELL</a>
-                <SellModal stock={stock} holding={holding} sellOrderPlacedFunction={sellOrderPlacedFunction} keepId={"sellModal" + holding.stockIndex} />
+                <SellModal stock={stock} holding={holding} keepId={"sellModal" + holding.stockIndex} />
             </td>
         </tr>
     } catch (e) {
@@ -91,7 +90,7 @@ function PendingOrderTableRow(props) {
     }
 }
 
-function getHoldings(executedOrders) { // TODO Check
+function getHoldings(executedOrders) {
     let holdings = {}; // stockIndex -> holding
     executedOrders.forEach(order => {
         try {
@@ -123,7 +122,7 @@ function getHoldings(executedOrders) { // TODO Check
     return holdingsArray;
 }
 
-const Portfolio = ({ stocks, funds, executedOrders, pendingOrders, userToken, placeOrder, deletePendingOrder }) => {
+const Portfolio = ({ stocks, funds, executedOrders, pendingOrders, userToken, deletePendingOrder }) => {
     function cancelOrder(orderId) {
         axios.post(`${constants.DOMAIN}/cancelOrder`, {
             userToken,
@@ -149,13 +148,13 @@ const Portfolio = ({ stocks, funds, executedOrders, pendingOrders, userToken, pl
                         <h3>Funds Remaining: Rs. {Number(funds).toFixed(2)}</h3>
                         <hr />
                         <h4>Holdings</h4>
-                        {getHoldings(executedOrders).length ?
+                        {getHoldings(executedOrders) ?
                             <table className="row">
                                 <tbody>
                                     <HoldingsTableHeader />
                                     {getHoldings(executedOrders).map((holding, index) => {
                                         try {
-                                            return <HoldingsTableRow key={index} stock={stocks[holding.stockIndex]} holding={holding} sellOrderPlacedFunction={placeOrder} />
+                                            return <HoldingsTableRow key={index} stock={stocks[holding.stockIndex]} holding={holding} />
                                         } catch (e) {
                                             return null;
                                         }
@@ -211,7 +210,7 @@ const mapStateToProps = (state) => ({
     userToken: state.auth
 });
 
-const mapDispatchToProps = { placeOrder, deletePendingOrder };
+const mapDispatchToProps = { deletePendingOrder };
 
 export default connect(
     mapStateToProps,

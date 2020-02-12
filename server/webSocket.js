@@ -1,6 +1,6 @@
-const socketStorage = require('../fastStorage/sockets');
-const constants = require('../constants');
-const auth = require('../auth');
+const socketStorage = require('./fastStorage/sockets');
+const constants = require('./constants');
+const auth = require('./auth');
 
 IO = null;
 rejson_instance = null;
@@ -26,15 +26,25 @@ function init(io, rejson_client, rejson_subs_client) {
     io.on('connection', function (socket) {
         socket.on(constants.eventNewClient, (data) => {
             console.log(constants.eventNewClient, data);
-            auth.getUserIdFromToken(data.userToken, (err, userId) => {
-                if (err) {
-                    console.log(err);
-                    socket.disconnect();
-                } else {
-                    socketStorage.setUserSocketId(userId, socket.id);
-                    // messageToUser(userId, constants.eventStockRateUpdate, { stockIndex: 2, rate: 150 }); // For Testing
-                }
-            });
+            if (data.userToken) {
+                auth.getUserIdFromToken(data.userToken, (err, userId) => {
+                    if (err) {
+                        console.log(err);
+                        socket.disconnect();
+                    } else {
+                        socketStorage.setUserSocketId(userId, socket.id);
+                        /*
+                        // Testing
+                        for (let index = 0; index < 10; index++) {
+                            setTimeout(() => {
+                                if(index != 0)
+                                    messageToUser(userId, constants.eventStockRateUpdate, {stockIndex:4, rate: index*1+910, time: index*20000});
+                            }, 2000*index);
+                        }
+                        */
+                    }
+                });
+            }
         });
     });
 }
@@ -52,7 +62,6 @@ function messageToUser(userId, eventName, data) {
 }
 
 function messageToEveryone(eventName, data) {
-    console.log('messageToEveryone', eventName, data);
     rejson_instance.client.publish(constants.internalEventNotifyEveryone, JSON.stringify({ eventName, data }));
 }
 

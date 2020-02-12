@@ -8,7 +8,7 @@ const ordersStorage = require('./fastStorage/orders');
 const socketStorage = require('./fastStorage/sockets');
 const userModel = require('./models/users');
 const auth = require('./auth');
-
+const constants = require('./constants');
 const stocks = require('./stocks');
 
 function checkIfDeveloper(req, res, next) {
@@ -40,12 +40,12 @@ router.post('/init', checkIfDeveloper, async (req, res) => {
     // set buyingPeriod to true
     // set playing to true
     const { unsafe } = req.body;
-    console.log('Unsafe: ' + unsafe, Boolean(unsafe))
     if (!unsafe) {
         userModel.find({})
             .then(users => {
                 users.forEach(user => {
                     user.executedOrders = [];
+                    user.funds = constants.initialFunds;
                     user.save();
                 });
             })

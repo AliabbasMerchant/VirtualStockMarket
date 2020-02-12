@@ -36,4 +36,4 @@ def getMemory():
 
 def getDB():
     r = requests.post(f"{URL}/dev/getDB", {'userToken': DEVELOPER_TOKEN})
-    pprint(r.text)
+    pprint(r.json())

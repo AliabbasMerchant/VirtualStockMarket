@@ -52,3 +52,13 @@ TODO set parameter of sell and buy?
 
 
 Chart
+
+WebSocket on Mobile
+Alignment on mobile?
+Suggestion: Increase Brokerage
+Remove setTimeout for Materialize
+
+Stock Rate change is problematic // I think it is fixed
+
+try catch in websocket updates
+Flash on update
