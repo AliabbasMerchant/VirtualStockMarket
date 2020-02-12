@@ -7,10 +7,14 @@ const fundsSlice = createSlice({
     initialState,
     reducers: {
         fundsChange(state, action) {
-            return typeof state == "number" ? state + action.payload : initialState;
+            try {
+                return typeof state === "number" || typeof state === "string" ? Number(state) + Number(action.payload) : initialState;
+            } catch (err) {
+                return state;
+            }
         },
         setFunds(_state, action) {
-            return typeof action.payload == "number" ? action.payload : initialState;
+            return Number(action.payload) === NaN ? initialState : Number(action.payload);
         },
         resetFunds(_state, _action) {
             return initialState;

@@ -12,7 +12,7 @@ const ordersSlice = createSlice({
                 pendingOrders: [...state.pendingOrders, order]
             });
         },
-        deletePendingOrder(state, action) {
+        deletePendingOrder(state, action) { // Try Catch not required
             const orderId = action.payload
             return Object.assign({}, state, {
                 pendingOrders: state.pendingOrders.filter(pendingOrder =>
@@ -21,26 +21,30 @@ const ordersSlice = createSlice({
             });
         },
         orderIsExecuted(state, action) {
-            const { orderId, quantity } = action.payload;
-            let newPendingOrders = [];
-            let executedOrder;
-            for (let i = 0; i < state.pendingOrders.length; i++) {
-                let temp = { ...state.pendingOrders[i] };
-                if (temp.orderId === orderId) {
-                    executedOrder = { ...temp, quantity };
-                    temp.quantity -= quantity;
-                    if (temp.quantity !== 0) {
+            try {
+                const { orderId, quantity } = action.payload;
+                let newPendingOrders = [];
+                let executedOrder;
+                for (let i = 0; i < state.pendingOrders.length; i++) {
+                    let temp = { ...state.pendingOrders[i] };
+                    if (temp.orderId === orderId) {
+                        executedOrder = { ...temp, quantity };
+                        temp.quantity -= quantity;
+                        if (temp.quantity !== 0) {
+                            newPendingOrders.concat(temp);
+                        }
+                    } else {
                         newPendingOrders.concat(temp);
                     }
-                } else {
-                    newPendingOrders.concat(temp);
                 }
+                return Object.assign({}, state, {
+                    executedOrders: [...state.executedOrders, executedOrder],
+                    pendingOrders: [...newPendingOrders],
+                });
+            } catch (err) {
+                console.log('orderIsExecuted', err);
+                return state;
             }
-            return Object.assign({}, state, {
-                executedOrders: [...state.executedOrders, executedOrder],
-                pendingOrders: [...newPendingOrders],
-                // pendingOrders: newPendingOrders,  // this should be okay
-            });
         },
         setPendingOrders(state, action) {
             return Object.assign({}, state, {
