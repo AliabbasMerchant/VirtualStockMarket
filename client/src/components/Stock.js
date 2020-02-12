@@ -6,6 +6,7 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 
 import BuyModal from './BuyModal';
+import FlashContainer from './FlashContainer';
 
 const Stock = ({ stocks }) => {
     let stockIndex = Number((new URLSearchParams(useLocation().search)).get("stockIndex"));
@@ -84,10 +85,14 @@ const Stock = ({ stocks }) => {
                     <div className="mx-auto col s12 md10 lg8">
                         <h1 className="my-2">{stock.name}</h1>
                         <h3>{stock.scrip}</h3>
-                        <h4><span className="mr-3">Rs.{(stock.rate).toFixed(2)}</span>
+                        <h4><span className="mr-3">Rs. <FlashContainer value={(stock.rate).toFixed(2)} /></span>
                             {stock.rate - stock.prevRate >= 0 ?
-                                <span className="ml-3 green-text">+{(stock.rate - stock.prevRate).toFixed(2)}</span>
-                                : <span className="ml-3 red-text">{(stock.rate - stock.prevRate).toFixed(2)}</span>}
+                                <span className="ml-3 green-text">
+                                    <FlashContainer value={`+${(stock.rate - stock.prevRate).toFixed(2)}`} />
+                                </span>
+                                : <span className="ml-3 red-text">
+                                    <FlashContainer value={(stock.rate - stock.prevRate).toFixed(2)} />
+                                </span>}
                         </h4>
                     </div>
                     <div className="chart-container">

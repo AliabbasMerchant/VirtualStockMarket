@@ -3,6 +3,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import SellModal from './SellModal';
+import FlashContainer from './FlashContainer';
 import constants from '../constants';
 import { deletePendingOrder } from '../reducers/orders';
 
@@ -145,7 +146,7 @@ const Portfolio = ({ stocks, funds, executedOrders, pendingOrders, userToken, de
             <div className="row">
                 <div className="mx-auto col s12 md10 lg8">
                     <div>
-                        <h3>Funds Remaining: Rs. {Number(funds).toFixed(2)}</h3>
+                        <h3>Funds Remaining: Rs. <FlashContainer value={Number(funds).toFixed(2)} /></h3>
                         <hr />
                         <h4>Holdings</h4>
                         {getHoldings(executedOrders) ?

@@ -35,13 +35,16 @@ function init(io, rejson_client, rejson_subs_client) {
                         socketStorage.setUserSocketId(userId, socket.id);
                         /*
                         // Testing
+                        // setTimeout(()=> {
+                        //     messageToUser(userId, constants.eventOrderPlaced, {ok: true, message: constants.defaultSuccessMessage, orderId: "5", quantity: 2, fundsChange: -20})
+                        // }, 2500);
                         for (let index = 0; index < 10; index++) {
                             setTimeout(() => {
                                 if(index != 0)
                                     messageToUser(userId, constants.eventStockRateUpdate, {stockIndex:4, rate: index*1+910, time: index*20000});
                             }, 2000*index);
                         }
-                        */
+                        // */
                     }
                 });
             }

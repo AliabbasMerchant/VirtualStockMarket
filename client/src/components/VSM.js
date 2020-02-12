@@ -10,7 +10,7 @@ const VSM = ({ stocks }) => {
                 <table className="row">
                     <tbody>
                         {stocks.map((stock, stockIndex) => {
-                            return <StocksListElement key={stockIndex} data={stock} id={stockIndex} />
+                            return <StocksListElement key={stockIndex} stock={stock} id={stockIndex} />
                         })}
                     </tbody>
                 </table>

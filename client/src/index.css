@@ -39,3 +39,12 @@ body {
 .textAlignRight {
     text-align: right;
 }
+
+.flashContainer {
+    background-color: transparent;
+    transition: background-color 500ms;
+}
+
+.flashContainer.flashing {
+    background-color: #eafe4e;
+}
