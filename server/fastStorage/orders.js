@@ -19,25 +19,6 @@ async function initialize() {
     }
 }
 
-function getPendingOrdersOfStock(stockIndex) {
-    return new Promise((resolve, reject) => {
-        instance.get(ORDERS_KEY, '.')
-            .then(orders => {
-                let res = [];
-                Object.keys(orders).forEach(orderId => {
-                    let order = orders[orderId];
-                    if (order.stockIndex == stockIndex) {
-                        order.orderId = orderId;
-                        res.push(order);
-                    }
-                });
-                resolve(res);
-            }).catch(err => {
-                reject(err);
-            });
-    });
-}
-
 async function addPendingOrder(orderId, quantity, rate, stockIndex, userId) {
     try {
         await instance.set(ORDERS_KEY, orderId, { quantity, rate, stockIndex, userId });
@@ -115,12 +96,11 @@ function getPendingOrders() {
 
 module.exports = {
     initOrders,
-    getPendingOrdersOfUser,
-    addPendingOrder,
-    cancelPendingOrder,
-    pendingOrderExecuted,
-    getPendingOrdersOfStock,
+    getPendingOrdersOfUser, // lock
+    addPendingOrder, // lock
+    cancelPendingOrder, // lock
+    pendingOrderExecuted, // lock
     getPendingOrders,
-    getPendingOrdersList,
-    initialize
+    getPendingOrdersList, // lock
+    initialize // lock
 }

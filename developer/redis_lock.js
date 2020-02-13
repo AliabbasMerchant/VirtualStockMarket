@@ -1,30 +1,46 @@
+const Rejson = require('iorejson');
+const redislock = require('redislock');
+const instance = new Rejson();
+
 async function f() {
-  const Rejson = require('iorejson');
-  const instance = new Rejson();
-  await instance.connect();
+    await instance.connect();
+    redislock.setDefaults({
+        timeout: 30000, // 30 seconds // more than enough time
+        retries: 19,
+        delay: 50
+    });
 
-  // instance.client.publish("abc", JSON.stringify({ a: 2, b: false }));
-
-  var client = instance.client;
-  var lock = require('redislock').createLock(client, {
-    timeout: 20000,
-    retries: 3,
-    delay: 100
-  });
-
-  lock.acquire('some:lock', function (err) {
-    if (err) console.log(err);
-    else {
-      console.log("Acquired lock");
-      setTimeout(() => {
-        lock.release(function (err) {
-          if (err) console.log(err);
-          else console.log("Released lock");
-        });
-      }, 2000);
+    try {
+        let lock = redislock.createLock(instance.client);
+        await lock.acquire('some:lock');
+        console.log("Acquired lock");
+        setTimeout(async () => {
+            try {
+                await lock.release();
+                console.log("Released lock");
+            } catch (err) {
+                console.log('1', err);
+            };
+        }, 2000);
+    } catch (err) {
+        console.log('1', err);
     }
-  });
-  console.log("Something")
+
+    setTimeout(() => {
+        let lock2 = redislock.createLock(instance.client);
+        lock2.acquire('some:lock', (err) => {
+            if (err) console.log('2', err);
+            else {
+                console.log("Acquired lock");
+                setTimeout(() => {
+                    lock2.release((err) => {
+                        if (err) console.log('2', err);
+                        else console.log("Released lock");
+                    });
+                }, 2000);
+            }
+        });
+    }, 1000);
 }
 
 f().then().catch()

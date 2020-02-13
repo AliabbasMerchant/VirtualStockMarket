@@ -93,22 +93,6 @@ async function setStockRate(stockIndex, rate) {
     }
 }
 
-function getStockRatesObject(stockIndex) {
-    return new Promise((resolve, reject) => {
-        instance.get(STOCKS_KEY, stockIndex)
-            .then(res => {
-                if (!res.ratesObject) {
-                    reject("No such stock");
-                } else {
-                    resolve(res.ratesObject);
-                }
-            })
-            .catch(err => {
-                reject(err);
-            });
-    });
-}
-
 function getStocks() {
     return new Promise((resolve, reject) => {
         instance.get(STOCKS_KEY, '.')
@@ -132,14 +116,13 @@ function getStocksRaw() {
 }
 
 module.exports = {
-    setStockQuantity,
-    deductStockQuantity,
-    getStockQuantity,
-    setStockRate,
-    getStockRate,
-    getStocks,
-    getStockRatesObject,
+    setStockQuantity, // lock
+    deductStockQuantity, // lock
+    getStockQuantity, // lock
+    setStockRate, // lock
+    getStockRate, // lock
+    getStocks, // lock
     getStocksRaw,
     initStocks,
-    initialize
+    initialize // lock
 }

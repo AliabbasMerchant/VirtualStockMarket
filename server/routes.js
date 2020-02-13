@@ -123,7 +123,7 @@ router.post('/getStocks', auth.checkIfAuthenticatedAndGetUserId, async (_req, re
                 try {
                     stocksData.push(stocks[stockIndex]);
                     stocksData[stockIndex].rate = rates[stockIndex].rate;
-                    let ratesObject = await stocksStorage.getStockRatesObject(stockIndex);
+                    let ratesObject = rates[stockIndex].ratesObject;
                     let ratesObj = {};
                     Object.keys(ratesObject).forEach(timestamp => {
                         ratesObj[[timestamp - initialTime]] = ratesObject[timestamp];
@@ -242,36 +242,6 @@ router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, re
                 ok: false,
                 message: constants.defaultErrorMessage
             });
-        });
-});
-
-router.post('/getRatesObject/:stockIndex', auth.checkIfAuthenticatedAndGetUserId, (req, res) => {
-    const stockIndex = req.params.stockIndex;
-    stocksStorage.getStockRatesObject(stockIndex)
-        .then(ratesObject => {
-            globalStorage.getInitialTime()
-                .then(initialTime => {
-                    let ratesObj = {};
-                    Object.keys(ratesObject).forEach(timestamp => {
-                        ratesObj[[timestamp - initialTime]] = ratesObject[timestamp];
-                    });
-                    ratesObject = ratesObj;
-                }).catch(console.log(err))
-                .finally(() => {
-                    res.json({
-                        ok: true,
-                        message: constants.defaultSuccessMessage,
-                        ratesObject
-                    })
-                })
-        })
-        .catch(err => {
-            console.log(err);
-            res.json({
-                ok: false,
-                message: constants.defaultErrorMessage,
-                ratesObject: {}
-            })
         });
 });
 

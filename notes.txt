@@ -27,9 +27,11 @@ Authorization Header // Not required
 
 -------------------------
 fastStorage:
-pendingOrders // only temporary
-stockRates and changes // cache
-socketIds // only temporary
+exchanges // not so hard-and-fast
+globals // not so hard-and-fast
+sockets // no one will compete, as it wont change so fast 
+orders // fast and strict: pendingOrdersStorage
+stocks // fast and strict: stocksStorage
 
 permanent storage:
 users and trades
@@ -51,13 +53,13 @@ Remove setTimeout for Materialize
 
 Stock Rate change is problematic // I think it is fixed
 
+Notify users when they are disconnected? // Maybe next time
 
- # WebSocket on Mobile
-    Alignment on mobile?
+    WebSocket on Mobile
+    Alignment on mobile
 # App Engine
 # PWA (Lets see...)
 # Message Queue? Or Locks
  # Axios Retry
-# Testing
+    # Testing
 # Deployment
-# Funds change Event
