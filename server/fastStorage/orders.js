@@ -42,7 +42,7 @@ async function addPendingOrder(orderId, quantity, rate, stockIndex, userId) {
     try {
         await instance.set(ORDERS_KEY, orderId, { quantity, rate, stockIndex, userId });
     } catch (error) {
-        console.log(error);
+        console.log('addPendingOrder', error);
     }
 }
 
@@ -50,7 +50,7 @@ async function cancelPendingOrder(orderId) {
     try {
         return await instance.del(ORDERS_KEY, orderId);
     } catch (error) {
-        console.log(error);
+        console.log('cancelPendingOrder', error);
     }
 }
 
@@ -58,6 +58,7 @@ async function pendingOrderExecuted(orderId, quantity) {
     try {
         let order = await instance.get(ORDERS_KEY, orderId);
         let q = order.quantity;
+        console.log(order, quantity);
         await cancelPendingOrder(orderId);
         if (q != quantity) {
             // selling: ok
@@ -66,7 +67,7 @@ async function pendingOrderExecuted(orderId, quantity) {
             await addPendingOrder(orderId, order.quantity, order.rate, order.stockIndex, order.userId);
         }
     } catch (err) {
-        console.log(err);
+        console.log('pendingOrderExecuted', err);
     }
 }
 

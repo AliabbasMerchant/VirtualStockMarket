@@ -75,7 +75,6 @@ router.post('/startTrading', checkIfDeveloper, async (req, res) => {
             .then(q => { current_left_quantity = q; })
             .catch(console.log)
             .finally(() => {
-                console.log(initial_quantity, current_left_quantity);
                 stocksStorage.setStockQuantity(stockIndex, Math.abs(initial_quantity - current_left_quantity));
             });
     })

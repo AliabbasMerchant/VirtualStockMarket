@@ -51,7 +51,7 @@ async function deductStockQuantity(stockIndex, quantity) {
         res.quantity -= quantity;
         await instance.set(STOCKS_KEY, stockIndex, res);
     } catch (error) {
-        console.log(error);
+        console.log('deductStockQuantity', error);
     }
 }
 
@@ -62,7 +62,7 @@ async function setStockQuantity(stockIndex, quantity) {
         res.quantity = quantity;
         await instance.set(STOCKS_KEY, stockIndex, res);
     } catch (error) {
-        console.log(error);
+        console.log('setStockQuantity', error);
     }
 }
 
@@ -89,7 +89,7 @@ async function setStockRate(stockIndex, rate) {
         res.ratesObject[[Date.now()]] = rate;
         await instance.set(STOCKS_KEY, stockIndex, res);
     } catch (error) {
-        console.log(error);
+        console.log('setStockRate', error);
     }
 }
 

@@ -31,10 +31,10 @@ const ordersSlice = createSlice({
                         executedOrder = { ...temp, quantity };
                         temp.quantity -= quantity;
                         if (temp.quantity !== 0) {
-                            newPendingOrders.concat(temp);
+                            newPendingOrders.push(temp);
                         }
                     } else {
-                        newPendingOrders.concat(temp);
+                        newPendingOrders.push(temp);
                     }
                 }
                 return Object.assign({}, state, {

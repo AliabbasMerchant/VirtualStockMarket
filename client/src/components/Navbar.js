@@ -55,7 +55,9 @@ const Navbar = ({ loggedIn, logoutUser, disconnectSocket }) => {
             <nav style={{ borderBottom: '1px solid grey', width: '100%' }} className="navbar navbar-fixed">
                 <div className="nav-wrapper">
                     <Link className="brand-logo mx-3" to="/">Wallstreet</Link>
-                    <div data-target="slide-out" className="sidenav-trigger hide-on-large-only"><i className="material-icons">menu</i></div>
+                    <div data-target="slide-out" className="sidenav-trigger hide-on-large-only" style={{ cursor: 'pointer' }}>
+                        <i className="material-icons">menu</i>
+                    </div>
                     <div className="right hide-on-med-and-down">
                         {list}
                     </div>
