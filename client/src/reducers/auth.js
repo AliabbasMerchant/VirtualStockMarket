@@ -7,6 +7,32 @@ import { setFunds, resetFunds } from './funds';
 import { setPendingOrders, setExecutedOrders, resetOrders } from './orders';
 import { setStocks, resetStocks } from './stocks';
 
+// let axios = require('axios');
+// const rax = require('retry-axios');
+// axios = axios.create();
+// axios.defaults.raxConfig = {
+//     instance: axios,
+//     retry: 3,
+//     noResponseRetries: 2,
+//     retryDelay: 1000,
+//     backoffType: 'exponential',
+//     onRetryAttempt: err => {
+//         const cfg = rax.getConfig(err);
+//         console.log(`Retry attempt #${cfg.currentRetryAttempt}`);
+//     }
+// }
+// rax.attach();
+
+// import axiosRetry from 'axios-retry';
+// // axiosRetry(axios, { retryDelay: 1000, retries: 3, retryDelay: axiosRetry.exponentialDelay });
+// axiosRetry(axios, {
+//     retries: 5,
+//     retryDelay: (retryCount, e) => {
+//         console.debug(retryCount, e);
+//         return retryCount * 1000;
+//     }
+// });
+
 let token = Cookies.get(constants.tokenCookieName);
 let initialState = token ? token : null;
 
@@ -70,7 +96,7 @@ export const loginUser = (userToken) => {
                     let stocks = response.stocks;
                     for (let i = 0; i < stocks.length; i++) {
                         let times = Object.keys(stocks[i].ratesObject);
-                        if(times.length > 1) {
+                        if (times.length > 1) {
                             times.sort();
                             // last one is current rate, so we need the 2nd last one
                             stocks[i].prevRate = stocks[i].ratesObject[times[times.length - 2]];

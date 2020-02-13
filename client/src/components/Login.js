@@ -61,7 +61,7 @@ const Login = ({ loggedIn, loginUser, connectSocket }) => {
                             <label htmlFor="password">Password</label>
                             <input ref={passwordRef} type="password" className="validate" name="password" required />
                         </div>
-                        <div onClick={() => loginFunction()} className="waves-effect waves-light btn my-2" id="login-button">Login</div>
+                        <div onClick={() => loginFunction()} className="btn my-2" id="login-button">Login</div>
                         <br />
                         <Link className="btn my-2" to="/register">Register</Link>
                     </div>

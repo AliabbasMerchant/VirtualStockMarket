@@ -57,7 +57,7 @@ function Register() {
                             <label htmlFor="password2">Confirm Password</label>
                             <input ref={password2Ref} type="password" className="validate" name="password2" required />
                         </div>
-                        <div onClick={registerFunction} className="waves-effect waves-light btn my-2">Register</div>
+                        <div onClick={registerFunction} className="btn my-2">Register</div>
                         <br />
                         <Link className="btn my-2" to="/login">Login</Link>
                     </div>

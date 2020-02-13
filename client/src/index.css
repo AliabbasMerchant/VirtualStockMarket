@@ -30,7 +30,7 @@ body {
     max-width: 100%;
     width: 100%;
     /* display: flex;
-  justify-content: space-between; */
+    justify-content: space-between; */
     background-color: lightgray;
     font-size: large;
     margin-bottom: 1px;
@@ -47,4 +47,19 @@ body {
 
 .flashContainer.flashing {
     background-color: #eafe4e;
+}
+
+html body #root #app #appNavbar {
+    width: 100%;
+}
+
+.scrollingTable {
+    /* width: 100%; */
+    /* display: block; */
+    overflow-x: auto;
+    /* white-space: nowrap; */
+}
+.scrollingTable > tbody{
+    display: block;
+    /* width: inherit; */
 }

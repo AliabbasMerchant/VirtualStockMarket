@@ -14,7 +14,7 @@ const fundsSlice = createSlice({
             }
         },
         setFunds(_state, action) {
-            return Number(action.payload) === NaN ? initialState : Number(action.payload);
+            return isNaN(Number(action.payload)) ? initialState : Number(action.payload);
         },
         resetFunds(_state, _action) {
             return initialState;

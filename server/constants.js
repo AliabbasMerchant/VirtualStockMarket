@@ -1,6 +1,6 @@
 module.exports = {
     initialFunds: 50000,
-    brokerageRateFraction: 0.001,
+    brokerageRateFraction: 0.001, // suggestion: increase this
 
     // initialTime,
     // buyingTimeLimit: initialTime + 10*60*1000, // milliseconds
@@ -19,5 +19,5 @@ module.exports = {
     defaultErrorMessage: "Sorry, there was an error processing your request",
 
     capFraction: 0.2,
-    exchangeLimit: 50,
+    exchangeLimit: 20,
 }

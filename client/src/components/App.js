@@ -19,7 +19,7 @@ const App = () => {
     return (
         <Router>
 
-            <div className="app">
+        <div id="app">
                 <Navbar />
 
                 <Switch>

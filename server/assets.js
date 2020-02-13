@@ -6,7 +6,8 @@ function getUserFunds(userId) {
     return new Promise((resolve, reject) => {
         userModel.findById(userId, (err, user) => {
             if (err || !user) {
-                console.log(err);
+                if(err)
+                    console.log(err);
                 reject("No Such User");
             } else {
                 resolve(user.funds);
@@ -18,8 +19,9 @@ function getUserFunds(userId) {
 function getUserHoldings(userId) {
     return new Promise((resolve, reject) => {
         userModel.findById(userId, (err, user) => {
-            if (err) {
-                console.log(err);
+            if (err || !user) {
+                if(err)
+                    console.log(err);
                 reject("No such user");
             } else {
                 let holdings = [];

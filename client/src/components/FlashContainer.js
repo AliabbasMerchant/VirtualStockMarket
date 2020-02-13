@@ -9,7 +9,6 @@ const FlashContainer = ({ value }) => {
         className="flashContainer"
         outerElementType="span"
         compare={(prevProps, newProps) => {
-            console.log(prevProps.value, newProps.value, newProps.value !== prevProps.value);
             return newProps.value !== prevProps.value;
         }}
     >

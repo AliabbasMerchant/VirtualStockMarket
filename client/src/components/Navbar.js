@@ -52,7 +52,7 @@ const Navbar = ({ loggedIn, logoutUser, disconnectSocket }) => {
 
     return (
         <div id="appNavbar">
-            <nav style={{ borderBottom: '1px solid grey' }} className="navbar navbar-fixed">
+            <nav style={{ borderBottom: '1px solid grey', width: '100%' }} className="navbar navbar-fixed">
                 <div className="nav-wrapper">
                     <Link className="brand-logo mx-3" to="/">Wallstreet</Link>
                     <div data-target="slide-out" className="sidenav-trigger hide-on-large-only"><i className="material-icons">menu</i></div>

@@ -18,6 +18,7 @@ async function initialize() {
         await instance.set(STOCKS_KEY, '.', {});
         for (const stockIndex in stocksData) {
             const stock = stocksData[stockIndex];
+            console.log(stock)
             let newStock = { rate: stock.rate, quantity: stock.initialQuantity, ratesObject: { [Date.now()]: stock.rate } };
             instance.set(STOCKS_KEY, stockIndex, newStock)
                 .then()

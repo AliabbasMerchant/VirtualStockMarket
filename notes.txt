@@ -4,15 +4,13 @@
 Should not crash
         Only integers (Round off) [I dont think we need this currently]
         Restrict number of transactions b/w users
-PWA
         Brokerage in % of rate (0.1%)
         Upper Cap and Lower Cap (20%)
         Starting Distribution
         Redis
-Message Queue?
         Chart***
         Only 1 device per team
-Check if valid user, in Authorization
+Check if valid user, in Authorization // Not Required
 
     Developer mode:
         For starting and pausing the event
@@ -23,9 +21,8 @@ Check if valid user, in Authorization
     Testing****************
         (If there is an error, remove Cancel button. Its okay)
 
-Exchange limit basis
-Not required, but recommended: Authorization Header
-Apache config
+        Exchange limit basis
+Authorization Header // Not required
 
 
 -------------------------
@@ -44,15 +41,23 @@ Secrets and all
 initialFunds
 
 Default values of redis variables // It should ideally give an error, so no need?
-
+-------------------------
 
 Selling -> quantity: positive
 Buying -> quantity: negative
-TODO: set parameter of sell and buy // Not needed atm
+Set parameter of sell and buy // Not needed
 
-WebSocket on Mobile
-Alignment on mobile?
-Suggestion: Increase Brokerage
 Remove setTimeout for Materialize
 
 Stock Rate change is problematic // I think it is fixed
+
+
+ # WebSocket on Mobile
+    Alignment on mobile?
+# App Engine
+# PWA (Lets see...)
+# Message Queue? Or Locks
+ # Axios Retry
+# Testing
+# Deployment
+# Funds change Event

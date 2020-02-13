@@ -27,7 +27,7 @@ function HoldingsTableRow(props) {
             <td>{Number((holding.rate)).toFixed(2)}</td>
             <td>{Number((stock.rate)).toFixed(2)}</td>
             <td>{Number((stock.rate - holding.rate) * Math.abs(holding.quantity)).toFixed(2)}</td>
-            <td><a className="btn waves-effect waves-light modal-trigger" href={"#sellModal" + holding.stockIndex}>SELL</a>
+            <td><a className="btn modal-trigger" href={"#sellModal" + holding.stockIndex}>SELL</a>
                 <SellModal stock={stock} holding={holding} keepId={"sellModal" + holding.stockIndex} />
             </td>
         </tr>
@@ -83,7 +83,7 @@ function PendingOrderTableRow(props) {
                 {order.quantity > 0 ?
                     <td>To Sell</td> :
                     <td>To Buy</td>}
-                <td><button className="btn waves-effect waves-light" onClick={() => cancelOrderFunction(order.orderId)}>CANCEL</button></td>
+                <td><button className="btn" onClick={() => cancelOrderFunction(order.orderId)}>CANCEL</button></td>
             </tr>
         )
     } catch (e) {
@@ -142,58 +142,64 @@ const Portfolio = ({ stocks, funds, executedOrders, pendingOrders, userToken, de
     }
 
     return (
-        <div className="mx-auto p-3 center container">
+        <div className="p-3 mx-auto center container">
             <div className="row">
-                <div className="mx-auto col s12 md10 lg8">
+                <div className="mx-auto s12 md10 lg8">
                     <div>
                         <h3>Funds Remaining: Rs. <FlashContainer value={Number(funds).toFixed(2)} /></h3>
                         <hr />
                         <h4>Holdings</h4>
                         {getHoldings(executedOrders) ?
-                            <table className="row">
-                                <tbody>
-                                    <HoldingsTableHeader />
-                                    {getHoldings(executedOrders).map((holding, index) => {
-                                        try {
-                                            return <HoldingsTableRow key={index} stock={stocks[holding.stockIndex]} holding={holding} />
-                                        } catch (e) {
-                                            return null;
-                                        }
-                                    })}
-                                </tbody>
-                            </table> :
+                            <div className="scrollingTable">
+                                <table>
+                                    <tbody>
+                                        <HoldingsTableHeader />
+                                        {getHoldings(executedOrders).map((holding, index) => {
+                                            try {
+                                                return <HoldingsTableRow key={index} stock={stocks[holding.stockIndex]} holding={holding} />
+                                            } catch (e) {
+                                                return null;
+                                            }
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div> :
                             null}
                         <hr />
                         <h4>Pending Orders</h4>
                         {pendingOrders ?
-                            <table className="row">
-                                <tbody>
-                                    <PendingOrderTableHeader />
-                                    {pendingOrders.map((order, index) => {
-                                        try {
-                                            return <PendingOrderTableRow key={index} stock={stocks[order.stockIndex]} order={order} cancelOrderFunction={cancelOrder} />
-                                        } catch (e) {
-                                            return null;
-                                        }
-                                    })}
-                                </tbody>
-                            </table> :
+                            <div className="scrollingTable">
+                                <table>
+                                    <tbody>
+                                        <PendingOrderTableHeader />
+                                        {pendingOrders.map((order, index) => {
+                                            try {
+                                                return <PendingOrderTableRow key={index} stock={stocks[order.stockIndex]} order={order} cancelOrderFunction={cancelOrder} />
+                                            } catch (e) {
+                                                return null;
+                                            }
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div> :
                             null}
                         <hr />
                         <h4>Executed Orders</h4>
                         {executedOrders ?
-                            <table className="row">
-                                <tbody>
-                                    <ExecutedOrderTableHeader />
-                                    {executedOrders.map((order, index) => {
-                                        try {
-                                            return <ExecutedOrderTableRow key={index} stock={stocks[order.stockIndex]} order={order} />
-                                        } catch (e) {
-                                            return null;
-                                        }
-                                    })}
-                                </tbody>
-                            </table> :
+                            <div className="scrollingTable">
+                                <table>
+                                    <tbody>
+                                        <ExecutedOrderTableHeader />
+                                        {executedOrders.map((order, index) => {
+                                            try {
+                                                return <ExecutedOrderTableRow key={index} stock={stocks[order.stockIndex]} order={order} />
+                                            } catch (e) {
+                                                return null;
+                                            }
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div> :
                             null}
                     </div>
                 </div>

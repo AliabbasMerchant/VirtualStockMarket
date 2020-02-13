@@ -95,12 +95,12 @@ const Stock = ({ stocks }) => {
                                 </span>}
                         </h4>
                     </div>
+                    <div>
+                        <a className="btn modal-trigger" href="#buyModal">BUY</a>
+                        <BuyModal stock={stock} stockIndex={stockIndex} keepId="buyModal" />
+                    </div>
                     <div className="chart-container">
                         <canvas className="my-3" id="chart" style={{ width: '180px', height: '90px' }}></canvas>
-                    </div>
-                    <div>
-                        <a className="btn waves-effect waves-light modal-trigger" href="#buyModal">BUY</a>
-                        <BuyModal stock={stock} stockIndex={stockIndex} keepId="buyModal" />
                     </div>
                 </div>
             </div>

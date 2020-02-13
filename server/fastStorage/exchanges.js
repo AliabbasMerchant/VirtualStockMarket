@@ -22,11 +22,11 @@ async function initialize() {
 }
 
 async function usersCanExchange(userId1, userId2, quantity, update=false) { // this should never throw an error
-    // This logic is a bit relaxed. If 2 users have exchanged 49 shares and limit is 50,
-    // then they will be able to do a last exchange, of how many ever shares they want.
     async function checkIfPossible(key, exchanges) { // this should never throw an error
-        // if(exchanges + quantity >= constants.exchangeLimit) { // strict
-        if(exchanges >= constants.exchangeLimit) { // relaxed
+        // This logic is a bit relaxed. If 2 users have exchanged 49 shares and limit is 50,
+        // then they will be able to do a last exchange, of how many ever shares they want.
+        // if(exchanges >= constants.exchangeLimit) { // relaxed
+        if(exchanges + 1 >= constants.exchangeLimit) { // strict
             return false;
         } else {
             if(update) {

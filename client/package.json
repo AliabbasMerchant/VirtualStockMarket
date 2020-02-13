@@ -20,6 +20,7 @@
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.3.0",
     "redux": "^4.0.5",
+    "retry-axios": "^2.1.1",
     "socket.io-client": "^2.3.0"
   },
   "scripts": {

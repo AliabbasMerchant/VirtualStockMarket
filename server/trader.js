@@ -119,6 +119,7 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
                                     .then(currentQuantity => {
                                         let rateDiff = rate - currentRate;
                                         let newRate = Number(Number(currentRate + (rateDiff * quantity / currentQuantity)).toFixed(2));
+                                        console.log(currentRate, rateDiff, quantity, currentQuantity, newRate)
                                         if (newRate !== currentRate) {
                                             stocksStorage.setStockRate(stockIndex, newRate);
                                             let initialTime = Date.now() - 1000 * 60 * 60 * 2; // 2 hours ago (Some random safe time)

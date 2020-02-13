@@ -14,7 +14,7 @@ const developer = require('./developer');
 const router = express.Router();
 
 router.use((req, _res, next) => {
-    console.log(String(new Date()), req.url, req.body);
+    // console.log(String(new Date()), req.url, req.body);
     next();
 })
 
@@ -168,7 +168,8 @@ router.post('/getExecutedOrders', auth.checkIfAuthenticatedAndGetUserId, (req, r
     const { userId } = req.body;
     userModel.findById(userId, (err, user) => {
         if (err || !user) {
-            console.log(err);
+            if (err)
+                console.log(err);
             res.json({
                 ok: false,
                 message: "No such user",
@@ -255,9 +256,8 @@ router.post('/getRatesObject/:stockIndex', auth.checkIfAuthenticatedAndGetUserId
                         ratesObj[[timestamp - initialTime]] = ratesObject[timestamp];
                     });
                     ratesObject = ratesObj;
-                }).catch(err => {
-                    console.log(err);
-                }).finally(() => {
+                }).catch(console.log(err))
+                .finally(() => {
                     res.json({
                         ok: true,
                         message: constants.defaultSuccessMessage,
