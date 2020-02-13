@@ -5,7 +5,8 @@ const router = express.Router();
 const globalStorage = require('./fastStorage/globals');
 const stocksStorage = require('./fastStorage/stocks');
 const ordersStorage = require('./fastStorage/orders');
-const socketStorage = require('./fastStorage/sockets');
+const socketsStorage = require('./fastStorage/sockets');
+const exchangesStorage = require('./fastStorage/exchanges');
 const userModel = require('./models/users');
 const auth = require('./auth');
 const constants = require('./constants');
@@ -58,8 +59,9 @@ router.post('/init', checkIfDeveloper, async (req, res) => {
     await globalStorage.setBuyingPeriod(true);
     await globalStorage.setPlayingStatus(true);
     await ordersStorage.initialize();
-    await socketStorage.initialize();
+    await socketsStorage.initialize();
     await stocksStorage.initialize();
+    await exchangesStorage.initialize();
     return res.send('OK');
 });
 
@@ -100,7 +102,7 @@ router.post('/getMemory', checkIfDeveloper, (req, res) => {
                 .then(orders => result.orders = orders)
                 .catch(err => result.orders = err)
                 .finally(() => {
-                    socketStorage.getSockets()
+                    socketsStorage.getSockets()
                         .then(sockets => result.sockets = sockets)
                         .catch(err => result.sockets = err)
                         .finally(() => {
@@ -108,10 +110,15 @@ router.post('/getMemory', checkIfDeveloper, (req, res) => {
                                 .then(globals => result.globals = globals)
                                 .catch(err => result.globals = err)
                                 .finally(() => {
-                                    res.json({
-                                        ok: true,
-                                        result
-                                    })
+                                    exchangesStorage.getExchanges()
+                                        .then(exchanges => result.exchanges = exchanges)
+                                        .catch(err => result.exchanges = err)
+                                        .finally(() => {
+                                            res.json({
+                                                ok: true,
+                                                result
+                                            });
+                                        });
                                 });
                         });
                 });

@@ -2,6 +2,7 @@ const assets = require('./assets');
 const stocksStorage = require('./fastStorage/stocks');
 const pendingOrdersStorage = require('./fastStorage/orders');
 const globalStorage = require('./fastStorage/globals');
+const exchangesStorage = require('./fastStorage/exchanges');
 const webSocketHandler = require('./webSocket');
 const constants = require('./constants');
 const userModel = require('./models/users');
@@ -122,11 +123,11 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
                                             stocksStorage.setStockRate(stockIndex, newRate);
                                             let initialTime = Date.now() - 1000 * 60 * 60 * 2; // 2 hours ago (Some random safe time)
                                             globalStorage.getInitialTime()
-                                            .then(time => initialTime = time)
-                                            .catch(console.log) // would be quite problematic
-                                            .finally(() => {
-                                                webSocketHandler.messageToEveryone(constants.eventStockRateUpdate, { stockIndex, rate: newRate, time: tradeTime - initialTime });
-                                            });
+                                                .then(time => initialTime = time)
+                                                .catch(console.log) // would be quite problematic
+                                                .finally(() => {
+                                                    webSocketHandler.messageToEveryone(constants.eventStockRateUpdate, { stockIndex, rate: newRate, time: tradeTime - initialTime });
+                                                });
                                         }
                                     })
                                     .catch((err) => console.log("Danger", err)); // lets hope this never happens
@@ -181,18 +182,20 @@ async function orderMatcher(stockIndex, userId) {
                             for (const order2 of orders) {
                                 if (order2.rate === order1.rate && order2.stockIndex === order1.stockIndex && order1.userId !== order2.userId) {
                                     if (order1.quantity * order2.quantity < 0) { // one wants to sell and the other is buying
-                                        let ok;
                                         [ok, order2.quantity] = await sufficientFundsAndHoldings(order2.userId, order2.quantity, order2.rate, order2.stockIndex);
                                         if (ok) {
                                             let quantity = Math.min(Math.abs(order1.quantity), Math.abs(order2.quantity));
-                                            let quantity1 = quantity * Math.sign(order1.quantity);
-                                            let quantity2 = quantity * Math.sign(order2.quantity);
-                                            executeOrder(order1.orderId, quantity1, order1.rate, stockIndex, order1.userId);
-                                            pendingOrdersStorage.pendingOrderExecuted(order1.orderId, quantity);
-                                            executeOrder(order2.orderId, quantity2, order2.rate, stockIndex, order2.userId);
-                                            pendingOrdersStorage.pendingOrderExecuted(order2.orderId, quantity);
-                                            // no need to triggerOrderMatcher again, because we have the do...while loop
-                                            someOrderHasExecuted = true;
+                                            ok = await exchangesStorage.usersCanExchange(order1.userId, order2.userId, quantity, true);
+                                            if (ok) {
+                                                let quantity1 = quantity * Math.sign(order1.quantity);
+                                                let quantity2 = quantity * Math.sign(order2.quantity);
+                                                executeOrder(order1.orderId, quantity1, order1.rate, stockIndex, order1.userId);
+                                                pendingOrdersStorage.pendingOrderExecuted(order1.orderId, quantity);
+                                                executeOrder(order2.orderId, quantity2, order2.rate, stockIndex, order2.userId);
+                                                pendingOrdersStorage.pendingOrderExecuted(order2.orderId, quantity);
+                                                // no need to triggerOrderMatcher again, because we have the do...while loop
+                                                someOrderHasExecuted = true;
+                                            }
                                         }
                                     }
                                 }

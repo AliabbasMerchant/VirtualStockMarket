@@ -47,6 +47,7 @@ rejson_client.connect()
         require('./fastStorage/orders').initOrders(rejson_client);
         require('./fastStorage/sockets').initSockets(rejson_client);
         require('./fastStorage/stocks').initStocks(rejson_client);
+        require('./fastStorage/exchanges').initExchanges(rejson_client);
     })
     .catch(console.log);
 rejson_client.on('error', function (err) {
