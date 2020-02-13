@@ -36,7 +36,7 @@ function init(io, rejson_client, rejson_subs_client) {
                         /*
                         // Testing
                         // setTimeout(()=> {
-                        //     messageToUser(userId, constants.eventOrderPlaced, {ok: true, message: constants.defaultSuccessMessage, orderId: "5", quantity: 2, fundsChange: -20})
+                        //     messageToUser(userId, constants.eventOrderPlaced, {ok: true, message: constants.defaultSuccessMessage, orderId: "5", quantity: 2, funds: 49980})
                         // }, 2500);
                         for (let index = 0; index < 10; index++) {
                             setTimeout(() => {

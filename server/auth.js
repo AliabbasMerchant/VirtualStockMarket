@@ -33,7 +33,7 @@ function checkIfAuthenticatedAndGetUserId(req, res, next) {
     const { userToken } = req.body;
     verifyToken(userToken, (err, decoded) => {
         if(err) {
-            console.log(err);
+            // console.log(err);
             res.json({
                 ok: false,
                 message: "Please login to access this feature",

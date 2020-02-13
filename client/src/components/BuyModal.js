@@ -25,7 +25,7 @@ const BuyModal = ({ stock, stockIndex, keepId, placeOrder, userToken, deletePend
             return;
         } else {
             let order = {
-                orderId: String(Math.round(Math.random() * 1000000)),
+                orderId: String(Math.round(Math.random() * 1000000000)),
                 quantity: -1 * Number(quantity),
                 rate: Number(rate),
                 stockIndex

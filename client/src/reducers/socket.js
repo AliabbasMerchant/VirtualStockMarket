@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import io from 'socket.io-client';
 
 import constants from '../constants';
-import { fundsChange } from './funds';
+import { setFunds } from './funds';
 import { orderIsExecuted, deletePendingOrder } from './orders';
 import { updateStockRate } from './stocks';
 
@@ -41,7 +41,7 @@ export const connectSocket = (userToken) => {
                 if (data.ok) {
                     window.M.toast({ html: "Pending Order Successfully Executed", classes: "toast-success" });
                     dispatch(orderIsExecuted({ orderId: data.orderId, quantity: Number(data.quantity) }));
-                    dispatch(fundsChange(Number(data.fundsChange)));
+                    dispatch(setFunds(data.funds));
                 } else {
                     dispatch(deletePendingOrder(data.orderId));
                     window.M.toast({ html: data.message, classes: "toast-error" });

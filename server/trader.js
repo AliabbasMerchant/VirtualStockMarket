@@ -102,8 +102,8 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
             console.log(err);
             webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: false, message: constants.defaultErrorMessage, orderId });
         } else {
-            let fundsChange = quantity * rate - assets.getBrokerageFees(rate, quantity);
-            user.funds += fundsChange;
+            let funds = user.funds + quantity * rate - assets.getBrokerageFees(rate, quantity);
+            user.funds = funds;
             let tradeTime = Date.now();
             user.executedOrders.push({ orderId, quantity, rate, stockIndex, tradeTime });
             user.save((err, _user) => {
@@ -138,7 +138,7 @@ async function executeOrder(orderId, quantity, rate, stockIndex, userId, changeR
                     if (stockQuantityChange && quantity < 0) { // will occur only in buying period
                         stocksStorage.deductStockQuantity(stockIndex, Math.abs(quantity));
                     }
-                    webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: true, message: constants.defaultSuccessMessage, orderId, quantity, fundsChange });
+                    webSocketHandler.messageToUser(userId, constants.eventOrderPlaced, { ok: true, message: constants.defaultSuccessMessage, orderId, quantity, funds });
                 }
             });
         }

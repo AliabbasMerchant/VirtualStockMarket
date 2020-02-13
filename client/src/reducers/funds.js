@@ -6,13 +6,6 @@ const fundsSlice = createSlice({
     name: 'funds',
     initialState,
     reducers: {
-        fundsChange(state, action) {
-            try {
-                return typeof state === "number" || typeof state === "string" ? Number(state) + Number(action.payload) : initialState;
-            } catch (err) {
-                return state;
-            }
-        },
         setFunds(_state, action) {
             return isNaN(Number(action.payload)) ? initialState : Number(action.payload);
         },
@@ -22,5 +15,5 @@ const fundsSlice = createSlice({
     }
 });
 
-export const { fundsChange, setFunds, resetFunds } = fundsSlice.actions;
+export const { setFunds, resetFunds } = fundsSlice.actions;
 export default fundsSlice.reducer;

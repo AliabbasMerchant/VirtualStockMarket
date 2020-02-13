@@ -25,7 +25,7 @@ const SellModal = ({ stock, holding, keepId, placeOrder, userToken, deletePendin
             return;
         } else {
             let order = {
-                orderId: String(Math.round(Math.random() * 1000000)),
+                orderId: String(Math.round(Math.random() * 1000000000)),
                 quantity: Number(quantity),
                 rate: Number(rate),
                 stockIndex: holding.stockIndex
