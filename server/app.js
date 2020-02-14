@@ -8,14 +8,12 @@ const Rejson = require('iorejson');
 
 const app = express();
 
-require('dotenv').config();
-
-if (process.env.NODE_ENV === 'production') {
-    const compression = require('compression');
-    const helmet = require('helmet');
-    app.use(helmet());
-    app.use(compression());
-}
+// if (process.env.NODE_ENV === 'production') {
+//     const compression = require('compression');
+//     const helmet = require('helmet');
+//     app.use(helmet());
+//     app.use(compression());
+// }
 
 mongoose.connect(process.env.MONGO_CONNECTION_STRING, {
     dbName: 'VSM',
@@ -39,6 +37,24 @@ app.use(
     })
 );
 
+Rejson.defaultOptions = {
+    port: process.env.REDIS_PORT,
+    host: process.env.REDIS_HOST,
+}
+
+const server = require('http').Server(app);
+const io = require('socket.io')(server, {
+    handlePreflightRequest: (req, res) => {
+        res.writeHead(200, {
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Allow-Origin": req.headers.origin, //or the specific origin you want to give access to,
+            "Access-Control-Allow-Credentials": true
+        });
+        res.end();
+    }
+});
+
+
 const rejson_client = new Rejson();
 rejson_client.connect()
     .then((_) => {
@@ -52,18 +68,6 @@ rejson_client.connect()
     .catch(console.log);
 rejson_client.on('error', function (err) {
     console.log('Orders: Redis Error ' + err);
-});
-
-const server = require('http').Server(app);
-const io = require('socket.io')(server, {
-    handlePreflightRequest: (req, res) => {
-        res.writeHead(200, {
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            "Access-Control-Allow-Origin": req.headers.origin, //or the specific origin you want to give access to,
-            "Access-Control-Allow-Credentials": true
-        });
-        res.end();
-    }
 });
 
 const rejson_subs_client = new Rejson();
