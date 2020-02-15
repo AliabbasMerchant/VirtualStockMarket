@@ -17,9 +17,8 @@ import VSM from './VSM';
 
 const App = () => {
     return (
-        <Router>
-
-        <div id="app">
+        <Router basename={process.env.PUBLIC_URL}>
+            <div id="app">
                 <Navbar />
 
                 <Switch>

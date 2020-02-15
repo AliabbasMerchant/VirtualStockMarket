@@ -1,5 +1,9 @@
 async function f() {
     const Rejson = require('iorejson');
+    Rejson.defaultOptions = {
+        port: 6379,
+        host: "35.200.136.177",
+    }
     const instance = new Rejson();
     await instance.connect();
 

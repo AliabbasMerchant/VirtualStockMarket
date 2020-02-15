@@ -30,48 +30,50 @@ const Stock = ({ stocks }) => {
                     }
                 }
 
-                new Chart(document.getElementById('chart').getContext('2d'),
-                    {
-                        type: 'line',
-                        data: {
-                            labels: times,
-                            datasets: [{
-                                data: rates,
-                                label: stocks[stockIndex].name,
-                                borderColor: '#fe8b36',
-                                backgroundColor: '#fe8b36',
-                                fill: false,
-                                lineTension: 0,
-                            }]
-                        },
-                        options: {
-                            animation: {
-                                duration: 250
+                if (document.getElementById('chart')) {
+                    new Chart(document.getElementById('chart').getContext('2d'),
+                        {
+                            type: 'line',
+                            data: {
+                                labels: times,
+                                datasets: [{
+                                    data: rates,
+                                    label: stocks[stockIndex].name,
+                                    borderColor: '#fe8b36',
+                                    backgroundColor: '#fe8b36',
+                                    fill: false,
+                                    lineTension: 0,
+                                }]
                             },
-                            legend: {
-                                display: false
-                            },
-                            responsive: true,
-                            scales: {
-                                xAxes: [{
-                                    type: 'time',
-                                    distribution: 'linear',
-                                    time: {
-                                        tooltipFormat: 'HH:mm:ss',
-                                        displayFormats: {
-                                            second: 'HH:mm:ss',
-                                            minute: 'HH:mm:ss',
-                                            hour: 'HH:mm:ss',
-                                            day: 'HH:mm:ss'
-                                        },
-                                        unit: 'minute'
-                                    }
-                                }],
+                            options: {
+                                animation: {
+                                    duration: 250
+                                },
+                                legend: {
+                                    display: false
+                                },
+                                responsive: true,
+                                scales: {
+                                    xAxes: [{
+                                        type: 'time',
+                                        distribution: 'linear',
+                                        time: {
+                                            tooltipFormat: 'HH:mm:ss',
+                                            displayFormats: {
+                                                second: 'HH:mm:ss',
+                                                minute: 'HH:mm:ss',
+                                                hour: 'HH:mm:ss',
+                                                day: 'HH:mm:ss'
+                                            },
+                                            unit: 'minute'
+                                        }
+                                    }],
+                                }
                             }
-                        }
-                    });
+                        });
+                }
             }
-        }, 1000);
+        }, 500);
     });
 
     function errorDiv() {

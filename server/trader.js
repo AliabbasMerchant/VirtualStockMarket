@@ -159,52 +159,58 @@ async function sufficientFundsAndHoldings(userId, quantity, rate, stockIndex) {
 }
 
 async function orderMatcher(stockIndex, userId) {
-    let someOrderHasExecuted = false;
-    do {
-        someOrderHasExecuted = false;
-        try {
-            let orders = await pendingOrdersStorage.getPendingOrdersList();
-            console.log("ordersPool", orders);
-            const matcher = { stockIndex, userId }
-            for (const param in matcher) {
-                const value = matcher[param];
-                for (const order1 of orders) {
-                    if (order1[param] == value) {
-                        let ok;
-                        [ok, order1.quantity] = await sufficientFundsAndHoldings(order1.userId, order1.quantity, order1.rate, order1.stockIndex);
-                        if (ok) {
-                            for (const order2 of orders) {
-                                if (order2.rate === order1.rate && order2.stockIndex === order1.stockIndex && order1.userId !== order2.userId) {
-                                    if (order1.quantity * order2.quantity < 0) { // one wants to sell and the other is buying
-                                        [ok, order2.quantity] = await sufficientFundsAndHoldings(order2.userId, order2.quantity, order2.rate, order2.stockIndex);
-                                        if (ok) {
-                                            let quantity = Math.min(Math.abs(order1.quantity), Math.abs(order2.quantity));
-                                            ok = await exchangesStorage.usersCanExchange(order1.userId, order2.userId, quantity, true);
+    try {
+        let lock = await pendingOrdersStorage.lock();
+        let someOrderHasExecuted = false;
+        do {
+            someOrderHasExecuted = false;
+            try {
+                let orders = await pendingOrdersStorage.getPendingOrdersList();
+                console.log("ordersPool", orders);
+                const matcher = { stockIndex, userId }
+                for (const param in matcher) {
+                    const value = matcher[param];
+                    for (const order1 of orders) {
+                        if (order1[param] == value) {
+                            let ok;
+                            [ok, order1.quantity] = await sufficientFundsAndHoldings(order1.userId, order1.quantity, order1.rate, order1.stockIndex);
+                            if (ok) {
+                                for (const order2 of orders) {
+                                    if (order2.rate === order1.rate && order2.stockIndex === order1.stockIndex && order1.userId !== order2.userId) {
+                                        if (order1.quantity * order2.quantity < 0) { // one wants to sell and the other is buying
+                                            [ok, order2.quantity] = await sufficientFundsAndHoldings(order2.userId, order2.quantity, order2.rate, order2.stockIndex);
                                             if (ok) {
-                                                let quantity1 = quantity * Math.sign(order1.quantity);
-                                                let quantity2 = quantity * Math.sign(order2.quantity);
-                                                let tradeTime = Date.now()
-                                                await executeOrder(order1.orderId, quantity1, order1.rate, stockIndex, order1.userId, tradeTime);
-                                                await pendingOrdersStorage.pendingOrderExecuted(order1.orderId, quantity1);
-                                                await executeOrder(order2.orderId, quantity2, order2.rate, stockIndex, order2.userId, tradeTime);
-                                                await pendingOrdersStorage.pendingOrderExecuted(order2.orderId, quantity2);
-                                                someOrderHasExecuted = true;
+                                                let quantity = Math.min(Math.abs(order1.quantity), Math.abs(order2.quantity));
+                                                ok = await exchangesStorage.usersCanExchange(order1.userId, order2.userId, quantity, true);
+                                                if (ok) {
+                                                    let quantity1 = quantity * Math.sign(order1.quantity);
+                                                    let quantity2 = quantity * Math.sign(order2.quantity);
+                                                    let tradeTime = Date.now()
+                                                    await executeOrder(order1.orderId, quantity1, order1.rate, stockIndex, order1.userId, tradeTime);
+                                                    await pendingOrdersStorage.pendingOrderExecuted(order1.orderId, quantity1);
+                                                    await executeOrder(order2.orderId, quantity2, order2.rate, stockIndex, order2.userId, tradeTime);
+                                                    await pendingOrdersStorage.pendingOrderExecuted(order2.orderId, quantity2);
+                                                    someOrderHasExecuted = true;
+                                                }
                                             }
                                         }
                                     }
+                                    if (someOrderHasExecuted) break;
                                 }
-                                if (someOrderHasExecuted) break;
                             }
                         }
+                        if (someOrderHasExecuted) break;
                     }
                     if (someOrderHasExecuted) break;
                 }
-                if (someOrderHasExecuted) break;
+            } catch (err) {
+                console.log(err);
             }
-        } catch (err) {
-            console.log(err);
-        }
-    } while (someOrderHasExecuted);
+        } while (someOrderHasExecuted);
+        await pendingOrdersStorage.unlock(lock);
+    } catch (err) {
+        console.log("orderMatcher: Could not lock: ", err);
+    }
 }
 
 module.exports = {

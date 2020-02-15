@@ -67,7 +67,7 @@ function PendingOrderTableHeader() {
         <th>Quantity</th>
         <th>Rate</th>
         <th>Status</th>
-        <th>Cancel</th>
+        {/* <th>Cancel</th> */}
     </tr>
 }
 function PendingOrderTableRow(props) {
@@ -83,7 +83,7 @@ function PendingOrderTableRow(props) {
                 {order.quantity > 0 ?
                     <td>To Sell</td> :
                     <td>To Buy</td>}
-                <td><button className="btn" onClick={() => cancelOrderFunction(order.orderId)}>CANCEL</button></td>
+                {/* <td><button className="btn" onClick={() => cancelOrderFunction(order.orderId)}>CANCEL</button></td> */}
             </tr>
         )
     } catch (e) {

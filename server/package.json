@@ -2,13 +2,17 @@
   "name": "vsm-server",
   "version": "1.0.0",
   "description": "The server for VSM",
+  "engines": {
+    "node": ">=8.0.0"
+  },
   "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AliabbasMerchant/VSM.git"
+    "url": "git+https://github.com/AliabbasMerchant/VirtualStockMarket.git"
   },
   "keywords": [
     "WebSockets",
@@ -17,9 +21,9 @@
   "author": "Aliabbas Merchant",
   "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/AliabbasMerchant/VSM/issues"
+    "url": "https://github.com/AliabbasMerchant/VirtualStockMarket/issues"
   },
-  "homepage": "https://github.com/AliabbasMerchant/VSM#readme",
+  "homepage": "https://github.com/AliabbasMerchant/VirtualStockMarket#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
@@ -32,6 +36,7 @@
     "iorejson": "^0.1.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.8.1",
+    "redislock": "^1.3.0",
     "socket.io": "^2.3.0"
   }
 }

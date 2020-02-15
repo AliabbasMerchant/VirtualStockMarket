@@ -6,7 +6,7 @@ const userSchema = mongoose.Schema({
     name: { type: String, required: true },
     username: { type: String, required: true },
     password: { type: String, required: true },
-    funds: { type: Number, required: true, default: constants.initialFunds },
+    funds: { type: Number, required: true, default: Number(process.env.INITIAL_FUNDS) },
     executedOrders: [{
         orderId: { type: String, required: true },
         quantity: { type: Number, required: true },

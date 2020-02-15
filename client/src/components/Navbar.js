@@ -11,7 +11,7 @@ const Navbar = ({ loggedIn, logoutUser, disconnectSocket }) => {
         setTimeout(() => {
             if (document.querySelector('.sidenav'))
                 new window.M.Sidenav(document.querySelector('.sidenav'));
-        }, 5000);
+        }, 1000);
     });
     // document.addEventListener('DOMContentLoaded', function () {
     //     new window.M.Sidenav(document.querySelector('.sidenav'));

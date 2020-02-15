@@ -9,7 +9,6 @@ const socketsStorage = require('./fastStorage/sockets');
 const exchangesStorage = require('./fastStorage/exchanges');
 const userModel = require('./models/users');
 const auth = require('./auth');
-const constants = require('./constants');
 const stocks = require('./stocks');
 
 function checkIfDeveloper(req, res, next) {
@@ -46,7 +45,7 @@ router.post('/init', checkIfDeveloper, async (req, res) => {
             .then(users => {
                 users.forEach(user => {
                     user.executedOrders = [];
-                    user.funds = constants.initialFunds;
+                    user.funds = Number(process.env.INITIAL_FUNDS);
                     user.save();
                 });
             })
@@ -65,6 +64,26 @@ router.post('/init', checkIfDeveloper, async (req, res) => {
     return res.send('OK');
 });
 
+router.post('/initMemory', checkIfDeveloper, async (req, res) => { // very risky
+    const {initialTime, buyingPeriod, playingStatus, } = req.body
+    if (!initialTime || !buyingPeriod || !playingStatus) {
+        res.json({
+            ok: false,
+            message: "Please fill in all required fields"
+        });
+        return;
+    }
+    await globalStorage.initialize();
+    await globalStorage.setInitialTime(initialTime);
+    await globalStorage.setBuyingPeriod(buyingPeriod);
+    await globalStorage.setPlayingStatus(playingStatus);
+    await socketsStorage.initialize();
+    await exchangesStorage.initialize();
+    await ordersStorage.initialize();
+    await stocksStorage.initialize();
+    return res.send('OK');
+});
+
 router.post('/startTrading', checkIfDeveloper, async (req, res) => {
     await globalStorage.setPlayingStatus(true);
     await globalStorage.setBuyingPeriod(false);
@@ -75,7 +94,7 @@ router.post('/startTrading', checkIfDeveloper, async (req, res) => {
             .then(q => { current_left_quantity = q; })
             .catch(console.log)
             .finally(() => {
-                stocksStorage.setStockQuantity(stockIndex, Math.abs(initial_quantity - current_left_quantity));
+                stocksStorage.setStockQuantity(stockIndex, initial_quantity - current_left_quantity);
             });
     })
     res.send('OK');
@@ -88,6 +107,11 @@ router.post('/break', checkIfDeveloper, (req, res) => {
 
 router.post('/restart', checkIfDeveloper, (req, res) => {
     globalStorage.setPlayingStatus(true);
+    res.send('OK');
+});
+
+router.post('restartBuyingPeriod', checkIfDeveloper, (req, res) => {
+    globalStorage.setBuyingPeriod(true);
     res.send('OK');
 });
 
@@ -130,13 +154,6 @@ router.post('/getDB', checkIfDeveloper, (req, res) => {
             err,
             users
         })
-    })
-});
-
-router.post('/leaderboard', checkIfDeveloper, (req, res) => {
-    res.json({
-        ok: true,
-        message: "Not yet implemented"
     })
 });
 

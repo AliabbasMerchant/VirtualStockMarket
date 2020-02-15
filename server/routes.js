@@ -121,7 +121,7 @@ router.post('/getStocks', auth.checkIfAuthenticatedAndGetUserId, async (_req, re
             }
             for (let stockIndex = 0; stockIndex < rates.length; stockIndex++) {
                 try {
-                    stocksData.push(stocks[stockIndex]);
+                    stocksData.push({ ...stocks[stockIndex] });
                     stocksData[stockIndex].rate = rates[stockIndex].rate;
                     let ratesObject = rates[stockIndex].ratesObject;
                     let ratesObj = {};
@@ -221,7 +221,7 @@ router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, re
     }
     stocksStorage.getStockRate(stockIndex)
         .then(currentRate => {
-            let capValue = currentRate * constants.capFraction;
+            let capValue = currentRate * Number(process.env.CAP_FRACTION);
             if (currentRate - capValue <= rate && rate <= currentRate + capValue) {
                 trader.tryToTrade(orderId, quantity, rate, stockIndex, userId, (ok, message) => {
                     res.json({
@@ -232,7 +232,7 @@ router.post('/placeOrder', auth.checkIfAuthenticatedAndGetUserId, async (req, re
             } else {
                 return res.json({
                     ok: false,
-                    message: "Rate cannot be so different from current market rate"
+                    message: "Price should be within the circuit range"
                 });
             }
         })

@@ -1,8 +1,6 @@
 export default {
-    // DOMAIN: "http://192.168.43.199:5000",
-    // WEBSOCKET_DOMAIN: "http://192.168.43.199:5000",
-    DOMAIN: "http://localhost:5000",
-    WEBSOCKET_DOMAIN: "http://localhost:5000",
+    DOMAIN: "https://vsm-service-1-dot-ecell-wallstreet.appspot.com",
+    WEBSOCKET_DOMAIN: "https://vsm-service-1-dot-ecell-wallstreet.appspot.com",
     tokenCookieName: "userToken",
 
     eventNewClient: "newClient",

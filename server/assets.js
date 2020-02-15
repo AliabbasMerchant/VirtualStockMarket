@@ -1,5 +1,4 @@
 const userModel = require('./models/users');
-const constants = require('./constants');
 const stocks = require('./stocks');
 
 function getUserFunds(userId) {
@@ -49,7 +48,7 @@ function getUserHoldings(userId) {
 }
 
 function getBrokerageFees(ratePerShare, quantity) {
-    return Math.abs(constants.brokerageRateFraction * ratePerShare * quantity);
+    return Math.abs(Number(process.env.BROKERAGE_RATE_FRACTION) * ratePerShare * quantity);
 }
 
 module.exports = {

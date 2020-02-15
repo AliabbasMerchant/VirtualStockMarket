@@ -20,7 +20,8 @@ async function initialize() {
 }
 
 function getInitialTime() {
-    return instance.get(GLOBALS_KEY, "INITIAL_TIME");
+    let t = instance.get(GLOBALS_KEY, "INITIAL_TIME")
+    return t ? t : Date.now() - 1000 * 60 * 2;
 }
 
 async function setInitialTime(initial_time) {
@@ -33,6 +34,8 @@ async function setInitialTime(initial_time) {
 
 function getPlayingStatus() {
     return instance.get(GLOBALS_KEY, "PLAYING_STATUS");
+    // return Boolean(t);
+    // return typeof t === "boolean" ? t : true;
 }
 
 async function setPlayingStatus(status) {
@@ -45,6 +48,8 @@ async function setPlayingStatus(status) {
 
 function getBuyingPeriod() {
     return instance.get(GLOBALS_KEY, "START_PERIOD");
+    // return Boolean(t);
+    // return typeof t == "boolean" ? t : false;
 }
 
 async function setBuyingPeriod(start_period) {

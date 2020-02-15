@@ -33,10 +33,10 @@ function getStockQuantity(stockIndex) {
     return new Promise((resolve, reject) => {
         instance.get(STOCKS_KEY, stockIndex)
             .then(res => {
-                if (!res.quantity) {
-                    reject("No such stock");
-                } else {
+                if (res && res.quantity) {
                     resolve(res.quantity);
+                } else {
+                    reject("No such stock");
                 }
             }).catch((err) => {
                 reject(err);
@@ -47,9 +47,11 @@ function getStockQuantity(stockIndex) {
 async function deductStockQuantity(stockIndex, quantity) {
     try {
         let res = await instance.get(STOCKS_KEY, stockIndex);
-        await instance.del(STOCKS_KEY, stockIndex);
-        res.quantity -= quantity;
-        await instance.set(STOCKS_KEY, stockIndex, res);
+        if (res) {
+            await instance.del(STOCKS_KEY, stockIndex);
+            res.quantity -= quantity;
+            await instance.set(STOCKS_KEY, stockIndex, res);
+        }
     } catch (error) {
         console.log('deductStockQuantity', error);
     }
@@ -58,9 +60,11 @@ async function deductStockQuantity(stockIndex, quantity) {
 async function setStockQuantity(stockIndex, quantity) {
     try {
         let res = await instance.get(STOCKS_KEY, stockIndex);
-        await instance.del(STOCKS_KEY, stockIndex);
-        res.quantity = quantity;
-        await instance.set(STOCKS_KEY, stockIndex, res);
+        if (res) {
+            await instance.del(STOCKS_KEY, stockIndex);
+            res.quantity = quantity;
+            await instance.set(STOCKS_KEY, stockIndex, res);
+        }
     } catch (error) {
         console.log('setStockQuantity', error);
     }
@@ -70,10 +74,10 @@ function getStockRate(stockIndex) {
     return new Promise((resolve, reject) => {
         instance.get(STOCKS_KEY, stockIndex)
             .then(res => {
-                if (!res.rate) {
-                    reject("No such stock");
-                } else {
+                if (res && res.rate) {
                     resolve(res.rate);
+                } else {
+                    reject("No such stock");
                 }
             }).catch(err => {
                 reject(err);
@@ -84,10 +88,12 @@ function getStockRate(stockIndex) {
 async function setStockRate(stockIndex, rate) {
     try {
         let res = await instance.get(STOCKS_KEY, stockIndex);
-        await instance.del(STOCKS_KEY, stockIndex);
-        res.rate = rate;
-        res.ratesObject[[Date.now()]] = rate;
-        await instance.set(STOCKS_KEY, stockIndex, res);
+        if (res) {
+            await instance.del(STOCKS_KEY, stockIndex);
+            res.rate = rate;
+            res.ratesObject[[Date.now()]] = rate;
+            await instance.set(STOCKS_KEY, stockIndex, res);
+        }
     } catch (error) {
         console.log('setStockRate', error);
     }
@@ -97,13 +103,15 @@ function getStocks() {
     return new Promise((resolve, reject) => {
         instance.get(STOCKS_KEY, '.')
             .then(stocks => {
-                let res = new Array(Object.keys(stocks).length);
-                Object.keys(stocks).forEach(stockIndex => {
-                    let stock = stocks[stockIndex];
-                    stock.stockIndex = stockIndex;
-                    res[stockIndex] = stock;
-                });
-                resolve(res);
+                if (stocks) {
+                    let res = new Array(Object.keys(stocks).length);
+                    Object.keys(stocks).forEach(stockIndex => {
+                        let stock = stocks[stockIndex];
+                        stock.stockIndex = stockIndex;
+                        res[stockIndex] = stock;
+                    });
+                    resolve(res);
+                } else resolve([]);
             })
             .catch(err => {
                 reject(err);

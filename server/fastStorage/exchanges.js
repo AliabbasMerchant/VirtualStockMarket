@@ -1,5 +1,3 @@
-const constants = require('../constants');
-
 const EXCHANGES_KEY = 'vsm_exchanges';
 
 instance = null;
@@ -25,8 +23,8 @@ async function usersCanExchange(userId1, userId2, quantity, update=false) { // t
     async function checkIfPossible(key, exchanges) { // this should never throw an error
         // This logic is a bit relaxed. If 2 users have exchanged 49 shares and limit is 50,
         // then they will be able to do a last exchange, of how many ever shares they want.
-        // if(exchanges >= constants.exchangeLimit) { // relaxed
-        if(exchanges + 1 >= constants.exchangeLimit) { // strict
+        // if(exchanges >= Number(process.env.EXCHANGE_LIMIT)) { // relaxed
+        if(exchanges + 1 >= Number(process.env.EXCHANGE_LIMIT)) { // strict
             return false;
         } else {
             if(update) {
@@ -44,13 +42,17 @@ async function usersCanExchange(userId1, userId2, quantity, update=false) { // t
     let keys = [userId1 + "&" + userId2, userId2 + "&" + userId1];
     try {
         let exchanges = await instance.get(EXCHANGES_KEY, keys[0]);
-        return await checkIfPossible(keys[0], exchanges);
+        // if(exchanges) {
+            return await checkIfPossible(keys[0], exchanges);
+        // } return false;
     } catch (error) {
         // this means that the key does not exist
         // console.log(error);
         try {
             let exchanges = await instance.get(EXCHANGES_KEY, keys[1]);
-            return await checkIfPossible(keys[1], exchanges);
+            // if(exchanges) {
+                return await checkIfPossible(keys[1], exchanges);
+            // } return false;
         } catch (error) {
             // this means that the key does not exist
             // console.log(error);

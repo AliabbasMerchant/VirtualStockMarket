@@ -3,6 +3,7 @@ deployment
 config.py
 dev_exec.py
 nodemon.json
+server.yaml
 
 build
 
