@@ -7,6 +7,8 @@ server.yaml
 
 build
 
+data_snapshots
+
 .vscode
 .idea
 
